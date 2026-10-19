@@ -23,7 +23,7 @@ library(tidyr)
 
 # ---- Settings ---------------------------------------------------------------
 
-SEASONS   <- 2016:2025          # test with a single year first, e.g. 2025
+SEASONS   <- 2025          # test with a single year first, e.g. 2025
 CACHE_DIR <- "C:/massey_cache"  # outside OneDrive; rendered pages saved here
 OUT_FILE  <- "massey_ratings_all.csv"
 DELAY_SEC <- 3                  # pause between seasons (be polite)

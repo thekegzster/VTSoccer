@@ -84,9 +84,11 @@ unwrap_google_link <- function(href) {
 # Parse a published-Google-Sheet table into text + link matrices.
 # Skips row-number headers and freeze-bar cells; expands merged (colspan) cells.
 parse_waffle <- function(doc) {
-  tbl <- html_element(doc, "table.waffle")
-  if (inherits(tbl, "xml_missing")) tbl <- html_element(doc, "table")
-  if (inherits(tbl, "xml_missing")) return(NULL)
+  tables <- html_elements(doc, "table.waffle")
+  if (length(tables) == 0) tables <- html_elements(doc, "table")
+  if (length(tables) == 0) return(NULL)
+  # use the largest table on the page
+  tbl <- tables[[which.max(map_int(tables, ~ length(html_elements(.x, "tr"))))]]
   
   rows <- html_elements(tbl, "tbody tr")
   parsed <- map(rows, function(tr) {
@@ -113,17 +115,46 @@ parse_waffle <- function(doc) {
   )
 }
 
+# Posts from 2024 and earlier link to sheets with Google's OLD URL format:
+#   https://docs.google.com/spreadsheet/pub?key=KEY&gid=..&range=..&output=html
+# Rewrite those to the current format, which returns the same "waffle" table
+# as the 2025-2026 sheets:
+#   https://docs.google.com/spreadsheets/d/KEY/pubhtml?gid=..&range=..&single=true
+normalize_sheet_url <- function(u) {
+  if (!str_detect(u, "/spreadsheet/pub\\?") || !str_detect(u, "[?&]key=")) return(u)
+  param <- function(name) str_match(u, paste0("[?&]", name, "=([^&#]+)"))[, 2]
+  key   <- param("key")
+  gid   <- param("gid")
+  range <- param("range")
+  q <- c(
+    if (!is.na(gid))   paste0("gid=", gid),
+    if (!is.na(range)) paste0("range=", range),
+    "single=true", "chrome=false", "widget=false"
+  )
+  paste0("https://docs.google.com/spreadsheets/d/", key, "/pubhtml?", paste(q, collapse = "&"))
+}
+
 slugify <- function(x) str_replace_all(str_to_lower(x), "[^a-z0-9]+", "-")
 
-# Clean column-group labels from the sheet header into tidy names
+# Clean header labels into tidy names. Covers both sheet layouts:
+#   2024+ : grouped headers  (Conf | Pts | Overall | RPI | SOS | Quad 1 ...)
+#   <=2023: one label per column (CW CL CD PTS | W L D | RPI SOS OSS)
+# Both end up with the same names (conf_w, overall_w, rpi_rank, ...).
 clean_label <- function(x) {
   x <- str_to_lower(str_squish(x))
   case_when(
     x == "conf"    ~ "conf",
+    x == "cw"      ~ "conf_w",
+    x == "cl"      ~ "conf_l",
+    x %in% c("cd", "ct") ~ "conf_t",
     x == "pts"     ~ "conf_pts",
     x == "overall" ~ "overall",
+    x == "w"       ~ "overall_w",
+    x == "l"       ~ "overall_l",
+    x %in% c("d", "t") ~ "overall_t",
     x == "rpi"     ~ "rpi_rank",
     x == "sos"     ~ "sos_rank",
+    x == "oss"     ~ "oss_rank",
     x == "last 8"  ~ "last8",
     str_detect(x, "^quad") ~ str_replace(x, "quad\\s*", "q"),
     str_detect(x, "^<=")   ~ paste0("vs_top", str_extract(x, "\\d+")),
@@ -133,37 +164,44 @@ clean_label <- function(x) {
   )
 }
 
-# Turn one standings sheet into a tidy tibble. Handles sheets with more than
-# one header block (e.g. a conference split into divisions).
+# Turn one standings sheet into a tidy tibble. Every row containing "RPI" is
+# treated as a header, so conferences split into divisions (e.g. the ACC's
+# Atlantic/Coastal tables before 2024) are read block by block.
 parse_standings <- function(m) {
   txt <- m$text
-  hdr_rows <- which(apply(txt, 1, function(r) any(r == "RPI")))
+  is_rpi  <- function(r) any(str_to_upper(r) == "RPI")
+  hdr_rows <- which(apply(txt, 1, is_rpi))
   if (length(hdr_rows) == 0) return(NULL)
   
-  updated <- txt[str_detect(txt[, 1], regex("^updated", ignore_case = TRUE)), 1]
-  updated <- if (length(updated)) updated[1] else NA_character_
+  upd_hit <- which(str_detect(txt, regex("^updated", ignore_case = TRUE)), arr.ind = TRUE)
+  updated <- if (length(upd_hit)) txt[upd_hit[1]] else NA_character_
   
   block_ends <- c(hdr_rows[-1] - 1, nrow(txt))
   
   map2_dfr(hdr_rows, block_ends, function(h_row, end_row) {
     h <- txt[h_row, ]
-    table_title <- h[1]
+    
+    # team column = first non-empty header cell (holds the division / title)
+    team_col <- which(h != "")[1]
+    division <- h[team_col]
+    h    <- h[team_col:length(h)]
     h[1] <- "team"
-    # carry group labels across blank header cells (W/L/T sub-columns)
-    for (j in seq_along(h)[-1]) if (h[j] == "") h[j] <- h[j - 1]
     
     if (end_row <= h_row) return(NULL)
-    body <- txt[(h_row + 1):end_row, , drop = FALSE]
+    body <- txt[(h_row + 1):end_row, team_col:ncol(txt), drop = FALSE]
     body <- body[body[, 1] != "" &
                    !str_detect(body[, 1], regex("^updated", ignore_case = TRUE)), , drop = FALSE]
     if (nrow(body) == 0) return(NULL)
+    
+    # carry group labels across blank header cells (W/L/T under "Conf" etc.)
+    for (j in seq_along(h)[-1]) if (h[j] == "") h[j] <- h[j - 1]
     
     # drop spacer columns (empty in every team row)
     keep <- colSums(body != "") > 0
     keep[1] <- TRUE
     h <- h[keep]; body <- body[, keep, drop = FALSE]
     
-    # name columns: 3-wide groups become _w/_l/_t
+    # name columns: 3-wide groups become _w/_l/_t, single columns keep their label
     r <- rle(h)
     nm <- unlist(map2(r$values, r$lengths, function(v, n) {
       base <- if (v == "team") "team" else clean_label(v)
@@ -176,7 +214,7 @@ parse_standings <- function(m) {
     
     colnames(body) <- nm
     as_tibble(body, .name_repair = "minimal") %>%
-      mutate(table_title = table_title, sheet_updated = updated, .before = 1)
+      mutate(division = division, sheet_updated = updated, .before = 1)
   })
 }
 
@@ -230,14 +268,16 @@ scrape_one <- function(conference, season, season_year, post_url) {
     str_replace("^http://", "https://") %>%
     unique()
   sheet_urls <- sheet_urls[str_detect(sheet_urls, "pub")]
+  sheet_urls <- unique(map_chr(sheet_urls, normalize_sheet_url))
   if (length(sheet_urls) == 0) { warning("No embedded sheet in ", post_url); return(NULL) }
   
   map_dfr(sheet_urls, function(su) {
     sdoc <- fetch_html(su)
-    if (is.null(sdoc)) return(NULL)
+    if (is.null(sdoc)) { message("    could not download sheet: ", su); return(NULL) }
     m <- parse_waffle(sdoc)
-    if (is.null(m)) return(NULL)
-    parse_standings(m)
+    out <- if (is.null(m)) NULL else parse_standings(m)
+    if (is.null(out) || nrow(out) == 0) message("    no standings table found in: ", su)
+    out
   }) %>%
     { if (nrow(.) == 0) NULL else mutate(., conference = conference, season = season,
                                          season_year = season_year, post_url = post_url, .before = 1) }
@@ -252,7 +292,7 @@ if (length(errors)) message(length(errors), " pages errored; see `errors`.")
 # ---- Step 4: tidy types and save --------------------------------------------
 
 id_cols <- c("conference", "season", "season_year", "post_url",
-             "table_title", "sheet_updated", "team")
+             "division", "sheet_updated", "team")
 
 rpi <- rpi_raw %>%
   mutate(across(-any_of(id_cols), ~ suppressWarnings(as.numeric(.x)))) %>%
