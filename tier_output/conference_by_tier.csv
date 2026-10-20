@@ -1,0 +1,137 @@
+conference,tier,n,share_of_conf
+America East Conference,Champion (1-10),4,0.04938271604938271
+America East Conference,Elite (11-25),10,0.12345679012345678
+America East Conference,Q1,22,0.2716049382716049
+America East Conference,Q2,20,0.24691358024691357
+America East Conference,Q3,18,0.2222222222222222
+America East Conference,Q4,7,0.08641975308641975
+American Conference,Champion (1-10),4,0.04878048780487805
+American Conference,Elite (11-25),10,0.12195121951219512
+American Conference,Q1,25,0.3048780487804878
+American Conference,Q2,30,0.36585365853658536
+American Conference,Q3,10,0.12195121951219512
+American Conference,Q4,3,0.036585365853658534
+Atlantic 10 Conference,Champion (1-10),4,0.08888888888888889
+Atlantic 10 Conference,Elite (11-25),4,0.08888888888888889
+Atlantic 10 Conference,Q1,16,0.35555555555555557
+Atlantic 10 Conference,Q2,7,0.15555555555555556
+Atlantic 10 Conference,Q3,10,0.2222222222222222
+Atlantic 10 Conference,Q4,4,0.08888888888888889
+Atlantic Coast Conference,Champion (1-10),42,0.3333333333333333
+Atlantic Coast Conference,Elite (11-25),24,0.19047619047619047
+Atlantic Coast Conference,Q1,44,0.3492063492063492
+Atlantic Coast Conference,Q2,12,0.09523809523809523
+Atlantic Coast Conference,Q3,3,0.023809523809523808
+Atlantic Coast Conference,Q4,1,0.007936507936507936
+Atlantic Sun Conference,Champion (1-10),1,0.013333333333333334
+Atlantic Sun Conference,Q1,13,0.17333333333333334
+Atlantic Sun Conference,Q2,12,0.16
+Atlantic Sun Conference,Q3,23,0.30666666666666664
+Atlantic Sun Conference,Q4,26,0.3466666666666667
+Big East Conference,Champion (1-10),8,0.07407407407407407
+Big East Conference,Elite (11-25),13,0.12037037037037036
+Big East Conference,Q1,38,0.35185185185185186
+Big East Conference,Q2,27,0.25
+Big East Conference,Q3,17,0.1574074074074074
+Big East Conference,Q4,5,0.046296296296296294
+Big South Conference,Elite (11-25),2,0.022727272727272728
+Big South Conference,Q1,11,0.125
+Big South Conference,Q2,6,0.06818181818181818
+Big South Conference,Q3,23,0.26136363636363635
+Big South Conference,Q4,46,0.5227272727272727
+Big Ten Conference,Champion (1-10),6,0.06382978723404255
+Big Ten Conference,Elite (11-25),21,0.22340425531914893
+Big Ten Conference,Q1,33,0.35106382978723405
+Big Ten Conference,Q2,22,0.23404255319148937
+Big Ten Conference,Q3,9,0.09574468085106383
+Big Ten Conference,Q4,3,0.031914893617021274
+Big West Conference,Elite (11-25),4,0.044444444444444446
+Big West Conference,Q1,16,0.17777777777777778
+Big West Conference,Q2,30,0.3333333333333333
+Big West Conference,Q3,26,0.28888888888888886
+Big West Conference,Q4,14,0.15555555555555556
+Coastal Athletic Association,Champion (1-10),3,0.03125
+Coastal Athletic Association,Elite (11-25),2,0.020833333333333332
+Coastal Athletic Association,Q1,25,0.2604166666666667
+Coastal Athletic Association,Q2,29,0.3020833333333333
+Coastal Athletic Association,Q3,23,0.23958333333333334
+Coastal Athletic Association,Q4,14,0.14583333333333334
+Conference USA,Champion (1-10),2,0.03773584905660377
+Conference USA,Elite (11-25),12,0.22641509433962265
+Conference USA,Q1,14,0.2641509433962264
+Conference USA,Q2,10,0.18867924528301888
+Conference USA,Q3,11,0.20754716981132076
+Conference USA,Q4,4,0.07547169811320754
+Horizon League,Q1,3,0.030303030303030304
+Horizon League,Q2,28,0.2828282828282828
+Horizon League,Q3,25,0.25252525252525254
+Horizon League,Q4,43,0.43434343434343436
+Independents,Q4,2,1
+Ivy League,Champion (1-10),3,0.0375
+Ivy League,Elite (11-25),8,0.1
+Ivy League,Q1,20,0.25
+Ivy League,Q2,21,0.2625
+Ivy League,Q3,15,0.1875
+Ivy League,Q4,13,0.1625
+Metro Conference,Q1,12,0.10526315789473684
+Metro Conference,Q2,17,0.14912280701754385
+Metro Conference,Q3,37,0.32456140350877194
+Metro Conference,Q4,48,0.42105263157894735
+Mid-American Conference,Champion (1-10),3,0.07142857142857142
+Mid-American Conference,Elite (11-25),5,0.11904761904761904
+Mid-American Conference,Q1,12,0.2857142857142857
+Mid-American Conference,Q2,12,0.2857142857142857
+Mid-American Conference,Q3,6,0.14285714285714285
+Mid-American Conference,Q4,4,0.09523809523809523
+Missouri Valley Conference,Champion (1-10),1,0.0136986301369863
+Missouri Valley Conference,Elite (11-25),5,0.0684931506849315
+Missouri Valley Conference,Q1,11,0.1506849315068493
+Missouri Valley Conference,Q2,24,0.3287671232876712
+Missouri Valley Conference,Q3,21,0.2876712328767123
+Missouri Valley Conference,Q4,11,0.1506849315068493
+NEC,Q1,4,0.044444444444444446
+NEC,Q2,14,0.15555555555555556
+NEC,Q3,25,0.2777777777777778
+NEC,Q4,47,0.5222222222222223
+Ohio Valley Conference,Q1,2,0.08333333333333333
+Ohio Valley Conference,Q2,2,0.08333333333333333
+Ohio Valley Conference,Q3,5,0.20833333333333334
+Ohio Valley Conference,Q4,15,0.625
+Pac-12 Conference,Champion (1-10),7,0.23333333333333334
+Pac-12 Conference,Elite (11-25),5,0.16666666666666666
+Pac-12 Conference,Q1,12,0.4
+Pac-12 Conference,Q2,5,0.16666666666666666
+Pac-12 Conference,Q3,1,0.03333333333333333
+Patriot League,Q1,17,0.17
+Patriot League,Q2,23,0.23
+Patriot League,Q3,27,0.27
+Patriot League,Q4,33,0.33
+Southern Conference,Elite (11-25),3,0.05357142857142857
+Southern Conference,Q1,7,0.125
+Southern Conference,Q2,18,0.32142857142857145
+Southern Conference,Q3,12,0.21428571428571427
+Southern Conference,Q4,16,0.2857142857142857
+Summit League,Champion (1-10),2,0.030303030303030304
+Summit League,Elite (11-25),6,0.09090909090909091
+Summit League,Q1,7,0.10606060606060606
+Summit League,Q2,10,0.15151515151515152
+Summit League,Q3,13,0.19696969696969696
+Summit League,Q4,28,0.42424242424242425
+Sun Belt Conference,Champion (1-10),4,0.058823529411764705
+Sun Belt Conference,Elite (11-25),5,0.07352941176470588
+Sun Belt Conference,Q1,22,0.3235294117647059
+Sun Belt Conference,Q2,14,0.20588235294117646
+Sun Belt Conference,Q3,12,0.17647058823529413
+Sun Belt Conference,Q4,11,0.16176470588235295
+West Coast Conference,Champion (1-10),4,0.04819277108433735
+West Coast Conference,Elite (11-25),5,0.060240963855421686
+West Coast Conference,Q1,23,0.27710843373493976
+West Coast Conference,Q2,21,0.25301204819277107
+West Coast Conference,Q3,20,0.24096385542168675
+West Coast Conference,Q4,10,0.12048192771084337
+Western Athletic Conference,Champion (1-10),1,0.009433962264150943
+Western Athletic Conference,Elite (11-25),1,0.009433962264150943
+Western Athletic Conference,Q1,20,0.18867924528301888
+Western Athletic Conference,Q2,22,0.20754716981132076
+Western Athletic Conference,Q3,34,0.32075471698113206
+Western Athletic Conference,Q4,28,0.2641509433962264

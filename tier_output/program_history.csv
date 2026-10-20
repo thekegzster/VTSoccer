@@ -1,0 +1,245 @@
+team,seasons,top10_finishes,top25_finishes,median_rpi,best_rpi,latest_conf
+Georgetown,10,6,9,7,2,Big East Conference
+Clemson,10,6,8,7.5,2,Atlantic Coast Conference
+Virginia,10,6,8,9.5,1,Atlantic Coast Conference
+Wake Forest,10,6,7,7.5,1,Atlantic Coast Conference
+Notre Dame,10,5,7,11.5,3,Atlantic Coast Conference
+North Carolina,10,5,7,15,2,Atlantic Coast Conference
+Stanford,10,4,9,11,5,Atlantic Coast Conference
+Duke,10,4,6,17.5,3,Atlantic Coast Conference
+Washington,10,4,5,25,1,Big Ten Conference
+Indiana,10,3,10,14,2,Big Ten Conference
+SMU,10,3,7,14.5,3,Atlantic Coast Conference
+Louisville,10,3,5,25,5,Atlantic Coast Conference
+Kentucky,10,3,5,26,3,Sun Belt Conference
+Syracuse,10,3,4,28.5,1,Atlantic Coast Conference
+Hofstra,10,3,4,31.5,5,Coastal Athletic Association
+Maryland,10,2,7,21.5,1,Big Ten Conference
+Denver,10,2,6,23.5,2,Summit League
+Akron,10,2,5,21.5,6,Big East Conference
+Marshall,10,2,5,26.5,1,Sun Belt Conference
+Oregon State,10,2,3,30.5,2,West Coast Conference
+Pittsburgh,10,2,3,30.5,4,Atlantic Coast Conference
+Portland,10,2,2,38,8,West Coast Conference
+New Hampshire,10,1,6,19.5,7,America East Conference
+West Virginia,10,1,5,35,6,Sun Belt Conference
+Vermont,10,1,4,30.5,2,America East Conference
+Virginia Tech,10,1,4,38.5,7,Atlantic Coast Conference
+Missouri State,10,1,4,49.5,10,American Conference
+Cornell,10,1,3,54,10,Ivy League
+UCF,10,1,3,54,5,Sun Belt Conference
+Creighton,10,1,2,39,10,Big East Conference
+Western Michigan,10,1,2,48.5,8,Missouri Valley Conference
+San Diego,10,1,2,58,5,West Coast Conference
+Ohio State,10,1,2,66,1,Big Ten Conference
+Saint Mary's,10,1,2,71.5,8,West Coast Conference
+Princeton,10,1,2,72.5,1,Ivy League
+Tulsa,10,1,2,82.5,6,American Conference
+Penn,10,1,2,100.5,7,Ivy League
+Bryant,10,1,2,148.5,6,America East Conference
+Dayton,2,1,1,47,6,Atlantic 10 Conference
+Seattle,10,1,1,48,9,West Coast Conference
+St. John's,10,1,1,70.5,9,Big East Conference
+Lipscomb,10,1,1,95.5,7,Atlantic Sun Conference
+UMass Lowell,10,1,1,101.5,4,America East Conference
+UCLA,10,0,4,26,18,Big Ten Conference
+Charlotte,10,0,4,27.5,14,American Conference
+FIU,10,0,4,32.5,12,American Conference
+Butler,10,0,3,43,11,Big East Conference
+Providence,10,0,3,58,14,Big East Conference
+Dartmouth,10,0,3,114,16,Ivy League
+Michigan,10,0,2,35,15,Big Ten Conference
+Coastal Carolina,10,0,2,58.5,22,Sun Belt Conference
+Michigan State,10,0,2,59.5,12,Big Ten Conference
+Boston College,10,0,2,62,15,Atlantic Coast Conference
+UC Santa Barbara,10,0,2,71.5,17,Big West Conference
+Penn State,10,0,2,73.5,20,Big Ten Conference
+Loyola Marymount,9,0,2,84,23,West Coast Conference
+Kansas City,6,0,2,106.5,20,Summit League
+UConn,1,0,1,15,15,Big East Conference
+UMass,1,0,1,23,23,Atlantic 10 Conference
+Saint Louis,2,0,1,30.5,24,Atlantic 10 Conference
+NC State,10,0,1,40.5,16,Atlantic Coast Conference
+South Florida,10,0,1,50.5,13,American Conference
+New Mexico,4,0,1,57,21,Conference USA
+Elon,10,0,1,60.5,25,Coastal Athletic Association
+High Point,10,0,1,62,11,Big South Conference
+Wisconsin,10,0,1,65.5,24,Big Ten Conference
+Connecticut,9,0,1,69,24,Big East Conference
+UAlbany,7,0,1,69,12,America East Conference
+Harvard,10,0,1,80.5,22,Ivy League
+UNCG,8,0,1,83,11,Southern Conference
+Loyola Chicago,8,0,1,84,16,Atlantic 10 Conference
+South Carolina,10,0,1,86.5,19,Sun Belt Conference
+UC Irvine,10,0,1,87.5,23,Big West Conference
+Memphis,10,0,1,89,25,American Conference
+Seton Hall,10,0,1,94,17,Big East Conference
+UC Davis,10,0,1,95,18,Big West Conference
+Furman,9,0,1,97,14,Southern Conference
+ETSU,8,0,1,101,23,Southern Conference
+Northern Illinois,10,0,1,122,23,Missouri Valley Conference
+Grand Canyon,10,0,1,138.5,12,Western Athletic Conference
+California,10,0,0,50,33,Atlantic Coast Conference
+Albany (N.Y.),3,0,0,51,31,America East Conference
+Florida Gulf Coast,1,0,0,55,55,Atlantic Sun Conference
+VCU,2,0,0,55,43,Atlantic 10 Conference
+UNC Wilmington,1,0,0,59,59,Coastal Athletic Association
+George Mason,2,0,0,59.5,41,Atlantic 10 Conference
+Fordham,2,0,0,60.5,29,Atlantic 10 Conference
+Davidson,2,0,0,65,52,Atlantic 10 Conference
+James Madison,10,0,0,65.5,37,Sun Belt Conference
+East Tennessee State,1,0,0,67,67,Southern Conference
+FDU,1,0,0,68,68,NEC
+Xavier,10,0,0,70,33,Big East Conference
+Georgia State,10,0,0,71,36,Sun Belt Conference
+Massachusetts,1,0,0,76,76,Summit League
+UNCW,9,0,0,76,36,Coastal Athletic Association
+Brown,10,0,0,79.5,56,Ivy League
+San Diego State,10,0,0,81,30,Western Athletic Conference
+SIUE,10,0,0,81.5,36,Ohio Valley Conference
+San Francisco,10,0,0,83,40,West Coast Conference
+Rutgers,10,0,0,85,32,Big Ten Conference
+UIC,10,0,0,85,32,Missouri Valley Conference
+Northwestern,10,0,0,85.5,47,Big Ten Conference
+UNC Greensboro,1,0,0,86,86,Southern Conference
+Villanova,10,0,0,87,28,Big East Conference
+FGCU,9,0,0,89,37,Atlantic Sun Conference
+Duquesne,2,0,0,89.5,53,Atlantic 10 Conference
+Old Dominion,10,0,0,89.5,28,Sun Belt Conference
+Oakland,10,0,0,90.5,72,Horizon League
+Loyola Maryland,10,0,0,91,56,Patriot League
+UMBC,10,0,0,92.5,67,America East Conference
+Hartwick,3,0,0,94,90,Sun Belt Conference
+Utah Valley,10,0,0,95.5,33,Western Athletic Conference
+CSUN,10,0,0,98,62,Big West Conference
+Bowling Green,10,0,0,99,49,Missouri Valley Conference
+Cal State Fullerton,10,0,0,101,35,Big West Conference
+California Baptist,5,0,0,102,56,Western Athletic Conference
+LMU,1,0,0,103,103,West Coast Conference
+Evansville,10,0,0,104,49,Missouri Valley Conference
+Buffalo,2,0,0,104.5,50,Mid-American Conference
+Cal Poly,10,0,0,105,30,Big West Conference
+Mercer,9,0,0,105,41,Southern Conference
+Yale,10,0,0,105,40,Ivy League
+San José State,9,0,0,106,54,Western Athletic Conference
+William & Mary,10,0,0,106,34,Coastal Athletic Association
+Oral Roberts,10,0,0,107,56,Summit League
+Air Force,10,0,0,108,26,Western Athletic Conference
+Cleveland State,10,0,0,108.5,78,Horizon League
+Marquette,10,0,0,108.5,59,Big East Conference
+Quinnipiac,10,0,0,108.5,66,Metro Conference
+Rider,10,0,0,108.5,38,Metro Conference
+DePaul,10,0,0,109,65,Big East Conference
+Colgate,10,0,0,110.5,45,Patriot League
+American,10,0,0,111,36,Patriot League
+Drexel,10,0,0,111.5,52,Coastal Athletic Association
+Stony Brook,10,0,0,112,58,Coastal Athletic Association
+Boston U.,10,0,0,112.5,28,Patriot League
+LIU,6,0,0,112.5,87,NEC
+Temple,10,0,0,112.5,40,American Conference
+Florida Atlantic,10,0,0,113,33,American Conference
+Omaha,10,0,0,113,55,Summit League
+Saint Francis (Pa.),7,0,0,113,97,NEC
+Cincinnati,5,0,0,114,97,American Conference
+Campbell,10,0,0,115.5,33,Coastal Athletic Association
+Pacific,10,0,0,116,29,West Coast Conference
+UAB,10,0,0,117,104,American Conference
+Marist,10,0,0,118,55,Metro Conference
+St. Francis Brooklyn,7,0,0,118,68,NEC
+Drake,10,0,0,119.5,45,Missouri Valley Conference
+Iona,10,0,0,121.5,48,Metro Conference
+Delaware,10,0,0,122,46,Summit League
+Georgia Southern,10,0,0,122,34,Sun Belt Conference
+Santa Clara,10,0,0,122.5,54,West Coast Conference
+Binghamton,10,0,0,123.5,65,America East Conference
+Wright State,10,0,0,123.5,35,Horizon League
+Saint Francis,3,0,0,124,123,NEC
+College of Charleston,10,0,0,125,66,Coastal Athletic Association
+Fairfield,10,0,0,125,60,Metro Conference
+NJIT,10,0,0,125,45,America East Conference
+Fairleigh Dickinson,9,0,0,126,50,NEC
+Gonzaga,10,0,0,126.5,91,West Coast Conference
+LIU Brooklyn,4,0,0,126.5,85,NEC
+Army West Point,10,0,0,127.5,62,Patriot League
+Columbia,10,0,0,129.5,29,Ivy League
+UNLV,10,0,0,130.5,77,Western Athletic Conference
+Monmouth,10,0,0,132,43,Coastal Athletic Association
+Central Arkansas,10,0,0,132.5,29,Atlantic Sun Conference
+Rhode Island,2,0,0,133,127,Atlantic 10 Conference
+Lehigh,10,0,0,133.5,45,Patriot League
+Lafayette,10,0,0,134.5,93,Patriot League
+UC Riverside,10,0,0,138,82,Big West Conference
+Sacramento State,10,0,0,141.5,81,Big West Conference
+Siena,10,0,0,142,63,Metro Conference
+Bradley,10,0,0,142.5,113,Missouri Valley Conference
+North Florida,10,0,0,142.5,40,Atlantic Sun Conference
+Bellarmine,5,0,0,143,116,Atlantic Sun Conference
+Northeastern,10,0,0,143,44,Coastal Athletic Association
+Merrimack,6,0,0,145.5,66,Metro Conference
+Valparaiso,5,0,0,146,99,Missouri Valley Conference
+Appalachian State,5,0,0,147,68,Sun Belt Conference
+San Jose State,1,0,0,147,147,Western Athletic Conference
+Stetson,10,0,0,147,99,Atlantic Sun Conference
+Detroit,1,0,0,148,148,Horizon League
+Hartford,7,0,0,148,65,Independents
+UTRGV,9,0,0,148,44,Western Athletic Conference
+Green Bay,10,0,0,150.5,89,Horizon League
+La Salle,2,0,0,152,139,Atlantic 10 Conference
+CSU Bakersfield,10,0,0,154,103,Big West Conference
+Houston Baptist,5,0,0,155,128,Western Athletic Conference
+Wofford,9,0,0,157,103,Southern Conference
+Lindenwood,4,0,0,157.5,90,Ohio Valley Conference
+Gardner-Webb,10,0,0,160,35,Big South Conference
+Manhattan,10,0,0,160,117,Metro Conference
+Jacksonville,10,0,0,161.5,90,Atlantic Sun Conference
+Mercyhurst,2,0,0,162.5,116,NEC
+Cal Baptist,2,0,0,163.5,137,Western Athletic Conference
+St. Bonaventure,2,0,0,163.5,135,Atlantic 10 Conference
+IU Indy,2,0,0,164,158,Horizon League
+Milwaukee,10,0,0,164.5,107,Horizon League
+Saint Joseph's,2,0,0,164.5,142,Atlantic 10 Conference
+Utah Tech,4,0,0,165.5,122,Western Athletic Conference
+HCU,4,0,0,166.5,106,Ohio Valley Conference
+Navy,10,0,0,166.5,95,Patriot League
+Belmont,9,0,0,167,84,Missouri Valley Conference
+Holy Cross,10,0,0,167,120,Patriot League
+Liberty,10,0,0,167.5,131,Ohio Valley Conference
+Fort Wayne,2,0,0,168,154,Summit League
+Purdue Fort Wayne,7,0,0,168,116,Horizon League
+UIW,5,0,0,168,155,Ohio Valley Conference
+Bucknell,10,0,0,169,59,Patriot League
+Dixie State,1,0,0,169,169,Western Athletic Conference
+UMKC,4,0,0,169.5,136,Western Athletic Conference
+Presbyterian,10,0,0,172,120,Big South Conference
+Central Connecticut State,1,0,0,175,175,NEC
+USC Upstate,10,0,0,175.5,135,Big South Conference
+HBU,1,0,0,176,176,Western Athletic Conference
+UC San Diego,5,0,0,178,148,Big West Conference
+Queens,4,0,0,179,164,Atlantic Sun Conference
+Detroit Mercy,9,0,0,180,116,Horizon League
+Incarnate Word,5,0,0,181,142,Western Athletic Conference
+Northern Kentucky,10,0,0,181,113,Horizon League
+Le Moyne,3,0,0,182,161,NEC
+Robert Morris,10,0,0,182.5,96,Horizon League
+IPFW,1,0,0,183,183,Summit League
+Longwood,10,0,0,184,153,Big South Conference
+Winthrop,10,0,0,184.5,87,Big South Conference
+Radford,10,0,0,186.5,26,Big South Conference
+Western Illinois,10,0,0,186.5,162,Ohio Valley Conference
+St. Thomas,5,0,0,188,121,Summit League
+IUPUI,8,0,0,189,154,Horizon League
+UNC Asheville,10,0,0,189,115,Big South Conference
+Sacred Heart,10,0,0,190,47,Metro Conference
+Niagara,10,0,0,191.5,139,Metro Conference
+Saint Peter's,10,0,0,192,92,Metro Conference
+Eastern Illinois,10,0,0,192.5,169,Ohio Valley Conference
+George Washington,2,0,0,194,183,Atlantic 10 Conference
+Canisius,10,0,0,195.5,82,Metro Conference
+Chicago State,5,0,0,196,189,NEC
+New Haven,1,0,0,196,196,NEC
+Central Connecticut,9,0,0,198,171,NEC
+Mount St. Mary's,7,0,0,198,143,Metro Conference
+Stonehill,4,0,0,198,190,NEC
+Howard,10,0,0,201.5,192,NEC
+Southern Indiana,4,0,0,204.5,190,Ohio Valley Conference
+VMI,9,0,0,206,203,Southern Conference
