@@ -551,7 +551,6 @@ p_split <- ggplot(vt_split, aes(win_pct, season)) +
   scale_x_continuous(labels = scales::percent, limits = c(0, 1)) +
   scale_y_discrete(limits = rev) +
   labs(title = "Virginia Tech: ACC games vs. non-conference games",
-       subtitle = "Win % with ties counted as half. Non-conference = overall minus conference record.",
        x = "Win %", y = NULL) +
   theme(legend.position = "top", legend.justification = "left")
 save_vt(p_split, "05_vt_conf_vs_nonconf.png", w = 9, h = 6)
