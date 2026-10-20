@@ -8,7 +8,7 @@ Tools for collecting NCAA Division I men's soccer RPI data (2015–present) and 
 |---|---|
 | `scrape_rpi.R` | Scrapes final RPI standings for every conference and season from the [RPI Update: Men's Soccer](https://rpiupdatemenssoccer.blogspot.com/) blog. Writes `rpi_standings_all.csv`. |
 | `rpi_tier_analysis.R` | Splits teams into six RPI tiers, profiles each tier, ranks programs over 10 years, and makes the Virginia Tech / ACC charts. |
-| `acc_2018_manual.csv` | Hand-entered 2018 ACC results (see Data notes). Optional. |
+| `acc_2018_manual.csv` | Hand-entered 2018 ACC results that replace the incorrect scraped 2018 ACC data. |
 | `scrape_massey.R` | Work in progress: scrapes past Massey Ratings using a headless Chrome browser. |
 
 ## How to run
@@ -19,8 +19,7 @@ Tools for collecting NCAA Division I men's soccer RPI data (2015–present) and 
                       "readr", "tidyr", "ggplot2", "scales", "ggrepel"))
    ```
 2. Run `scrape_rpi.R`. The full scrape takes about 15 minutes. Downloaded pages are cached in `rpi_cache/`, so later runs are fast.
-3. (Optional) Fill in `acc_2018_manual.csv`.
-4. Run `rpi_tier_analysis.R`.
+3. Run `rpi_tier_analysis.R`. It automatically adds the 2018 ACC rows from `acc_2018_manual.csv`.
 
 ## Tiers
 
@@ -44,14 +43,9 @@ The quartile cutoffs are calculated separately for each season, because the numb
 
 - **2026 is excluded** from the analysis because the season is still in progress.
 - **2020-21 (COVID season)** is kept in the data but left out of summaries. Teams that didn't play that season are removed.
-- **2018 ACC data from the source is wrong.** It's a copy of the 2020-21 data, so it's always dropped. Add the real numbers to `acc_2018_manual.csv` to fill the gap.
+- **2018 ACC data from the source is wrong.** It's a copy of the 2020-21 data, so it's dropped and replaced with the hand-collected records and RPI ranks in `acc_2018_manual.csv`. Those rows don't have SOS, conference or Quad records.
 - **The Atlantic 10 is missing before 2024** because of broken links in the source archive. A10 programs (including Saint Louis) aren't given a 10-year tier.
 - **Team names are standardized** (e.g., "UNC Wilmington" → "UNCW"). The mapping is at the top of `rpi_tier_analysis.R`; add to it if you find more variants.
 - **This RPI is the blog's own calculation.** It closely matches the official NCAA RPI in most seasons but not all (it differs most in 2020-21).
 - If the project is in a OneDrive folder on Windows, keep cache folders outside OneDrive (e.g., `C:/rpi_cache`) to avoid file-locking and long-path errors.
 
-## Next steps
-
-- Add player data: minutes and box-score stats from stats.ncaa.org, and class year, position and transfer history from school roster pages.
-- Compare roster makeup (class year, transfers, returning minutes) between VT and the Champion/Elite programs, weighting by minutes played.
-- Finish the Massey Ratings scraper.
