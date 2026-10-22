@@ -401,3 +401,4 @@ for m in ["Goals", "Shots, total", "Head goals, total", "Non-penalty goals, tota
     out.loc[out.minutes_played == 0, m] = 0
 out.to_csv(OUT, index=False)
 print("wrote", OUT, out.shape)
+
