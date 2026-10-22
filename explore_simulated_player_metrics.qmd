@@ -1,0 +1,70 @@
+---
+title: "Untitled"
+format: html
+---
+
+```{r}
+library(tidyverse)
+df <- read_csv("simulated_player_metrics.csv")
+```
+
+```{r}
+df <- df |> 
+  filter(minutes_played > 0)
+
+top_10_teams <- df |> 
+  filter(team_rpi_rank <= 10) |> 
+  filter(position != "GK") |> 
+  group_by(season_year, team) |> 
+  mutate(
+    max_mins = max(minutes_played),
+    mins_percentage = minutes_played / max_mins
+  ) |> 
+  filter(mins_percentage > .25) |> 
+  mutate(
+    position_group = case_when(
+      position %in% c("CB", "FB") ~ "D",
+      position %in% c("DM", "CM", "AM") ~ "M",
+      position %in% c("W", "CF") ~ "F",
+    )
+  ) |> 
+  select(team, season_year, player_name, player_id, position_group) |> 
+  summarize(
+    num_D = sum(position_group == "D"),
+    num_M = sum(position_group == "M"),
+    num_F = sum(position_group == "F")
+  )
+
+non_top_10_teams <- df |> 
+  filter(team_rpi_rank > 10) |> 
+  filter(position != "GK") |> 
+  group_by(season_year, team) |> 
+  mutate(
+    max_mins = max(minutes_played),
+    mins_percentage = minutes_played / max_mins
+  ) |> 
+  filter(mins_percentage > .25) |> 
+  mutate(
+    position_group = case_when(
+      position %in% c("CB", "FB") ~ "D",
+      position %in% c("DM", "CM", "AM") ~ "M",
+      position %in% c("W", "CF") ~ "F",
+    )
+  ) |> 
+  select(team, season_year, player_name, player_id, position_group) |> 
+  summarize(
+    num_D = sum(position_group == "D"),
+    num_M = sum(position_group == "M"),
+    num_F = sum(position_group == "F")
+  )
+
+mean(top_10_teams$num_D)
+mean(top_10_teams$num_M)
+mean(top_10_teams$num_F)
+mean(non_top_10_teams$num_D)
+mean(non_top_10_teams$num_M)
+mean(non_top_10_teams$num_F)
+
+```
+
+
