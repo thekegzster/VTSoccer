@@ -66,5 +66,101 @@ mean(non_top_10_teams$num_M)
 mean(non_top_10_teams$num_F)
 
 ```
+```{r}
+library(cowplot)
+# 6 RPI tiers: 1-10, 11-25, then teams ranked 26+ split into 4 equal groups within each season
+tier_levels <- c("1-10", "11-25", "26+ Q1", "26+ Q2", "26+ Q3", "26+ Q4")
+
+team_tiers <- df |>
+  distinct(season_year, team, team_rpi_rank) |>
+  group_by(season_year) |>
+  mutate(
+    rest_quartile = if_else(team_rpi_rank > 25,
+                            ntile(if_else(team_rpi_rank > 25, team_rpi_rank, NA), 4), NA),
+    tier = case_when(
+      team_rpi_rank <= 10 ~ "1-10",
+      team_rpi_rank <= 25 ~ "11-25",
+      TRUE ~ paste0("26+ Q", rest_quartile)
+    ),
+    tier = factor(tier, levels = tier_levels)
+  ) |>
+  ungroup() |>
+  select(season_year, team, tier)
+
+# Rank range actually covered by each tier (the Q1-Q4 cutoffs shift a little by season)
+tier_ranges <- df |>
+  distinct(season_year, team, team_rpi_rank) |>
+  left_join(team_tiers, by = c("season_year", "team")) |>
+  group_by(tier) |>
+  summarize(rank_min = min(team_rpi_rank), rank_max = max(team_rpi_rank), .groups = "drop")
+print(tier_ranges)
+
+# One pipeline for all tiers instead of a copy of the code per tier
+team_counts <- df |>
+  filter(position != "GK") |>
+  left_join(team_tiers, by = c("season_year", "team")) |>
+  mutate(
+    position_group = case_when(
+      position %in% c("CB", "FB") ~ "D",
+      position %in% c("DM", "CM", "AM") ~ "M",
+      position %in% c("W", "CF") ~ "F"
+    )
+  ) |>
+  group_by(season_year, team, tier) |>
+  mutate(mins_percentage = minutes_played / max(minutes_played)) |>
+  filter(mins_percentage > .25) |>
+  summarize(
+    num_D = sum(position_group == "D"),
+    num_M = sum(position_group == "M"),
+    num_F = sum(position_group == "F"),
+    .groups = "drop"
+  )
+
+# The 6 groups: tier x position group, with summary stats of players-per-team-season
+group_summary <- team_counts |>
+  pivot_longer(c(num_D, num_M, num_F),
+               names_to = "position_group", names_prefix = "num_",
+               values_to = "players") |>
+  group_by(tier, position_group) |>
+  summarize(
+    team_seasons = n(),
+    mean   = mean(players),
+    median = median(players),
+    sd     = sd(players),
+    min    = min(players),
+    q25    = quantile(players, .25),
+    q75    = quantile(players, .75),
+    max    = max(players),
+    .groups = "drop"
+  ) |>
+  mutate(position_group = factor(position_group, levels = c("D", "M", "F"))) |>
+  arrange(tier, position_group) |>
+  mutate(across(c(mean, sd), ~ round(.x, 2)))
+
+print(group_summary)
+
+# Same counts for VT, season by season, to set beside the tiers
+vt_team <- "Virginia Tech"   # change to "Vermont" if that's the VT you mean
+vt_counts <- team_counts |> filter(team == vt_team) |> arrange(season_year)
+print(vt_counts)
+
+write_csv(group_summary, "roster_group_summary.csv")
+
+group_labels <- c(D = "Defenders", M = "Midfielders", F = "Forwards")
+
+# 6 shades from dark maroon through VT maroon to light pink
+maroon_gradient <- colorRampPalette(c("#4A0E23", "#861F41", "#E8B7C6"))(6)
+
+ggplot(group_summary, aes(x = tier, y = mean, fill = tier)) +
+  geom_col() +
+  geom_errorbar(aes(ymin = q25, ymax = q75), width = 0.3) +
+  scale_fill_manual(values = maroon_gradient) +
+  facet_wrap(~ position_group, labeller = as_labeller(group_labels)) +
+  theme_classic() +
+  theme(legend.position = "none",
+        axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(x = "RPI tier", y = "Players per team-season (mean, Q25-Q75)",
+       title = "Roster makeup by RPI tier")
+```
 
 
