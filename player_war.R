@@ -50,6 +50,9 @@ ADJUST_SOS   <- TRUE           # adjust stats for strength of schedule
 FIT_EXCLUDE  <- c(2020)        # seasons left out of the weight fit (COVID)
 FOCUS_TEAM   <- "Virginia Tech"
 LATEST       <- 2025           # most recent complete season (for charts)
+VERSION      <- "v1 baseline"  # label for this run in the scorecard; change it every
+# time you change the method so runs can be compared
+SCORE_MIN    <- 600            # minutes needed to count in the scorecard
 
 set.seed(2026)
 dir.create(OUT_DIR, showWarnings = FALSE)
@@ -411,5 +414,130 @@ p5 <- ggplot(chk, aes(team_war, rpi_rank)) +
   theme_war
 save(p5, "05_team_war_vs_rpi.png")
 cat(sprintf("Team WAR vs RPI rank: Spearman r = %.2f\n", rpi_r))
+
+# ---- 11. Scorecard ----------------------------------------------------------
+# Grades the method on players, not teams. Needs the simulated true_talent
+# column (the answer key), so it is skipped automatically on real data.
+#
+# For each position (players with SCORE_MIN+ minutes, FIT_EXCLUDE seasons left out):
+#   r_talent         WAR/90 vs true talent. Higher = better.
+#   r_talent_no_team same, after removing team strength from both. This is the
+#                    main score: does WAR find good players, not good teams?
+#   r_team           WAR/90 vs team strength. Some is expected (good programs
+#                    recruit better players), so compare it with talent_vs_team.
+#   talent_vs_team   true talent vs team strength: the "honest" amount of team
+#                    link. r_team well above this = WAR is crediting the team.
+# Uses WAR per 90, not total WAR, so playing time doesn't count as skill.
+# Each run is added to scorecard_history.csv under VERSION (a rerun with the
+# same VERSION replaces its old rows).
+
+pos_order <- c("GK", "CB", "FB", "DM", "CM", "AM", "W", "CF")
+
+if (all(c("true_talent", "team_strength_z") %in% names(players))) {
+  
+  sc_data <- player_war %>%
+    filter(minutes_played >= SCORE_MIN, !season_year %in% FIT_EXCLUDE) %>%
+    inner_join(players %>% select(player_id, season_year, true_talent, team_strength_z),
+               by = c("player_id", "season_year"))
+  
+  # correlation of x and y after removing z from both (partial correlation)
+  partial_r <- function(x, y, z) cor(resid(lm(x ~ z)), resid(lm(y ~ z)))
+  
+  by_position <- sc_data %>%
+    group_by(position) %>%
+    summarise(n                = n(),
+              r_talent         = cor(war_per_90, true_talent),
+              r_talent_no_team = partial_r(war_per_90, true_talent, team_strength_z),
+              r_team           = cor(war_per_90, team_strength_z),
+              talent_vs_team   = cor(true_talent, team_strength_z),
+              .groups = "drop")
+  
+  scorecard <- bind_rows(
+    by_position,
+    by_position %>%   # simple average across positions, so each position counts equally
+      summarise(position = "Average", n = sum(n),
+                across(c(r_talent, r_talent_no_team, r_team, talent_vs_team), mean))
+  ) %>%
+    pivot_longer(-c(position, n), names_to = "metric", values_to = "value") %>%
+    bind_rows(tibble(
+      position = "Model",
+      n        = NA_integer_,
+      metric   = c("heldout_r2_win_pct", "year_to_year_r", "team_r_win_pct", "team_spearman_rpi"),
+      value    = c(if (WEIGHT_MODE == "learned") r2_oos else NA_real_,
+                   yoy_r, cor(chk$team_war, chk$win_pct), rpi_r))) %>%
+    mutate(version = VERSION, weight_mode = WEIGHT_MODE,
+           run_time = format(Sys.time(), "%Y-%m-%d %H:%M"), value = round(value, 3)) %>%
+    relocate(version, weight_mode, run_time)
+  
+  hist_file <- file.path(OUT_DIR, "scorecard_history.csv")
+  history <- if (file.exists(hist_file)) {
+    read_csv(hist_file, col_types = cols(n = col_integer(), value = col_double(),
+                                         .default = col_character())) %>%
+      filter(version != VERSION)
+  } else NULL
+  history <- bind_rows(history, scorecard)
+  write_csv(scorecard, file.path(OUT_DIR, "scorecard.csv"))
+  write_csv(history, hist_file)
+  
+  cat(sprintf("\nScorecard (%s): r with true talent, team strength removed\n", VERSION))
+  print(scorecard %>% filter(metric == "r_talent_no_team") %>%
+          select(position, n, value) %>%
+          arrange(match(position, c(pos_order, "Average"))), n = 20)
+  
+  # 06: this run, by position
+  metric_labels <- c(r_talent_no_team = "WAR vs true talent, team strength removed (main score)",
+                     r_talent         = "WAR vs true talent",
+                     r_team           = "WAR vs team strength",
+                     talent_vs_team   = "True talent vs team strength (expected team link)")
+  metric_cols   <- c("#1baf7a", "#2a78d6", "#eb6834", "#a8a6a0")
+  sc_plot <- scorecard %>%
+    filter(metric %in% names(metric_labels)) %>%
+    mutate(position = factor(position, levels = rev(c(pos_order, "Average"))),
+           metric   = factor(metric_labels[metric], levels = metric_labels))
+  model_vals <- with(filter(scorecard, position == "Model"), setNames(value, metric))
+  
+  p6 <- ggplot(sc_plot, aes(value, position, colour = metric, shape = metric,
+                            group = factor(metric, levels = rev(metric_labels)))) +  # main score on top
+    geom_vline(xintercept = 0, colour = ink2, linewidth = 0.3) +
+    geom_point(size = 3, position = position_dodge(width = 0.6)) +
+    scale_colour_manual(values = metric_cols) +
+    scale_shape_manual(values = c(16, 16, 17, 4)) +
+    scale_x_continuous(limits = c(min(0, sc_plot$value), 1), breaks = seq(0, 1, 0.2)) +
+    guides(colour = guide_legend(ncol = 1), shape = guide_legend(ncol = 1)) +
+    labs(title = sprintf("WAR scorecard: %s", VERSION),
+         subtitle = sprintf(paste0("Correlations for players with %d+ minutes\nModel checks: ",
+                                   "held-out R-squared %s, year-to-year r %.2f, team win %% r %.2f"),
+                            SCORE_MIN,
+                            ifelse(is.na(model_vals[["heldout_r2_win_pct"]]), "n/a",
+                                   sprintf("%.2f", model_vals[["heldout_r2_win_pct"]])),
+                            model_vals[["year_to_year_r"]], model_vals[["team_r_win_pct"]]),
+         x = "Correlation", y = NULL, caption = "Simulated player data; true talent is the simulation's answer key") +
+    theme_war + theme(panel.grid.major.y = element_blank())
+  save(p6, "06_scorecard.png", h = 7)
+  
+  # 07: main score across versions (only once there are at least two)
+  if (n_distinct(history$version) >= 2) {
+    hist_plot <- history %>%
+      filter(metric == "r_talent_no_team") %>%
+      mutate(position = factor(position, levels = c(pos_order, "Average")),
+             # versions sort by name, so start labels with v1, v2, ... to keep them in order
+             version  = factor(version, levels = sort(unique(history$version))))
+    p7 <- ggplot(hist_plot, aes(position, value, colour = version, group = version)) +
+      geom_line(linewidth = 0.6, alpha = 0.6) +
+      geom_point(size = 2.8) +
+      geom_hline(yintercept = 0, colour = ink2, linewidth = 0.3) +
+      # same palette as the other charts; ggplot's defaults take over past 6 versions
+      { if (n_distinct(hist_plot$version) <= 6)
+        scale_colour_manual(values = c("#a8a6a0", "#2a78d6", "#eb6834", "#1baf7a", "#eda100", "#7b5cd6")) } +
+      scale_y_continuous(limits = c(min(0, hist_plot$value), 1)) +
+      labs(title = "Is the method getting better?",
+           subtitle = "WAR vs true talent with team strength removed, by version (higher is better)",
+           x = NULL, y = "Correlation", caption = "Simulated player data") +
+      theme_war + theme(panel.grid.major.x = element_blank())
+    save(p7, "07_scorecard_history.png")
+  }
+} else {
+  cat("\nNo true_talent column: scorecard skipped (expected on real data).\n")
+}
 
 cat("\nDone. Outputs in", OUT_DIR, "\n")
