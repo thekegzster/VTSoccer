@@ -3,7 +3,8 @@
 #
 # Inputs (in DATA_DIR):
 #   simulated_player_metrics.csv   one row per player per season (Wyscout-style)
-#   rpi_standings_all_fixed.csv    team records + strength of schedule
+#   simulated_standings.csv        team records + strength of schedule (set STANDINGS_FILE;
+#                                  use rpi_standings_all_fixed.csv for the real records)
 #   war_weights.csv                which stats count for each position, and
 #                                  whether more of the stat is good (+1), bad (-1),
 #                                  or excluded (0)
@@ -38,6 +39,8 @@ library(scales)
 
 DATA_DIR     <- "."            # folder with the input CSVs
 OUT_DIR      <- "war_output"
+STANDINGS_FILE <- "simulated_standings.csv"   # simulated results (players cause winning).
+# Use "rpi_standings_all_fixed.csv" with real player data.
 WEIGHTS_FILE <- "war_weights_compiled.csv"  # which stat list to use:
 #   "war_weights_original.csv" = original (goals, assists, duplicates)
 #   "war_weights_compiled.csv" = one stat per idea, xG and xA
@@ -80,7 +83,7 @@ players <- read_csv(file.path(DATA_DIR, "simulated_player_metrics.csv"),
                     show_col_types = FALSE) %>%
   filter(minutes_played > 0)
 
-standings <- read_csv(file.path(DATA_DIR, "rpi_standings_all_fixed.csv"),
+standings <- read_csv(file.path(DATA_DIR, STANDINGS_FILE),
                       show_col_types = FALSE) %>%
   select(season_year, team, conference, rpi_rank, sos_rank,
          overall_w, overall_l, overall_t) %>%
@@ -547,7 +550,7 @@ if (all(c("true_talent", "team_strength_z") %in% names(players))) {
     hist_plot <- history %>%
       filter(metric == "r_talent_no_team") %>%
       mutate(position = factor(position, levels = c(pos_order, "Average")),
-             # versions sort by name, so start labels with v1, v2, ... to keep them in order
+             # versions are shown in alphabetical order of their labels
              version  = factor(version, levels = sort(unique(history$version))))
     p7 <- ggplot(hist_plot, aes(position, value, colour = version, group = version)) +
       geom_line(linewidth = 0.6, alpha = 0.6) +

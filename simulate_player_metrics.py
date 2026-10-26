@@ -6,15 +6,32 @@ for every team-season in rpi_standings_all_fixed.csv.
 - Team strength comes from RPI rank (within season) and win %, and shifts every metric
   (better teams: more possession, more shots/xG, better passing, fewer defensive actions).
 - Games played come from the team's actual W-L-T record in the standings file.
+- Team results are SIMULATED (simulated_standings.csv): each team's games are played out using
+  program strength + the minutes-weighted talent of its players + schedule, so better players
+  actually cause more winning. RPI rank is re-estimated from the simulated record.
 - Derived metrics are computed from their components so the data is internally consistent
   (e.g. goals <= shots, head goals <= goals, xG+xA = xG + xA, successful attacking actions =
   SoT + accurate crosses + successful dribbles).
 
-Usage: python simulate_player_metrics.py <standings.csv> <out.csv> [seed]
+Usage: python simulate_player_metrics.py <standings.csv> <out.csv> [seed] [metric_defs.txt] [standings_out.csv]
 """
 import sys
 import numpy as np
 import pandas as pd
+from statistics import NormalDist   # standard library; replaces scipy.stats.norm
+
+
+class norm:
+    """Inverse of the standard normal CDF (same result as scipy.stats.norm.ppf)."""
+    _nd = NormalDist()
+
+    @staticmethod
+    def ppf(p):
+        p = np.asarray(p, dtype=float)
+        out = np.full(p.shape, np.nan)
+        ok = ~np.isnan(p)
+        out[ok] = [norm._nd.inv_cdf(x) for x in p[ok]]
+        return out
 
 SRC = sys.argv[1] if len(sys.argv) > 1 else "rpi_standings_all_fixed.csv"
 OUT = sys.argv[2] if len(sys.argv) > 2 else "simulated_player_metrics.csv"
@@ -107,7 +124,6 @@ st["gp"] = st[["overall_w", "overall_l", "overall_t"]].sum(axis=1).clip(lower=1)
 st["win_pct"] = (st.overall_w + 0.5 * st.overall_t) / st.gp
 st["n_in_season"] = st.groupby("season_year").team.transform("count")
 st["rank_pct"] = 1 - (st.rpi_rank - 1) / (st.n_in_season - 1)      # 1 = best
-from scipy.stats import norm
 st["strength_z"] = 0.75 * norm.ppf(st.rank_pct.clip(.01, .99)) + 0.25 * norm.ppf(st.win_pct.clip(.02, .98))
 st["strength_z"] = (st.strength_z - st.strength_z.mean()) / st.strength_z.std()
 st["team_possession"] = (50 + 4.5 * st.strength_z + rng.normal(0, 2, len(st))).clip(36, 64)
@@ -399,6 +415,83 @@ out.loc[out.minutes_played == 0, metric_order] = np.nan
 for m in ["Goals", "Shots, total", "Head goals, total", "Non-penalty goals, total", "Yellow cards, total",
           "Red cards, total"]:
     out.loc[out.minutes_played == 0, m] = 0
+# Ground truth for method testing: the hidden talent value that generated this player's stats
+# (that season, after development). Higher = better. Do NOT use as a model input.
+out["true_talent"] = np.round(df._talent.values, 3)
+
+# ---------------- simulated team results -------------------------------------------------------
+# In the first version, team results were the REAL standings, so player talent never caused
+# winning. Here each team's W-L-T is simulated game by game, and the team's quality depends on
+#   - program strength (strength_z, from the real RPI/record: coaching, facilities, depth)
+#   - the talent of the players who actually played, weighted by their minutes
+#   - schedule (a tougher schedule means tougher opponents)
+# A separate random stream is used, so every player stat above is unchanged.
+# RPI rank is then re-estimated from the simulated record + the real schedule strength.
+STANDINGS_OUT = sys.argv[5] if len(sys.argv) > 5 else "simulated_standings.csv"
+A_PROGRAM = 0.30     # goal difference per game per 1 SD of program strength
+B_TALENT  = 0.30     # goal difference per game per 1 SD of lineup talent
+C_SCHED   = 0.60     # goal difference per game from easiest (0) to toughest (1) schedule
+BASE_GOALS = 1.35    # goals per team per game for two even teams
+OT_SHARE  = 0.32     # share of level games settled (overtime/late winner) so ties ~ real rate
+rng_res = np.random.default_rng(SEED + 1)
+
+lineup = (df.assign(tm=df._talent * df.minutes_played)
+            .groupby(["season_year", "team"])
+            .agg(tm=("tm", "sum"), mins=("minutes_played", "sum")))
+lineup["lineup_talent"] = lineup.tm / lineup.mins.replace(0, np.nan)
+lineup["talent_z"] = (lineup.lineup_talent - lineup.lineup_talent.mean()) / lineup.lineup_talent.std()
+
+res = st.merge(lineup[["lineup_talent", "talent_z"]].reset_index(), on=["season_year", "team"], how="left")
+res["sos_pct"] = 1 - res.groupby("season_year").sos_rank.rank(pct=True, method="average")
+res["sos_pct"] = res.sos_pct.fillna(0.5)
+res["exp_goal_diff"] = (A_PROGRAM * res.strength_z + B_TALENT * res.talent_z.fillna(0)
+                        - C_SCHED * (res.sos_pct - 0.5))
+
+has_games = res[["overall_w", "overall_l", "overall_t"]].notna().all(axis=1) & (res.gp > 0)
+sim_w, sim_l, sim_t = [], [], []
+for d, n, ok in zip(res.exp_goal_diff, res.gp, has_games):
+    if not ok:
+        sim_w.append(np.nan); sim_l.append(np.nan); sim_t.append(np.nan); continue
+    n = int(n)
+    gf = rng_res.poisson(BASE_GOALS * np.exp(d / 2), n)
+    ga = rng_res.poisson(BASE_GOALS * np.exp(-d / 2), n)
+    level = gf == ga
+    settled = level & (rng_res.random(n) < OT_SHARE)
+    won_ot = rng_res.random(n) < 1 / (1 + np.exp(-d))      # better team more likely to win it
+    w = (gf > ga) | (settled & won_ot)
+    l = (gf < ga) | (settled & ~won_ot)
+    sim_w.append(w.sum()); sim_l.append(l.sum()); sim_t.append(n - w.sum() - l.sum())
+res["sim_w"], res["sim_l"], res["sim_t"] = sim_w, sim_l, sim_t
+res["sim_win_pct"] = (res.sim_w + 0.5 * res.sim_t) / res.gp
+
+# Re-estimate RPI rank: learn from the REAL data how RPI rank relates to record and schedule,
+# then apply that to the simulated record (keeping each team's real leftover part)
+real = res[has_games].copy()
+rank_z = norm.ppf(real.rank_pct.clip(.005, .995))
+Xr = np.column_stack([np.ones(len(real)), real.win_pct, real.sos_pct])
+coef, *_ = np.linalg.lstsq(Xr, rank_z, rcond=None)
+res["rpi_score"] = np.nan
+res.loc[has_games, "rpi_score"] = (Xr @ coef + (rank_z - Xr @ coef)
+                                   + coef[1] * (real.sim_win_pct - real.win_pct)).values
+res["rpi_score"] = res.rpi_score.fillna(pd.Series(norm.ppf(res.rank_pct.clip(.005, .995)), index=res.index))
+res["sim_rpi_rank"] = res.groupby("season_year").rpi_score.rank(ascending=False, method="first").astype(int)
+
+standings_out = pd.DataFrame({
+    "season_year": res.season_year, "season": res.season, "conference": res.conference, "team": res.team,
+    "rpi_rank": res.sim_rpi_rank, "sos_rank": res.sos_rank,
+    "overall_w": res.sim_w, "overall_l": res.sim_l, "overall_t": res.sim_t,
+    "real_rpi_rank": res.rpi_rank, "real_w": res.overall_w, "real_l": res.overall_l, "real_t": res.overall_t,
+    "lineup_talent": res.lineup_talent.round(3),
+})
+for c in ["overall_w", "overall_l", "overall_t", "real_w", "real_l", "real_t"]:
+    standings_out[c] = standings_out[c].astype("Int64")
+standings_out.to_csv(STANDINGS_OUT, index=False)
+print("wrote", STANDINGS_OUT, standings_out.shape)
+
+# Player file: team rank now matches the simulated results
+out = out.merge(res[["season_year", "team", "sim_rpi_rank"]], on=["season_year", "team"], how="left")
+out["team_rpi_rank"] = out.sim_rpi_rank.astype(int)
+out = out.drop(columns="sim_rpi_rank")
+
 out.to_csv(OUT, index=False)
 print("wrote", OUT, out.shape)
-
