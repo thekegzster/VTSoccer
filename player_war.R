@@ -38,6 +38,9 @@ library(scales)
 
 DATA_DIR     <- "."            # folder with the input CSVs
 OUT_DIR      <- "war_output"
+WEIGHTS_FILE <- "war_weights_compiled.csv"  # which stat list to use:
+#   "war_weights_original.csv" = original (goals, assists, duplicates)
+#   "war_weights_compiled.csv" = one stat per idea, xG and xA
 WEIGHT_MODE  <- "learned"      # "learned" or "manual"
 MIN_QUAL     <- 300            # minutes to count toward min/max and replacement level
 PRIOR_MIN    <- 270            # shrinkage: a player is treated as if he also played
@@ -50,9 +53,23 @@ ADJUST_SOS   <- TRUE           # adjust stats for strength of schedule
 FIT_EXCLUDE  <- c(2020)        # seasons left out of the weight fit (COVID)
 FOCUS_TEAM   <- "Virginia Tech"
 LATEST       <- 2025           # most recent complete season (for charts)
-VERSION      <- "v1 baseline"  # label for this run in the scorecard; change it every
-# time you change the method so runs can be compared
+VERSION      <- ""             # label for this run in the scorecard. Leave "" to name it
+# automatically from the weights file and mode, e.g.
+# "war_weights_compiled (learned)". Set your own label when you
+# change something else (shrinkage, replacement level, ...)
 SCORE_MIN    <- 600            # minutes needed to count in the scorecard
+
+# Optional overrides from the command line, so you can switch without editing:
+#   Rscript player_war.R war_weights_original.csv manual
+args <- commandArgs(trailingOnly = TRUE)
+if (length(args) >= 1) WEIGHTS_FILE <- args[1]
+if (length(args) >= 2) WEIGHT_MODE  <- args[2]
+if (length(args) >= 3) VERSION      <- args[3]
+
+stopifnot(WEIGHT_MODE %in% c("learned", "manual"))
+if (!file.exists(file.path(DATA_DIR, WEIGHTS_FILE))) stop("Weights file not found: ", WEIGHTS_FILE)
+if (VERSION == "") VERSION <- sprintf("%s (%s)", sub("\\.csv$", "", WEIGHTS_FILE), WEIGHT_MODE)
+cat(sprintf("Weights: %s | mode: %s | scorecard label: %s\n", WEIGHTS_FILE, WEIGHT_MODE, VERSION))
 
 set.seed(2026)
 dir.create(OUT_DIR, showWarnings = FALSE)
@@ -69,7 +86,7 @@ standings <- read_csv(file.path(DATA_DIR, "rpi_standings_all_fixed.csv"),
          overall_w, overall_l, overall_t) %>%
   distinct(season_year, team, .keep_all = TRUE)
 
-weights_cfg <- read_csv(file.path(DATA_DIR, "war_weights.csv"),
+weights_cfg <- read_csv(file.path(DATA_DIR, WEIGHTS_FILE),
                         show_col_types = FALSE) %>%
   filter(direction != 0)
 
@@ -99,6 +116,10 @@ z <- function(x) coalesce(x, 0)   # missing count/rate -> 0
 # they're defending more. Scale defensive volume to a 50% possession game.
 padj <- function(x, poss) x * (100 - 50) / (100 - poss)
 
+# The on-ball version: teams that have the ball more make more on-ball mistakes
+# (more touches, more chances to lose it). Scale to a 50% possession game.
+padj_own <- function(x, poss) x * 50 / poss
+
 players <- players %>%
   mutate(
     accelerations    = z(`Accelerations / 90`),
@@ -117,9 +138,15 @@ players <- players %>%
     dribbles_won     = z(`Dribbles / 90`) * z(`Dribbles %`) / 100,
     aerial_won       = z(`Aerial duels / 90 minutes`) * z(`Aerial duels won (%)`) / 100,
     aerial_win_pct   = `Aerial duels won (%)`,
-    lost_balls       = z(`Losses / 90`),
+    lost_balls       = padj_own(z(`Losses / 90`), team_possession_pct),
     cards            = z(`Yellow cards / 90 minutes`) + 2 * z(`Red cards / 90 minutes`),
     pass_acc         = `Pass accuracy`,
+    # Expected goals / assists: shot and chance quality, much less luck-driven
+    # than actual goals and assists over a 20-game season
+    xg               = z(`xG / 90`),
+    xa               = z(`xA / 90`),
+    # The stats below are no longer used in war_weights.csv (replaced by xg/xa
+    # and the win % versions) but stay defined so you can switch back.
     goals            = z(`Goals / 90`),
     chances_created  = z(`Shot assists / 90`),
     shots            = z(`Shots / 90`),
@@ -133,7 +160,7 @@ players <- players %>%
   )
 
 missing_stats <- setdiff(unique(weights_cfg$stat), names(players))
-if (length(missing_stats)) stop("war_weights.csv uses stats that aren't defined: ",
+if (length(missing_stats)) stop(WEIGHTS_FILE, " uses stats that aren't defined: ",
                                 paste(missing_stats, collapse = ", "))
 
 id_cols <- c("season_year", "conference", "team", "player_id", "player_name",

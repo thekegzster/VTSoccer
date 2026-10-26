@@ -1,77 +1,60 @@
 position,stat,direction,win_weight,wins_per_season_5_to_95,note
-AM,chances_created,1,0.045377271490787914,0.9075454298157583,NA
-AM,through_passes,1,0.025807862561449433,0.5161572512289887,NA
-AM,shots_on_target,1,0.024728702917207145,0.4945740583441429,NA
-AM,crosses,1,0.02086496763708073,0.4172993527416146,NA
-AM,accelerations,1,0.016419424731993065,0.3283884946398613,NA
-AM,goals,1,0.016029095253275536,0.3205819050655107,NA
-AM,dribbles_won,1,0.0100246891018375,0.20049378203675,NA
-AM,pressing,1,0.00551223914264376,0.11024478285287521,NA
-AM,assists,1,0,0,NA
+AM,xa,1,0.04572737023403942,0.9145474046807884,chance creation: expected assists per 90 (replaces chances_created and assists)
+AM,xg,1,0.0328202197448337,0.656404394896674,shooting: expected goals per 90 (replaces goals and shots_on_target)
+AM,through_passes,1,0.02137907273746914,0.4275814547493828,NA
+AM,crosses,1,0.01913057519088345,0.38261150381766895,NA
+AM,accelerations,1,0.009562576419516787,0.19125152839033577,NA
+AM,dribbles_won,1,0.00861348000305311,0.1722696000610622,NA
+AM,pressing,1,0.006684228633331502,0.13368457266663003,NA
 AM,loose_ball_duels,1,0,0,NA
-CB,pass_acc,1,0.047655044948982005,0.9531008989796401,NA
-CB,def_duel_win_pct,1,0.03822687208964257,0.7645374417928514,share of defensive duels won; not inflated by facing more attacks
-CB,lost_balls,-1,-0.02138056947411114,-0.42761138948222277,NA
-CB,aerial_win_pct,1,0.013810808377594429,0.27621616755188855,share of aerial duels won
-CB,cards,-1,-0.0017294978468873853,-0.034589956937747704,NA
-CB,def_duels_won,1,0,0,team goals conceded and blocked shots are not in the data
+CB,lost_balls,-1,-0.05428311841636301,-1.0856623683272602,ball losses per 90 adjusted to a 50% possession game
+CB,pass_acc,1,0.039742104692534905,0.7948420938506982,NA
+CB,def_duel_win_pct,1,0.02956876329187939,0.5913752658375878,defending 1v1: share of defensive duels won (replaces def_duels_won). Team goals conceded and blocked shots are not in the data
+CB,aerial_win_pct,1,0.011682611903573772,0.23365223807147545,aerial ability: share of aerial duels won (replaces aerial_won)
+CB,cards,-1,-0.0013976573880655552,-0.027953147761311106,NA
 CB,loose_ball_duels,1,0,0,NA
 CB,interceptions,1,0,0,NA
 CB,clearances,1,0,0,NA
-CB,aerial_won,1,0,0,NA
 CB,sliding_tackles,1,0,0,NA
-CF,shots,1,0.043597160620641215,0.8719432124128244,NA
-CF,chances_created,1,0.03718551827401058,0.7437103654802115,NA
-CF,dribbles_won,1,0.0298680437103853,0.597360874207706,NA
-CF,through_passes,1,0.028449214989078795,0.5689842997815758,NA
-CF,shots_on_target,1,0.017321505123634808,0.3464301024726962,NA
-CF,assists,1,0.010770565713024297,0.21541131426048593,NA
-CF,goals,1,0.007947019232392013,0.15894038464784027,link-up plays are not in the data
-CF,crosses,1,0.006130513145455621,0.12261026290911242,NA
+CF,xg,1,0.05316693295872745,1.063338659174549,"shooting: expected goals per 90 (replaces goals, shots and shots_on_target). Link-up plays are not in the data"
+CF,xa,1,0.03749180096077114,0.7498360192154228,chance creation: expected assists per 90 (replaces chances_created and assists)
+CF,dribbles_won,1,0.023976021666436396,0.4795204333287279,NA
+CF,through_passes,1,0.020692098263472465,0.41384196526944933,NA
+CF,crosses,1,0.009772484786387495,0.1954496957277499,NA
 CF,duels_won,1,0,0,NA
-CM,through_passes,1,0.03728370540612643,0.7456741081225285,NA
-CM,chances_created,1,0.03675620064911007,0.7351240129822014,NA
-CM,def_duel_win_pct,1,0.026270559822363544,0.5254111964472709,share of defensive duels won; not inflated by facing more attacks
-CM,shots_on_target,1,0.01601169582976294,0.3202339165952588,NA
-CM,pressing,1,0.007389204440995185,0.1477840888199037,NA
-CM,assists,1,0.006874710003273742,0.13749420006547486,NA
-CM,goals,1,0.00660396854161477,0.13207937083229543,NA
-CM,aerial_win_pct,1,0.004188274919565827,0.08376549839131653,share of aerial duels won
+CM,xa,1,0.04599151380927925,0.919830276185585,chance creation: expected assists per 90 (replaces chances_created and assists)
+CM,through_passes,1,0.028063710329459732,0.5612742065891947,NA
+CM,xg,1,0.02453849457286773,0.4907698914573546,shooting: expected goals per 90 (replaces goals and shots_on_target)
+CM,def_duel_win_pct,1,0.021346466177871462,0.42692932355742924,defending 1v1: share of defensive duels won (replaces def_duels_won)
+CM,pressing,1,0.005711178404135375,0.11422356808270749,NA
+CM,aerial_win_pct,1,0.0024136685786397554,0.04827337157279511,aerial ability: share of aerial duels won (replaces aerial_won)
 CM,loose_ball_duels,1,0,0,NA
-CM,aerial_won,1,0,0,NA
 CM,interceptions,1,0,0,NA
-CM,def_duels_won,1,0,0,NA
-DM,passes,1,0.0683009984352245,1.3660199687044898,NA
-DM,through_passes,1,0.04355912934995745,0.871182586999149,NA
-DM,shots_on_target,1,0.021235428272947346,0.4247085654589469,NA
-DM,chances_created,1,0.020142238379891,0.40284476759782,NA
-DM,dribbles_won,1,0.014614087630877532,0.2922817526175506,NA
-DM,goals,1,0.011036094847478157,0.22072189694956315,NA
-DM,assists,1,0.006695530422681883,0.13391060845363767,NA
-DM,sliding_tackles,1,4.0165561539253316e-4,0.008033112307850664,NA
+DM,passes,1,0.05658930888396382,1.1317861776792764,NA
+DM,xg,1,0.034423765747965594,0.6884753149593119,shooting: expected goals per 90 (replaces goals and shots_on_target)
+DM,through_passes,1,0.033320740392502234,0.6664148078500447,NA
+DM,xa,1,0.022596259918936504,0.4519251983787301,chance creation: expected assists per 90 (replaces chances_created and assists)
+DM,dribbles_won,1,0.010650670828140765,0.2130134165628153,NA
 DM,loose_ball_duels,1,0,0,NA
+DM,sliding_tackles,1,0,0,NA
 DM,interceptions,1,0,0,NA
-FB,accelerations,1,0.0329648887055708,0.659297774111416,NA
-FB,dribbles_won,1,0.02623881684303272,0.5247763368606544,NA
-FB,key_passes,1,0.02290177415712971,0.4580354831425941,NA
-FB,def_duel_win_pct,1,0.022170274024229945,0.44340548048459894,share of defensive duels won; not inflated by facing more attacks
-FB,crosses,1,0.01630816963641769,0.3261633927283538,NA
-FB,pressing,1,0.004026608617280967,0.08053217234561934,NA
-FB,def_duels_won,1,0,0,NA
+FB,xa,1,0.0429372280735335,0.85874456147067,chance creation: expected assists per 90 (replaces key_passes)
+FB,accelerations,1,0.02456446593357332,0.4912893186714664,NA
+FB,dribbles_won,1,0.020777906396132577,0.41555812792265157,NA
+FB,def_duel_win_pct,1,0.01961357906363059,0.39227158127261175,defending 1v1: share of defensive duels won; not inflated by facing more attacks (replaces def_duels_won)
+FB,crosses,1,0.016541690151242672,0.33083380302485343,NA
+FB,pressing,1,0.00436885542224515,0.087377108444903,NA
 FB,sliding_tackles,1,0,0,NA
 FB,clearances,1,0,0,NA
 FB,interceptions,1,0,0,NA
 FB,loose_ball_duels,1,0,0,loose ball duels per 90; no win % in the data
-GK,pass_acc,1,0.052133185161420334,1.0426637032284065,NA
-GK,exits,1,1.989395015637175e-4,0.003978790031274351,NA
-W,chances_created,1,0.04076954053428333,0.8153908106856667,NA
-W,shots_on_target,1,0.03902198826401584,0.7804397652803167,NA
-W,through_passes,1,0.027151968489872235,0.5430393697974447,NA
-W,goals,1,0.01869664962712941,0.37393299254258816,NA
-W,accelerations,1,0.01767333565187161,0.3534667130374322,NA
-W,dribbles_won,1,0.013919838671564658,0.27839677343129315,NA
-W,crosses,1,0.012226142515026869,0.24452285030053736,NA
-W,assists,1,0.004598282462361944,0.09196564924723888,NA
-W,aerial_win_pct,1,0.0038837731844750425,0.07767546368950086,share of aerial duels won
+GK,pass_acc,1,0.04729332121605375,0.9458664243210749,NA
+GK,exits,1,0.0016174342281666582,0.03234868456333317,NA
+W,xg,1,0.051730487796867584,1.0346097559373517,shooting: expected goals per 90 (replaces goals and shots_on_target)
+W,xa,1,0.04268001783372523,0.8536003566745045,chance creation: expected assists per 90 (replaces chances_created and assists)
+W,through_passes,1,0.019989999769155078,0.39979999538310157,NA
+W,crosses,1,0.013095019602749393,0.2619003920549879,NA
+W,accelerations,1,0.012701350243079394,0.25402700486158786,NA
+W,dribbles_won,1,0.008480435701716178,0.16960871403432357,NA
+W,aerial_win_pct,1,0.005655364387703689,0.11310728775407378,aerial ability: share of aerial duels won (replaces aerial_won)
 W,loose_ball_duels,1,0,0,NA
-W,aerial_won,1,0,0,NA
