@@ -41,11 +41,11 @@ OUT_DIR      <- "war_output"
 WEIGHT_MODE  <- "learned"      # "learned" or "manual"
 MIN_QUAL     <- 300            # minutes to count toward min/max and replacement level
 PRIOR_MIN    <- 270            # shrinkage: a player is treated as if he also played
-                               # this many minutes at the position average
+# this many minutes at the position average
 SCALE_LO     <- 0.05           # percentile used as the scaling "min"
 SCALE_HI     <- 0.95           # percentile used as the scaling "max"
 REPL_PCTL    <- 0.20           # replacement level = this percentile of qualified
-                               # players at the position, each season
+# players at the position, each season
 ADJUST_SOS   <- TRUE           # adjust stats for strength of schedule
 FIT_EXCLUDE  <- c(2020)        # seasons left out of the weight fit (COVID)
 FOCUS_TEAM   <- "Virginia Tech"
@@ -207,13 +207,13 @@ if (WEIGHT_MODE == "learned") {
   lower <- c(ifelse(cfg$direction > 0, 0, -Inf), -Inf)
   upper <- c(ifelse(cfg$direction > 0, Inf, 0),  Inf)
   folds <- as.integer(factor(fit_rows$season_year))   # leave one season out
-
+  
   cv <- cv.glmnet(X, y, alpha = 0, foldid = folds, keep = TRUE,
                   lower.limits = lower, upper.limits = upper,
                   penalty.factor = c(rep(1, nrow(cfg)), 0))
   b <- coef(cv, s = "lambda.min")[, 1]
   cfg$weight <- unname(b[cfg$feature])
-
+  
   pred_oos <- cv$fit.preval[, which(cv$lambda == cv$lambda.min)]
   r2_oos   <- 1 - sum((y - pred_oos)^2) / sum((y - mean(y))^2)
   r2_sos   <- summary(lm(y ~ fit_rows$sos_pct))$r.squared
@@ -394,5 +394,22 @@ p4 <- ggplot(yoy, aes(war_per_90 * 1000 / 90, next_war_per_90 * 1000 / 90)) +
        caption = "Simulated player data") +
   theme_war
 save(p4, "04_war_year_to_year.png")
+
+# 05: team WAR vs RPI rank (rank 1 at the top, so better teams sit higher, like chart 03)
+# Spearman because RPI is a rank: it only asks whether higher WAR goes with a better rank
+rpi_r <- cor(chk$team_war, chk$rpi_rank, method = "spearman")
+p5 <- ggplot(chk, aes(team_war, rpi_rank)) +
+  geom_point(colour = "#2a78d6", alpha = 0.35, size = 2) +
+  # a curve, not a straight line: ranks stop at 1, so the top flattens out
+  geom_smooth(method = "loess", se = FALSE, colour = ink2, linewidth = 0.6, formula = y ~ x) +
+  geom_point(data = filter(chk, team == FOCUS_TEAM), colour = "#eb6834", size = 3) +
+  scale_y_reverse(breaks = c(1, 50, 100, 150, 200)) +
+  labs(title = "Does team WAR line up with RPI?",
+       subtitle = sprintf("Each dot is a team-season; orange = %s. Spearman r = %.2f",
+                          FOCUS_TEAM, rpi_r),
+       x = "Total team WAR", y = "RPI rank", caption = "Simulated player data") +
+  theme_war
+save(p5, "05_team_war_vs_rpi.png")
+cat(sprintf("Team WAR vs RPI rank: Spearman r = %.2f\n", rpi_r))
 
 cat("\nDone. Outputs in", OUT_DIR, "\n")
