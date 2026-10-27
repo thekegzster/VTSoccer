@@ -54,6 +54,11 @@ FOCUS_TEAM   <- "Virginia Tech"
 LATEST       <- 2025           # most recent complete season (for charts)
 VERSION      <- ""             # scorecard label; "" = automatic from weights file and mode
 SCORE_MIN    <- 600            # minutes needed to count in the scorecard and scatter
+GOAL_UNIT_STATS <- c("xg", "xa")  # stats already measured in goals (expected goals and
+# expected assists). They skip the 0-1 scaling, keep their
+# real per-90 values, and get ONE value per expected goal
+# shared by every position (not shrunk by the fit).
+# character(0) = treat them like every other stat
 
 # Optional overrides from the command line:
 #   Rscript player_gar.R gar_weights.csv manual
@@ -204,11 +209,15 @@ long <- long %>%
   group_by(season_year, position, stat) %>%
   mutate(lo = quantile(value[qualified], SCALE_LO, na.rm = TRUE),
          hi = quantile(value[qualified], SCALE_HI, na.rm = TRUE),
-         scaled = if_else(hi > lo, pmin(pmax((value - lo) / (hi - lo), 0), 1), 0.5),
+         scaled = if_else(stat %in% GOAL_UNIT_STATS, value,      # already in goals: keep as is
+                          if_else(hi > lo, pmin(pmax((value - lo) / (hi - lo), 0), 1), 0.5)),
          # league average for the position, weighted by minutes
          scaled_avg = weighted.mean(scaled, minutes_played)) %>%
   ungroup() %>%
-  mutate(feature = paste(position, stat, sep = ":"))
+  # goal-unit stats share one feature across positions ("all:xg"), so an expected
+  # goal is worth the same whoever produces it
+  mutate(feature = if_else(stat %in% GOAL_UNIT_STATS, paste0("all:", stat),
+                           paste(position, stat, sep = ":")))
 
 
 # ---- 7. Two weight fits: attack -> goals scored, defense -> goals conceded --
@@ -230,7 +239,9 @@ team_features <- long %>%
   inner_join(teams, by = c("season_year", "team"))
 
 cfg <- weights_cfg %>%
-  mutate(feature = paste(position, stat, sep = ":"), weight = NA_real_) %>%
+  mutate(feature = if_else(stat %in% GOAL_UNIT_STATS, paste0("all:", stat),
+                           paste(position, stat, sep = ":")),
+         weight = NA_real_) %>%
   filter(feature %in% unique(long$feature))
 
 fit_rows <- team_features %>%
@@ -241,19 +252,21 @@ r2_oos       <- c(attack = NA_real_, defense = NA_real_)
 
 for (sd in c("attack", "defense")) {
   cs    <- cfg$side == sd
-  feats <- cfg$feature[cs]
+  feats <- unique(cfg$feature[cs])
+  dir_f <- cfg$direction[cs][match(feats, cfg$feature[cs])]
   y     <- targets[[sd]]
   if (WEIGHT_MODE == "learned") {
     X <- as.matrix(fit_rows[, c(feats, "sos_pct")])
     # direction is fixed by the weights file; the fit only picks the size
-    lower <- c(ifelse(cfg$direction[cs] > 0, 0, -Inf), -Inf)
-    upper <- c(ifelse(cfg$direction[cs] > 0, Inf, 0),  Inf)
+    lower <- c(ifelse(dir_f > 0, 0, -Inf), -Inf)
+    upper <- c(ifelse(dir_f > 0, Inf, 0),  Inf)
     folds <- as.integer(factor(fit_rows$season_year))   # leave one season out
     cv <- cv.glmnet(X, y, alpha = 0, foldid = folds, keep = TRUE,
                     lower.limits = lower, upper.limits = upper,
-                    penalty.factor = c(rep(1, length(feats)), 0))
+                    # goal-unit stats and schedule aren't shrunk; everything else is
+                    penalty.factor = c(ifelse(grepl("^all:", feats), 0, 1), 0))
     b <- coef(cv, s = "lambda.min")[, 1]
-    cfg$weight[cs] <- unname(b[feats])
+    cfg$weight[cs] <- unname(b[cfg$feature[cs]])
     pred_oos <- cv$fit.preval[, which(cv$lambda == cv$lambda.min)]
     r2_oos[[sd]] <- 1 - sum((y - pred_oos)^2) / sum((y - mean(y))^2)
     cat(sprintf("%s fit: team %s per game explained, held-out seasons: %.2f\n",
@@ -294,10 +307,11 @@ if (WEIGHT_MODE == "learned") {
 weights_used <- cfg %>%
   left_join(calib, by = c("position", "side")) %>%
   mutate(goal_weight = weight * beta,
+         units = if_else(stat %in% GOAL_UNIT_STATS, "goals per 1.0 per 90", "0-1 scale (5th-95th pct)"),
          # goals added (attack) or prevented (defense) over a full season
          # (1,800 min) by going from the 5th-percentile player on this stat to the 95th
          goals_per_season_5_to_95 = goal_weight * 1800 / 90) %>%
-  select(position, side, stat, direction, goal_weight, goals_per_season_5_to_95, note) %>%
+  select(position, side, stat, units, direction, goal_weight, goals_per_season_5_to_95, note) %>%
   arrange(position, side, desc(abs(goal_weight)))
 write_csv(weights_used, file.path(OUT_DIR, "weights_used.csv"))
 
@@ -424,6 +438,35 @@ p1 <- ggplot(top_parts, aes(goals, label, fill = part)) +
        x = "Goals", y = NULL, caption = "Simulated player data") +
   theme_gar + theme(panel.grid.major.y = element_blank())
 save(p1, "01_top25_gar.png", w = 10, h = 8)
+
+# 01b: the same chart for each position, in GAR_output/by_position/
+pos_names <- c(GK = "goalkeepers", CB = "center backs", FB = "fullbacks",
+               DM = "defensive midfielders", CM = "central midfielders",
+               AM = "attacking midfielders", W = "wingers", CF = "center forwards")
+dir.create(file.path(OUT_DIR, "by_position"), showWarnings = FALSE)
+for (ps in pos_order) {
+  top_p <- player_gar %>%
+    filter(season_year == LATEST, position == ps) %>%
+    slice_min(gar_rank_pos, n = 25, with_ties = FALSE) %>%
+    mutate(label = paste0(player_name, " (", team, ")"),
+           label = factor(label, levels = rev(unique(label))))
+  if (nrow(top_p) == 0) next
+  parts_p <- top_p %>%
+    select(label, Attack = off_gaa, Defense = def_gaa, `Average over replacement` = repl_value) %>%
+    pivot_longer(-label, names_to = "part", values_to = "goals") %>%
+    mutate(part = factor(part, levels = rev(names(side_cols))))
+  pp <- ggplot(parts_p, aes(goals, label, fill = part)) +
+    geom_col(width = 0.7) +
+    geom_vline(xintercept = 0, colour = ink2, linewidth = 0.4) +
+    geom_point(data = top_p, aes(gar, label), inherit.aes = FALSE,
+               shape = 21, fill = "white", colour = ink, size = 2.3, stroke = 0.8) +
+    scale_fill_manual(values = side_cols, breaks = names(side_cols), drop = FALSE) +
+    labs(title = sprintf("Top %d %s by GAR, %d", nrow(top_p), pos_names[[ps]], LATEST),
+         subtitle = "Goals above replacement, split into attack, defense and replacement value. Dot = net GAR",
+         x = "Goals", y = NULL, caption = "Simulated player data") +
+    theme_gar + theme(panel.grid.major.y = element_blank())
+  save(pp, file.path("by_position", sprintf("01_top25_gar_%s.png", ps)), w = 10, h = 8)
+}
 
 # 02: attack vs defense for every regular, latest season
 sc <- player_gar %>%

@@ -6,9 +6,9 @@ for every team-season in rpi_standings_all_fixed.csv.
 - Team strength comes from RPI rank (within season) and win %, and shifts every metric
   (better teams: more possession, more shots/xG, better passing, fewer defensive actions).
 - Games played come from the team's actual W-L-T record in the standings file.
-- Team results are SIMULATED (simulated_standings.csv): each team's games are played out using
-  program strength + the minutes-weighted talent of its players + schedule, so better players
-  actually cause more winning. RPI rank is re-estimated from the simulated record.
+- Team results are SIMULATED (simulated_standings.csv), game by game: a team's goals scored are
+  its own players' goals; goals conceded depend on program strength, the talent of its GK/CB/FB/DM
+  and schedule. So better players actually cause more winning. RPI rank is re-estimated.
 - Derived metrics are computed from their components so the data is internally consistent
   (e.g. goals <= shots, head goals <= goals, xG+xA = xG + xA, successful attacking actions =
   SoT + accurate crosses + successful dribbles).
@@ -420,45 +420,60 @@ for m in ["Goals", "Shots, total", "Head goals, total", "Non-penalty goals, tota
 out["true_talent"] = np.round(df._talent.values, 3)
 
 # ---------------- simulated team results -------------------------------------------------------
-# In the first version, team results were the REAL standings, so player talent never caused
-# winning. Here each team's W-L-T is simulated game by game, and the team's quality depends on
-#   - program strength (strength_z, from the real RPI/record: coaching, facilities, depth)
-#   - the talent of the players who actually played, weighted by their minutes
-#   - schedule (a tougher schedule means tougher opponents)
+# Each team's season is played out game by game:
+#   GOALS SCORED   = the goals its own players scored (the Goals column above, which comes from
+#                    their shots and xG), spread at random over the team's games. So attackers'
+#                    output really is the team's attack, as in real soccer.
+#   GOALS CONCEDED = random each game, with an average that depends on
+#                    - program strength (strength_z, from the real RPI/record)
+#                    - the minutes-weighted talent of the GKs, CBs, FBs and DMs who played
+#                    - schedule (a tougher schedule means stronger opponents)
 # A separate random stream is used, so every player stat above is unchanged.
 # RPI rank is then re-estimated from the simulated record + the real schedule strength.
 STANDINGS_OUT = sys.argv[5] if len(sys.argv) > 5 else "simulated_standings.csv"
-A_PROGRAM = 0.30     # goal difference per game per 1 SD of program strength
-B_TALENT  = 0.30     # goal difference per game per 1 SD of lineup talent
-C_SCHED   = 0.60     # goal difference per game from easiest (0) to toughest (1) schedule
-BASE_GOALS = 1.35    # goals per team per game for two even teams
-OT_SHARE  = 0.32     # share of level games settled (overtime/late winner) so ties ~ real rate
+A_PROGRAM_DEF = 0.08   # goals conceded fall by about this share per 1 SD of program strength
+B_TALENT_DEF  = 0.10   # ... and per 1 SD of defensive-unit talent
+C_SCHED       = 0.40   # ... and rise by this (log scale) from the easiest to the toughest schedule
+OT_SHARE      = 0.33   # share of level games settled late (overtime) so ties ~ the real rate
+DEF_POSITIONS = ["GK", "CB", "FB", "DM"]
 rng_res = np.random.default_rng(SEED + 1)
 
-lineup = (df.assign(tm=df._talent * df.minutes_played)
-            .groupby(["season_year", "team"])
-            .agg(tm=("tm", "sum"), mins=("minutes_played", "sum")))
-lineup["lineup_talent"] = lineup.tm / lineup.mins.replace(0, np.nan)
-lineup["talent_z"] = (lineup.lineup_talent - lineup.lineup_talent.mean()) / lineup.lineup_talent.std()
+def minutes_weighted_talent(rows):
+    g = (rows.assign(tm=rows._talent * rows.minutes_played)
+             .groupby(["season_year", "team"])
+             .agg(tm=("tm", "sum"), mins=("minutes_played", "sum")))
+    return g.tm / g.mins.replace(0, np.nan)
 
-res = st.merge(lineup[["lineup_talent", "talent_z"]].reset_index(), on=["season_year", "team"], how="left")
+lineup = minutes_weighted_talent(df).rename("lineup_talent").to_frame()
+defence = minutes_weighted_talent(df[df.position.isin(DEF_POSITIONS)]).rename("def_talent").to_frame()
+defence["def_talent_z"] = (defence.def_talent - defence.def_talent.mean()) / defence.def_talent.std()
+team_goals = out.groupby(["season_year", "team"])["Goals"].sum().rename("player_goals").to_frame()
+
+res = (st.merge(lineup.reset_index(), on=["season_year", "team"], how="left")
+         .merge(defence.reset_index(), on=["season_year", "team"], how="left")
+         .merge(team_goals.reset_index(), on=["season_year", "team"], how="left"))
 res["sos_pct"] = 1 - res.groupby("season_year").sos_rank.rank(pct=True, method="average")
 res["sos_pct"] = res.sos_pct.fillna(0.5)
-res["exp_goal_diff"] = (A_PROGRAM * res.strength_z + B_TALENT * res.talent_z.fillna(0)
-                        - C_SCHED * (res.sos_pct - 0.5))
+res["ga_log_mult"] = (-A_PROGRAM_DEF * res.strength_z - B_TALENT_DEF * res.def_talent_z.fillna(0)
+                      + C_SCHED * (res.sos_pct - 0.5))
 
 has_games = res[["overall_w", "overall_l", "overall_t"]].notna().all(axis=1) & (res.gp > 0)
+# set the conceded baseline so the league concedes, on average, what it scores
+gp_ok = res.gp.where(has_games, 0)
+base_conceded = (res.player_goals.fillna(0) * has_games).sum() / (gp_ok * np.exp(res.ga_log_mult)).sum()
+
 sim_w, sim_l, sim_t, sim_gf, sim_ga = [], [], [], [], []
-for d, n, ok in zip(res.exp_goal_diff, res.gp, has_games):
+for goals, mult, n, ok in zip(res.player_goals.fillna(0), res.ga_log_mult, res.gp, has_games):
     if not ok:
         sim_w.append(np.nan); sim_l.append(np.nan); sim_t.append(np.nan)
         sim_gf.append(np.nan); sim_ga.append(np.nan); continue
     n = int(n)
-    gf = rng_res.poisson(BASE_GOALS * np.exp(d / 2), n)
-    ga = rng_res.poisson(BASE_GOALS * np.exp(-d / 2), n)
+    gf = rng_res.multinomial(int(goals), [1 / n] * n)          # the players' goals, game by game
+    ga_rate = base_conceded * np.exp(mult)
+    ga = rng_res.poisson(ga_rate, n)
     level = gf == ga
     settled = level & (rng_res.random(n) < OT_SHARE)
-    won_ot = rng_res.random(n) < 1 / (1 + np.exp(-d))      # better team more likely to win it
+    won_ot = rng_res.random(n) < 1 / (1 + np.exp(-(goals / n - ga_rate)))   # better team more likely
     w = (gf > ga) | (settled & won_ot)
     l = (gf < ga) | (settled & ~won_ot)
     sim_w.append(w.sum()); sim_l.append(l.sum()); sim_t.append(n - w.sum() - l.sum())

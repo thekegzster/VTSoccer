@@ -1,60 +1,60 @@
-position,side,stat,direction,goal_weight,goals_per_season_5_to_95,note
-AM,attack,xa,1,0.1044612393444131,2.0892247868882623,chance creation: expected assists per 90 (replaces chances_created and assists)
-AM,attack,through_passes,1,0.07697935140449054,1.5395870280898107,NA
-AM,attack,accelerations,1,0.0638455896138497,1.276911792276994,NA
-AM,attack,dribbles_won,1,0.057993512614097915,1.1598702522819584,NA
-AM,attack,xg,1,0.05465567027006766,1.0931134054013532,shooting: expected goals per 90 (replaces goals and shots_on_target)
-AM,attack,crosses,1,0.050616379781418176,1.0123275956283635,NA
-AM,defense,pressing,1,0.11956272606387262,2.3912545212774523,winning the ball back: counted on the defense side
-AM,defense,loose_ball_duels,1,0,0,NA
-CB,attack,pass_acc,1,0.09220420863543886,1.8440841727087773,build-up: counted on the attack side
-CB,defense,lost_balls,-1,-0.2267722917505326,-4.535445835010652,ball losses per 90 adjusted to a 50% possession game; counted on the defense side because losses lead to chances against
-CB,defense,def_duel_win_pct,1,0.22522814300661606,4.504562860132321,defending 1v1: share of defensive duels won (replaces def_duels_won). Team goals conceded and blocked shots are not in the data
-CB,defense,aerial_win_pct,1,0.10028902423570611,2.0057804847141223,aerial ability: share of aerial duels won (replaces aerial_won)
-CB,defense,interceptions,1,0.004364379727686026,0.08728759455372052,NA
-CB,defense,loose_ball_duels,1,0,0,NA
-CB,defense,clearances,1,0,0,NA
-CB,defense,sliding_tackles,1,0,0,NA
-CB,defense,cards,-1,0,0,NA
-CF,attack,through_passes,1,0.07568811225264412,1.5137622450528823,NA
-CF,attack,dribbles_won,1,0.06082962716059946,1.216592543211989,NA
-CF,attack,xg,1,0.058617840913148214,1.1723568182629642,"shooting: expected goals per 90 (replaces goals, shots and shots_on_target). Link-up plays are not in the data"
-CF,attack,xa,1,0.053008775582414666,1.0601755116482932,chance creation: expected assists per 90 (replaces chances_created and assists)
-CF,attack,duels_won,1,0.025003656587896262,0.5000731317579252,NA
-CF,attack,crosses,1,0.02037794483255641,0.40755889665112827,NA
-CM,attack,xa,1,0.09058139459706047,1.8116278919412094,chance creation: expected assists per 90 (replaces chances_created and assists)
-CM,attack,through_passes,1,0.08520214928444955,1.7040429856889912,NA
-CM,attack,xg,1,0.060926492537997506,1.21852985075995,shooting: expected goals per 90 (replaces goals and shots_on_target)
-CM,defense,def_duel_win_pct,1,0.24067092084854352,4.813418416970871,defending 1v1: share of defensive duels won (replaces def_duels_won)
-CM,defense,aerial_win_pct,1,0.12254892984432568,2.4509785968865136,aerial ability: share of aerial duels won (replaces aerial_won)
-CM,defense,pressing,1,0.022182516941504932,0.4436503388300987,winning the ball back: counted on the defense side
-CM,defense,interceptions,1,0.013869549727587235,0.2773909945517447,NA
-CM,defense,loose_ball_duels,1,0,0,NA
-DM,attack,through_passes,1,0.08962899773723611,1.792579954744722,NA
-DM,attack,passes,1,0.08406911140246252,1.6813822280492505,NA
-DM,attack,dribbles_won,1,0.06444586075086756,1.2889172150173511,NA
-DM,attack,xa,1,0.053172941098627295,1.063458821972546,chance creation: expected assists per 90 (replaces chances_created and assists)
-DM,attack,xg,1,0.04385717685984341,0.8771435371968681,shooting: expected goals per 90 (replaces goals and shots_on_target)
-DM,defense,interceptions,1,0.06130614556132172,1.2261229112264345,NA
-DM,defense,sliding_tackles,1,0.002391518831415099,0.04783037662830198,NA
-DM,defense,loose_ball_duels,1,0,0,NA
-FB,attack,xa,1,0.10606364973695007,2.121272994739001,chance creation: expected assists per 90 (replaces key_passes)
-FB,attack,dribbles_won,1,0.06660985082707664,1.3321970165415329,NA
-FB,attack,accelerations,1,0.05177780126218952,1.0355560252437903,NA
-FB,attack,crosses,1,0.02366833868559745,0.473366773711949,NA
-FB,defense,def_duel_win_pct,1,0.20606330815582705,4.121266163116541,defending 1v1: share of defensive duels won; not inflated by facing more attacks (replaces def_duels_won)
-FB,defense,interceptions,1,0.0666980263787926,1.333960527575852,NA
-FB,defense,pressing,1,0.028658079863634757,0.5731615972726952,winning the ball back: counted on the defense side
-FB,defense,sliding_tackles,1,0,0,NA
-FB,defense,clearances,1,0,0,NA
-FB,defense,loose_ball_duels,1,0,0,loose ball duels per 90; no win % in the data
-GK,attack,pass_acc,1,0.018236046885756026,0.36472093771512054,NA
-GK,defense,exits,1,0.07947953854040113,1.5895907708080226,NA
-W,attack,through_passes,1,0.08858725729001217,1.7717451458002433,NA
-W,attack,xg,1,0.043603570349216726,0.8720714069843345,shooting: expected goals per 90 (replaces goals and shots_on_target)
-W,attack,accelerations,1,0.04053645843173139,0.8107291686346279,NA
-W,attack,xa,1,0.03651035509980447,0.7302071019960894,chance creation: expected assists per 90 (replaces chances_created and assists)
-W,attack,dribbles_won,1,0.03394590956139799,0.6789181912279597,NA
-W,attack,aerial_win_pct,1,0.01986769657865031,0.3973539315730062,aerial ability (attacking headers/target play); counted on the attack side
-W,attack,crosses,1,0.013663961852249497,0.27327923704498996,NA
-W,defense,loose_ball_duels,1,0,0,NA
+position,side,stat,units,direction,goal_weight,goals_per_season_5_to_95,note
+AM,attack,xg,goals per 1.0 per 90,1,1.3687144492082295,27.37428898416459,shooting: expected goals per 90 (replaces goals and shots_on_target)
+AM,attack,xa,goals per 1.0 per 90,1,0.1303336514146758,2.6066730282935158,chance creation: expected assists per 90 (replaces chances_created and assists)
+AM,attack,dribbles_won,0-1 scale (5th-95th pct),1,0.0011704626584521846,0.023409253169043694,NA
+AM,attack,through_passes,0-1 scale (5th-95th pct),1,4.7743357595210646e-4,0.009548671519042129,NA
+AM,attack,crosses,0-1 scale (5th-95th pct),1,0,0,NA
+AM,attack,accelerations,0-1 scale (5th-95th pct),1,0,0,NA
+AM,defense,pressing,0-1 scale (5th-95th pct),1,0.05782181751783265,1.156436350356653,winning the ball back: counted on the defense side
+AM,defense,loose_ball_duels,0-1 scale (5th-95th pct),1,0,0,NA
+CB,attack,pass_acc,0-1 scale (5th-95th pct),1,0.03512596142525665,0.7025192285051329,build-up: counted on the attack side
+CB,defense,def_duel_win_pct,0-1 scale (5th-95th pct),1,0.13186090251021276,2.6372180502042553,defending 1v1: share of defensive duels won (replaces def_duels_won). Team goals conceded and blocked shots are not in the data
+CB,defense,lost_balls,0-1 scale (5th-95th pct),-1,-0.12924384090421343,-2.5848768180842687,ball losses per 90 adjusted to a 50% possession game; counted on the defense side because losses lead to chances against
+CB,defense,aerial_win_pct,0-1 scale (5th-95th pct),1,0.09123071483049752,1.8246142966099506,aerial ability: share of aerial duels won (replaces aerial_won)
+CB,defense,interceptions,0-1 scale (5th-95th pct),1,0.037656111323757936,0.7531222264751588,NA
+CB,defense,cards,0-1 scale (5th-95th pct),-1,-0.006932326339289517,-0.13864652678579034,NA
+CB,defense,loose_ball_duels,0-1 scale (5th-95th pct),1,0,0,NA
+CB,defense,clearances,0-1 scale (5th-95th pct),1,0,0,NA
+CB,defense,sliding_tackles,0-1 scale (5th-95th pct),1,0,0,NA
+CF,attack,xg,goals per 1.0 per 90,1,1.3687144492082295,27.37428898416459,"shooting: expected goals per 90 (replaces goals, shots and shots_on_target). Link-up plays are not in the data"
+CF,attack,xa,goals per 1.0 per 90,1,0.1303336514146758,2.6066730282935158,chance creation: expected assists per 90 (replaces chances_created and assists)
+CF,attack,through_passes,0-1 scale (5th-95th pct),1,0.03072239832789706,0.6144479665579412,NA
+CF,attack,duels_won,0-1 scale (5th-95th pct),1,0.008388311286135746,0.1677662257227149,NA
+CF,attack,crosses,0-1 scale (5th-95th pct),1,9.437279056077101e-4,0.018874558112154202,NA
+CF,attack,dribbles_won,0-1 scale (5th-95th pct),1,0,0,NA
+CM,attack,xg,goals per 1.0 per 90,1,1.3687144492082295,27.37428898416459,shooting: expected goals per 90 (replaces goals and shots_on_target)
+CM,attack,xa,goals per 1.0 per 90,1,0.1303336514146758,2.6066730282935158,chance creation: expected assists per 90 (replaces chances_created and assists)
+CM,attack,through_passes,0-1 scale (5th-95th pct),1,0.005927999783932524,0.11855999567865047,NA
+CM,defense,aerial_win_pct,0-1 scale (5th-95th pct),1,0.10030849149455373,2.0061698298910744,aerial ability: share of aerial duels won (replaces aerial_won)
+CM,defense,def_duel_win_pct,0-1 scale (5th-95th pct),1,0.0800485502068867,1.6009710041377339,defending 1v1: share of defensive duels won (replaces def_duels_won)
+CM,defense,pressing,0-1 scale (5th-95th pct),1,0.022099067349394947,0.4419813469878989,winning the ball back: counted on the defense side
+CM,defense,interceptions,0-1 scale (5th-95th pct),1,0.0018923166726671134,0.03784633345334227,NA
+CM,defense,loose_ball_duels,0-1 scale (5th-95th pct),1,0,0,NA
+DM,attack,xg,goals per 1.0 per 90,1,1.3687144492082295,27.37428898416459,shooting: expected goals per 90 (replaces goals and shots_on_target)
+DM,attack,xa,goals per 1.0 per 90,1,0.1303336514146758,2.6066730282935158,chance creation: expected assists per 90 (replaces chances_created and assists)
+DM,attack,dribbles_won,0-1 scale (5th-95th pct),1,0.028994875382402932,0.5798975076480586,NA
+DM,attack,passes,0-1 scale (5th-95th pct),1,0.010495858676068956,0.20991717352137912,NA
+DM,attack,through_passes,0-1 scale (5th-95th pct),1,0.010265150998662176,0.20530301997324354,NA
+DM,defense,interceptions,0-1 scale (5th-95th pct),1,0.06011326084320333,1.2022652168640666,NA
+DM,defense,sliding_tackles,0-1 scale (5th-95th pct),1,0.011305846252835216,0.22611692505670433,NA
+DM,defense,loose_ball_duels,0-1 scale (5th-95th pct),1,0,0,NA
+FB,attack,xa,goals per 1.0 per 90,1,0.1303336514146758,2.6066730282935158,chance creation: expected assists per 90 (replaces key_passes)
+FB,attack,dribbles_won,0-1 scale (5th-95th pct),1,0.02027324300030466,0.40546486000609316,NA
+FB,attack,accelerations,0-1 scale (5th-95th pct),1,0.0013919482706409904,0.027838965412819806,NA
+FB,attack,crosses,0-1 scale (5th-95th pct),1,0,0,NA
+FB,defense,def_duel_win_pct,0-1 scale (5th-95th pct),1,0.13386208877004604,2.677241775400921,defending 1v1: share of defensive duels won; not inflated by facing more attacks (replaces def_duels_won)
+FB,defense,interceptions,0-1 scale (5th-95th pct),1,0.033728842622391765,0.6745768524478353,NA
+FB,defense,pressing,0-1 scale (5th-95th pct),1,0.015949853404316733,0.31899706808633466,winning the ball back: counted on the defense side
+FB,defense,loose_ball_duels,0-1 scale (5th-95th pct),1,0.008711632487492961,0.17423264974985922,loose ball duels per 90; no win % in the data
+FB,defense,sliding_tackles,0-1 scale (5th-95th pct),1,0,0,NA
+FB,defense,clearances,0-1 scale (5th-95th pct),1,0,0,NA
+GK,attack,pass_acc,0-1 scale (5th-95th pct),1,0,0,NA
+GK,defense,exits,0-1 scale (5th-95th pct),1,0.03248137513987519,0.6496275027975037,NA
+W,attack,xg,goals per 1.0 per 90,1,1.3687144492082295,27.37428898416459,shooting: expected goals per 90 (replaces goals and shots_on_target)
+W,attack,xa,goals per 1.0 per 90,1,0.1303336514146758,2.6066730282935158,chance creation: expected assists per 90 (replaces chances_created and assists)
+W,attack,dribbles_won,0-1 scale (5th-95th pct),1,0.018910210255211564,0.3782042051042313,NA
+W,attack,through_passes,0-1 scale (5th-95th pct),1,0.017732259150712082,0.35464518301424164,NA
+W,attack,aerial_win_pct,0-1 scale (5th-95th pct),1,0.017453222784737116,0.3490644556947423,aerial ability (attacking headers/target play); counted on the attack side
+W,attack,crosses,0-1 scale (5th-95th pct),1,0.015770551874713285,0.3154110374942657,NA
+W,attack,accelerations,0-1 scale (5th-95th pct),1,0.011635835362080823,0.23271670724161647,NA
+W,defense,loose_ball_duels,0-1 scale (5th-95th pct),1,0.00480633737158166,0.0961267474316332,NA
