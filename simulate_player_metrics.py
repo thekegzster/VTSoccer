@@ -448,10 +448,11 @@ res["exp_goal_diff"] = (A_PROGRAM * res.strength_z + B_TALENT * res.talent_z.fil
                         - C_SCHED * (res.sos_pct - 0.5))
 
 has_games = res[["overall_w", "overall_l", "overall_t"]].notna().all(axis=1) & (res.gp > 0)
-sim_w, sim_l, sim_t = [], [], []
+sim_w, sim_l, sim_t, sim_gf, sim_ga = [], [], [], [], []
 for d, n, ok in zip(res.exp_goal_diff, res.gp, has_games):
     if not ok:
-        sim_w.append(np.nan); sim_l.append(np.nan); sim_t.append(np.nan); continue
+        sim_w.append(np.nan); sim_l.append(np.nan); sim_t.append(np.nan)
+        sim_gf.append(np.nan); sim_ga.append(np.nan); continue
     n = int(n)
     gf = rng_res.poisson(BASE_GOALS * np.exp(d / 2), n)
     ga = rng_res.poisson(BASE_GOALS * np.exp(-d / 2), n)
@@ -461,7 +462,10 @@ for d, n, ok in zip(res.exp_goal_diff, res.gp, has_games):
     w = (gf > ga) | (settled & won_ot)
     l = (gf < ga) | (settled & ~won_ot)
     sim_w.append(w.sum()); sim_l.append(l.sum()); sim_t.append(n - w.sum() - l.sum())
+    # a level game settled late counts one extra goal for the winner, so goals match the result
+    sim_gf.append(gf.sum() + (settled & won_ot).sum()); sim_ga.append(ga.sum() + (settled & ~won_ot).sum())
 res["sim_w"], res["sim_l"], res["sim_t"] = sim_w, sim_l, sim_t
+res["sim_gf"], res["sim_ga"] = sim_gf, sim_ga
 res["sim_win_pct"] = (res.sim_w + 0.5 * res.sim_t) / res.gp
 
 # Re-estimate RPI rank: learn from the REAL data how RPI rank relates to record and schedule,
@@ -480,10 +484,11 @@ standings_out = pd.DataFrame({
     "season_year": res.season_year, "season": res.season, "conference": res.conference, "team": res.team,
     "rpi_rank": res.sim_rpi_rank, "sos_rank": res.sos_rank,
     "overall_w": res.sim_w, "overall_l": res.sim_l, "overall_t": res.sim_t,
+    "goals_for": res.sim_gf, "goals_against": res.sim_ga,
     "real_rpi_rank": res.rpi_rank, "real_w": res.overall_w, "real_l": res.overall_l, "real_t": res.overall_t,
     "lineup_talent": res.lineup_talent.round(3),
 })
-for c in ["overall_w", "overall_l", "overall_t", "real_w", "real_l", "real_t"]:
+for c in ["overall_w", "overall_l", "overall_t", "goals_for", "goals_against", "real_w", "real_l", "real_t"]:
     standings_out[c] = standings_out[c].astype("Int64")
 standings_out.to_csv(STANDINGS_OUT, index=False)
 print("wrote", STANDINGS_OUT, standings_out.shape)
