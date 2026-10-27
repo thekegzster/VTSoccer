@@ -59,6 +59,17 @@ GOAL_UNIT_STATS <- c("xg", "xa")  # stats already measured in goals (expected go
 # real per-90 values, and get ONE value per expected goal
 # shared by every position (not shrunk by the fit).
 # character(0) = treat them like every other stat
+CAP_SCALE    <- FALSE          # FALSE = no cap: players beyond the 95th percentile keep
+# their full value (1.3, 1.6, ...). TRUE = the old 0-1 cap
+RANGE_LEVEL  <- 0.80           # uncertainty range shown for each player (0.80 = the middle
+# 80% of plausible values)
+
+# Comparing players with our own roster (for the transfer portal)
+ROSTER_SEASON <- LATEST        # season of our roster to compare everyone against
+PROJ_MINUTES  <- 1500          # minutes a regular starter plays in a season
+COMPARE_MIN   <- 600           # minutes a player needs to appear in the roster comparison
+STARTER_SLOTS <- c(GK = 1, CB = 2, FB = 2, DM = 1, CM = 2, AM = 1, W = 2, CF = 1)
+# how many of our players at each position count as regulars
 
 # Optional overrides from the command line:
 #   Rscript player_gar.R gar_weights.csv manual
@@ -69,7 +80,8 @@ if (length(args) >= 3) VERSION      <- args[3]
 
 stopifnot(WEIGHT_MODE %in% c("learned", "manual"))
 if (!file.exists(file.path(DATA_DIR, WEIGHTS_FILE))) stop("Weights file not found: ", WEIGHTS_FILE)
-if (VERSION == "") VERSION <- sprintf("%s (%s)", sub("\\.csv$", "", WEIGHTS_FILE), WEIGHT_MODE)
+if (VERSION == "") VERSION <- sprintf("%s (%s%s)", sub("\\.csv$", "", WEIGHTS_FILE), WEIGHT_MODE,
+                                      if (CAP_SCALE) "" else ", uncapped")
 cat(sprintf("Weights: %s | mode: %s | scorecard label: %s\n", WEIGHTS_FILE, WEIGHT_MODE, VERSION))
 
 set.seed(2026)
@@ -210,7 +222,10 @@ long <- long %>%
   mutate(lo = quantile(value[qualified], SCALE_LO, na.rm = TRUE),
          hi = quantile(value[qualified], SCALE_HI, na.rm = TRUE),
          scaled = if_else(stat %in% GOAL_UNIT_STATS, value,      # already in goals: keep as is
-                          if_else(hi > lo, pmin(pmax((value - lo) / (hi - lo), 0), 1), 0.5)),
+                          if_else(hi > lo,
+                                  if (CAP_SCALE) pmin(pmax((value - lo) / (hi - lo), 0), 1)
+                                  else (value - lo) / (hi - lo),   # 0 = 5th pct, 1 = 95th pct, no cap
+                                  0.5)),
          # league average for the position, weighted by minutes
          scaled_avg = weighted.mean(scaled, minutes_played)) %>%
   ungroup() %>%
@@ -356,7 +371,91 @@ player_gar <- player_index %>%
          minutes_played, gar, off_gaa, def_gaa, repl_value, gar_per_90, off_per_90, def_per_90,
          war_equiv, gar_rank, gar_rank_pos, rpi_rank)
 
+# ---- 8b. Uncertainty ranges ------------------------------------------------
+# How much a rating could be off because a season is a limited sample. Each stat's
+# sampling noise is estimated from the stat itself:
+#   counts per 90 (crosses, interceptions, ...)  behave like counts: variance ~ rate
+#   percentages (duel win %, pass accuracy)      depend on attempts: p(100 - p) / attempts
+#   xG and xA                                    depend on how many shots / chances they
+#                                                come from (a few big chances = noisier)
+# The noise shrinks with minutes, and the same shrinkage toward the position average
+# as step 4 is applied (PRIOR_MIN). Stats are combined using their weights:
+#   noise of the rating = sqrt( sum of weight^2 x noise of each scaled stat )
+# Stats are treated as independent, so ranges are a little narrow if stats move together.
+z_range <- qnorm(0.5 + RANGE_LEVEL / 2)
+helper <- players %>%
+  transmute(player_id, season_year,
+            vol_def  = z(`Defensive duels / 90 minutes`), vol_aer = z(`Aerial duels / 90 minutes`),
+            vol_pass = z(`Passes / 90`), shots90 = z(`Shots / 90`), sa90 = z(`Shot assists / 90`))
+unc <- long %>%
+  inner_join(weights_used %>% select(position, stat, goal_weight), by = c("position", "stat")) %>%
+  left_join(helper, by = c("player_id", "season_year")) %>%
+  mutate(attempts = case_when(stat == "def_duel_win_pct" ~ vol_def,
+                              stat == "aerial_win_pct"   ~ vol_aer,
+                              stat == "pass_acc"         ~ vol_pass),
+         # noise of one season's per-90 value = c x 90 / minutes
+         c = case_when(!is.na(attempts) ~ pmax(value, 0) * pmax(100 - value, 0) / pmax(attempts, 0.5),
+                       stat == "xg" ~ 2 * pmax(value, 0) * pmin(pmax(value, 0) / pmax(shots90, 0.1), 0.6),
+                       stat == "xa" ~ 2 * pmax(value, 0) * pmin(pmax(value, 0) / pmax(sa90, 0.1), 0.6),
+                       TRUE ~ pmax(value, 0)),
+         post_var   = c * 90 / (minutes_played + PRIOR_MIN),          # after shrinkage
+         scaled_var = if_else(stat %in% GOAL_UNIT_STATS, post_var,
+                              if_else(hi > lo, post_var / (hi - lo)^2, 0))) %>%
+  group_by(player_id, season_year) %>%
+  summarise(se_per_90 = sqrt(sum(goal_weight^2 * scaled_var, na.rm = TRUE)), .groups = "drop")
+
+player_gar <- player_gar %>%
+  left_join(unc, by = c("player_id", "season_year")) %>%
+  mutate(gar_per_90_lo = gar_per_90 - z_range * se_per_90,
+         gar_per_90_hi = gar_per_90 + z_range * se_per_90,
+         gar_lo        = gar_per_90_lo * minutes_played / 90,
+         gar_hi        = gar_per_90_hi * minutes_played / 90) %>%
+  relocate(gar_lo, gar_hi, .after = gar)
+cf_900 <- player_gar %>% filter(position == "CF", between(minutes_played, 800, 1000))
+cat(sprintf("Uncertainty: a CF with ~900 minutes has a %.0f%% range of about +/- %.3f GAR per 90 (+/- %.1f goals)\n",
+            100 * RANGE_LEVEL, median(z_range * cf_900$se_per_90),
+            median(z_range * cf_900$se_per_90 * cf_900$minutes_played / 90)))
+
 write_csv(player_gar, file.path(OUT_DIR, "player_gar.csv"))
+
+# ---- 8c. Compare every player with our own roster ---------------------------
+# For the portal, the real alternative to a target is the player we already have.
+# Our "regulars" at a position = our players with the most minutes in ROSTER_SEASON,
+# up to STARTER_SLOTS (e.g. 2 CBs). A target is compared with our WEAKEST regular at
+# his position (the spot he would most likely take).
+our_roster <- player_gar %>%
+  filter(team == FOCUS_TEAM, season_year == ROSTER_SEASON) %>%
+  group_by(position) %>%
+  arrange(desc(minutes_played), .by_group = TRUE) %>%
+  mutate(slot = row_number(), regular = slot <= STARTER_SLOTS[position[1]]) %>%
+  ungroup()
+write_csv(our_roster %>% select(position, slot, regular, player_name, class_year, minutes_played,
+                                gar, gar_lo, gar_hi, gar_per_90, gar_per_90_lo, gar_per_90_hi),
+          file.path(OUT_DIR, "our_roster.csv"))
+
+benchmark <- our_roster %>%
+  filter(regular) %>%
+  group_by(position) %>%
+  slice_min(gar_per_90, n = 1, with_ties = FALSE) %>%
+  ungroup() %>%
+  transmute(position, benchmark_player = player_name, benchmark_per_90 = gar_per_90,
+            benchmark_se = se_per_90)
+
+portal_vs_roster <- player_gar %>%
+  filter(season_year == ROSTER_SEASON, team != FOCUS_TEAM, minutes_played >= COMPARE_MIN) %>%
+  inner_join(benchmark, by = "position") %>%
+  mutate(se_diff        = sqrt(se_per_90^2 + benchmark_se^2),
+         upgrade_per_90 = gar_per_90 - benchmark_per_90,
+         # goals over a full season as a starter (PROJ_MINUTES), with its range
+         season_upgrade    = upgrade_per_90 * PROJ_MINUTES / 90,
+         season_upgrade_lo = (upgrade_per_90 - z_range * se_diff) * PROJ_MINUTES / 90,
+         season_upgrade_hi = (upgrade_per_90 + z_range * se_diff) * PROJ_MINUTES / 90,
+         chance_better     = pnorm(upgrade_per_90 / se_diff)) %>%
+  arrange(position, desc(gar_per_90)) %>%
+  select(position, player_name, team, conference, class_year, minutes_played,
+         gar_per_90, gar_per_90_lo, gar_per_90_hi, benchmark_player, benchmark_per_90,
+         upgrade_per_90, season_upgrade, season_upgrade_lo, season_upgrade_hi, chance_better, rpi_rank)
+write_csv(portal_vs_roster, file.path(OUT_DIR, "portal_vs_roster.csv"))
 
 team_gar <- player_gar %>%
   group_by(season_year, conference, team, rpi_rank) %>%
@@ -430,11 +529,13 @@ top_parts <- top %>%
 p1 <- ggplot(top_parts, aes(goals, label, fill = part)) +
   geom_col(width = 0.7) +
   geom_vline(xintercept = 0, colour = ink2, linewidth = 0.4) +
+  geom_errorbarh(data = top, aes(xmin = gar_lo, xmax = gar_hi, y = label), inherit.aes = FALSE,
+                 height = 0.35, colour = ink, linewidth = 0.45) +
   geom_point(data = top, aes(gar, label), inherit.aes = FALSE,
              shape = 21, fill = "white", colour = ink, size = 2.3, stroke = 0.8) +
   scale_fill_manual(values = side_cols, breaks = names(side_cols)) +
   labs(title = sprintf("Top 25 players by GAR, %d", LATEST),
-       subtitle = "Goals above replacement, split into attack, defense and replacement value. Dot = net GAR",
+       subtitle = sprintf("Goals above replacement: attack + defense + replacement value\nDot = net GAR; line = %d%% range", round(100 * RANGE_LEVEL)),
        x = "Goals", y = NULL, caption = "Simulated player data") +
   theme_gar + theme(panel.grid.major.y = element_blank())
 save(p1, "01_top25_gar.png", w = 10, h = 8)
@@ -458,14 +559,58 @@ for (ps in pos_order) {
   pp <- ggplot(parts_p, aes(goals, label, fill = part)) +
     geom_col(width = 0.7) +
     geom_vline(xintercept = 0, colour = ink2, linewidth = 0.4) +
+    geom_errorbarh(data = top_p, aes(xmin = gar_lo, xmax = gar_hi, y = label), inherit.aes = FALSE,
+                   height = 0.35, colour = ink, linewidth = 0.45) +
     geom_point(data = top_p, aes(gar, label), inherit.aes = FALSE,
                shape = 21, fill = "white", colour = ink, size = 2.3, stroke = 0.8) +
     scale_fill_manual(values = side_cols, breaks = names(side_cols), drop = FALSE) +
     labs(title = sprintf("Top %d %s by GAR, %d", nrow(top_p), pos_names[[ps]], LATEST),
-         subtitle = "Goals above replacement, split into attack, defense and replacement value. Dot = net GAR",
+         subtitle = sprintf("Goals above replacement: attack + defense + replacement value\nDot = net GAR; line = %d%% range", round(100 * RANGE_LEVEL)),
          x = "Goals", y = NULL, caption = "Simulated player data") +
     theme_gar + theme(panel.grid.major.y = element_blank())
   save(pp, file.path("by_position", sprintf("01_top25_gar_%s.png", ps)), w = 10, h = 8)
+}
+
+# 01c: who would upgrade our weakest regular at each position? (GAR_output/vs_roster/)
+dir.create(file.path(OUT_DIR, "vs_roster"), showWarnings = FALSE)
+chance_cols <- c("Very likely better (90%+)" = "#1baf7a", "Likely better (70-90%)" = "#7fcfa9",
+                 "Unclear (30-70%)" = "#a8a6a0", "Likely not better (<30%)" = "#eb6834")
+for (ps in pos_order) {
+  bm <- filter(benchmark, position == ps)
+  ours <- filter(our_roster, position == ps, regular)
+  tg <- portal_vs_roster %>%
+    filter(position == ps) %>%
+    slice_max(gar_per_90, n = 20, with_ties = FALSE) %>%
+    mutate(verdict = cut(chance_better, c(-Inf, 0.3, 0.7, 0.9, Inf),
+                         labels = rev(names(chance_cols))),
+           verdict = factor(verdict, levels = names(chance_cols)),
+           label = sprintf("%s (%s, %s)  %d%% | %+.1f", player_name, team, class_year,
+                           round(100 * chance_better), season_upgrade),
+           label = factor(label, levels = rev(label)))
+  if (nrow(tg) == 0 || nrow(bm) == 0) next
+  band <- with(ours %>% filter(player_name == bm$benchmark_player),
+               c(gar_per_90_lo[1], gar_per_90_hi[1]))
+  pv <- ggplot(tg, aes(gar_per_90, label)) +
+    annotate("rect", xmin = band[1], xmax = band[2], ymin = -Inf, ymax = Inf,
+             fill = "#861F41", alpha = 0.08) +
+    geom_vline(data = ours, aes(xintercept = gar_per_90), colour = "#861F41",
+               linetype = ifelse(ours$player_name == bm$benchmark_player, "solid", "dashed"),
+               linewidth = 0.6) +
+    geom_text(data = ours, aes(x = gar_per_90, y = Inf, label = sub(".* ", "", player_name)),
+              inherit.aes = FALSE, colour = "#861F41", size = 3.2, vjust = -0.4, hjust = 0.5) +
+    geom_errorbarh(aes(xmin = gar_per_90_lo, xmax = gar_per_90_hi, colour = verdict),
+                   height = 0.35, linewidth = 0.6) +
+    geom_point(aes(colour = verdict), size = 2.6) +
+    scale_colour_manual(values = chance_cols, drop = FALSE) +
+    guides(colour = guide_legend(nrow = 2)) +
+    coord_cartesian(clip = "off") +
+    labs(title = sprintf("Who would upgrade %s's %s? %d", FOCUS_TEAM, pos_names[[ps]], ROSTER_SEASON),
+         subtitle = sprintf(paste0("Top %d by GAR per 90 (%d+ minutes), with %d%% range. Maroon lines = our regulars;\n"),
+                            nrow(tg), COMPARE_MIN, round(100 * RANGE_LEVEL), bm$benchmark_player,
+                            sub(".* ", "", bm$benchmark_player), format(PROJ_MINUTES, big.mark = ",")),
+         x = "GAR per 90 (goals above replacement)", y = NULL, caption = "Simulated player data") +
+    theme_gar + theme(panel.grid.major.y = element_blank(), plot.margin = margin(12, 12, 6, 6))
+  save(pv, file.path("vs_roster", sprintf("upgrade_%s.png", ps)), w = 10, h = 8)
 }
 
 # 02: attack vs defense for every regular, latest season
