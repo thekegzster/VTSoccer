@@ -21,8 +21,8 @@
 # Outputs (in OUT_DIR = GAR_output): player_gar.csv, team_gar.csv,
 #   weights_used.csv, scorecard files, charts
 #
-# Steps 1-6 are identical to player_war.R (build stats, shrink, schedule
-# adjustment, 0-1 scaling). Steps 7 onward are new.
+# Steps 1-5 are the same as player_war.R (build stats, shrink, schedule
+# adjustment). Unlike WAR, stats are NOT rescaled to 0-1: they stay in raw units.
 # =============================================================================
 
 # install.packages(c("readr", "dplyr", "tidyr", "purrr", "ggplot2", "glmnet", "scales"))
@@ -42,34 +42,59 @@ STANDINGS_FILE <- "simulated_standings.csv"   # needs goals_for and goals_agains
 WEIGHTS_FILE <- "gar_weights.csv"   # stat list with a side column (attack / defense)
 WEIGHT_MODE  <- "learned"      # "learned" or "manual"
 MIN_QUAL     <- 300            # minutes to count toward scaling and replacement level
+STAT_PRIOR_MIN <- c(prevented_goals = 1800)  # stats that need more minutes before they're
+                               # trusted: goalkeeper shot-stopping swings a lot by luck, so a keeper
+                               # is treated as if he also had 1,800 average minutes (PRIOR_MIN for others)
 PRIOR_MIN    <- 270            # shrinkage: a player is treated as if he also played
-# this many minutes at the position average
-SCALE_LO     <- 0.05           # percentile used as the scaling "min"
-SCALE_HI     <- 0.95           # percentile used as the scaling "max"
+                               # this many minutes at the position average
 REPL_PCTL    <- 0.20           # replacement level = this percentile of qualified
-# players' NET index at the position, each season
+                               # players' NET index at the position, each season
 ADJUST_SOS   <- TRUE           # adjust stats for strength of schedule
 FIT_EXCLUDE  <- c(2020)        # seasons left out of the weight fit (COVID)
 FOCUS_TEAM   <- "Virginia Tech"
-LATEST       <- 2025           # most recent complete season (for charts)
+LATEST       <- 2025           # most recent complete season (for charts); NA = latest in the data
 VERSION      <- ""             # scorecard label; "" = automatic from weights file and mode
 SCORE_MIN    <- 600            # minutes needed to count in the scorecard and scatter
 GOAL_UNIT_STATS <- c("xg", "xa")  # stats already measured in goals (expected goals and
-# expected assists). They skip the 0-1 scaling, keep their
-# real per-90 values, and get ONE value per expected goal
-# shared by every position (not shrunk by the fit).
-# character(0) = treat them like every other stat
-CAP_SCALE    <- FALSE          # FALSE = no cap: players beyond the 95th percentile keep
-# their full value (1.3, 1.6, ...). TRUE = the old 0-1 cap
+                               # expected assists). They get ONE value per expected goal
+                               # shared by every position, and the fit doesn't shrink it.
+                               # character(0) = a separate value at each position
+ATTACK_MODEL <- "chance_share"  # how attack is measured:
+                               #   "chance_share" = each team's chances (its xG) are split between
+                               #     the shooters and the passers who set them up (see 6b)
+                               #   "learned" = old way: attacking stats fitted to team goals
+PASSER_SHARE <- 0.40           # share of an assisted chance credited to the passer (xA);
+                               # the shooter keeps the rest, plus all of his unassisted chances
+FIXED_WEIGHTS <- c(prevented_goals = 1.0)  # goals per unit, set rather than fitted: a goal
+                               # a keeper prevents is one goal fewer conceded (real data only)
+XG_GOAL_VALUE <- 1.0           # goals per expected goal (xG is built so 1 xG = 1 goal on average)
 RANGE_LEVEL  <- 0.80           # uncertainty range shown for each player (0.80 = the middle
-# 80% of plausible values)
+                               # 80% of plausible values)
 
 # Comparing players with our own roster (for the transfer portal)
-ROSTER_SEASON <- LATEST        # season of our roster to compare everyone against
+ROSTER_SEASON <- NA            # season of our roster to compare everyone against; NA = LATEST
 PROJ_MINUTES  <- 1500          # minutes a regular starter plays in a season
 COMPARE_MIN   <- 600           # minutes a player needs to appear in the roster comparison
 STARTER_SLOTS <- c(GK = 1, CB = 2, FB = 2, DM = 1, CM = 2, AM = 1, W = 2, CF = 1)
-# how many of our players at each position count as regulars
+                               # how many of our players at each position count as regulars
+
+# ---- Which data: simulated or real ------------------------------------------
+# "simulated" = simulated_player_metrics.csv / simulated_standings.csv (many seasons)
+# "real"      = the files prepare_real_data.R writes from the Wyscout export
+#               (one season, conference games only). Run prepare_real_data.R first.
+DATA_SOURCE  <- "real"
+PLAYERS_FILE <- "simulated_player_metrics.csv"
+if (DATA_SOURCE == "real") {
+  PLAYERS_FILE   <- "real_player_metrics.csv"
+  STANDINGS_FILE <- "real_standings.csv"
+  WEIGHTS_FILE   <- "gar_weights_real.csv"   # stat list without stats the export lacks
+  OUT_DIR        <- "GAR_output_real"
+  ADJUST_SOS     <- FALSE   # the Adjusted sheet already corrects for conference strength
+  LATEST         <- NA      # = the latest season in the file (2026)
+  MIN_QUAL       <- 270     # a season so far is ~5-11 conference games, so lower minute cut-offs
+  SCORE_MIN      <- 360
+  COMPARE_MIN    <- 360
+}
 
 # Optional overrides from the command line:
 #   Rscript player_gar.R gar_weights.csv manual
@@ -80,8 +105,11 @@ if (length(args) >= 3) VERSION      <- args[3]
 
 stopifnot(WEIGHT_MODE %in% c("learned", "manual"))
 if (!file.exists(file.path(DATA_DIR, WEIGHTS_FILE))) stop("Weights file not found: ", WEIGHTS_FILE)
-if (VERSION == "") VERSION <- sprintf("%s (%s%s)", sub("\\.csv$", "", WEIGHTS_FILE), WEIGHT_MODE,
-                                      if (CAP_SCALE) "" else ", uncapped")
+stopifnot(ATTACK_MODEL %in% c("chance_share", "learned"))
+if (VERSION == "") VERSION <- sprintf("%s (%s, %s)", sub("\\.csv$", "", WEIGHTS_FILE), WEIGHT_MODE,
+                                     if (ATTACK_MODEL == "chance_share")
+                                       sprintf("chance share %d%%", round(100 * PASSER_SHARE))
+                                     else "learned attack")
 cat(sprintf("Weights: %s | mode: %s | scorecard label: %s\n", WEIGHTS_FILE, WEIGHT_MODE, VERSION))
 
 set.seed(2026)
@@ -89,9 +117,20 @@ dir.create(OUT_DIR, showWarnings = FALSE)
 
 # ---- 1. Load ----------------------------------------------------------------
 
-players <- read_csv(file.path(DATA_DIR, "simulated_player_metrics.csv"),
+players <- read_csv(file.path(DATA_DIR, PLAYERS_FILE),
                     show_col_types = FALSE) %>%
   filter(minutes_played > 0)
+
+if (is.na(LATEST)) LATEST <- max(players$season_year)
+if (is.na(ROSTER_SEASON)) ROSTER_SEASON <- LATEST
+n_seasons <- n_distinct(players$season_year)
+DATA_CAPTION <- if (DATA_SOURCE == "real") sprintf("Wyscout data, conference games, %d season to date", LATEST) else
+  "Simulated player data"
+span_yrs <- intersect(sort(unique(players$season_year)), setdiff((LATEST - 4):LATEST, FIT_EXCLUDE))
+SEASON_SPAN <- if (length(span_yrs) == 1) as.character(span_yrs) else
+  sprintf("%d-%d%s", min(span_yrs), max(span_yrs), if (any(FIT_EXCLUDE %in% min(span_yrs):max(span_yrs))) " (2020 excluded)" else "")
+cat(sprintf("Data: %s (%d players, %d season%s; charts show %d)\n", PLAYERS_FILE, nrow(players),
+            n_seasons, if (n_seasons == 1) "" else "s", LATEST))
 
 standings <- read_csv(file.path(DATA_DIR, STANDINGS_FILE),
                       show_col_types = FALSE)
@@ -99,18 +138,28 @@ if (!all(c("goals_for", "goals_against") %in% names(standings)))
   stop(STANDINGS_FILE, " needs goals_for and goals_against columns for GAR")
 standings <- standings %>%
   select(season_year, team, conference, rpi_rank, sos_rank,
-         overall_w, overall_l, overall_t, goals_for, goals_against) %>%
+         overall_w, overall_l, overall_t, goals_for, goals_against,
+         any_of(c("games", "win_pct"))) %>%
   distinct(season_year, team, .keep_all = TRUE)
 
 weights_cfg <- read_csv(file.path(DATA_DIR, WEIGHTS_FILE),
                         show_col_types = FALSE) %>%
   filter(direction != 0)
+if (!"side" %in% names(weights_cfg) || !all(weights_cfg$side %in% c("attack", "defense")))
+  stop(WEIGHTS_FILE, " needs a 'side' column with attack or defense on every row")
+# With chance sharing, attack comes from xG and xA directly (step 6b), so the attack
+# rows of the weights file aren't used; only the defense rows are fitted.
+if (ATTACK_MODEL == "chance_share") weights_cfg <- filter(weights_cfg, side == "defense")
+
+# games and win_pct can be given directly (real_standings.csv does: the export covers
+# conference games only, so games come from team minutes); otherwise from the record
+for (nm in c("games", "win_pct")) if (!nm %in% names(standings)) standings[[nm]] <- NA_real_
 
 # ---- 2. Team context: record and schedule strength --------------------------
 
 teams <- standings %>%
-  mutate(games   = overall_w + overall_l + overall_t,
-         win_pct = (overall_w + 0.5 * overall_t) / games,
+  mutate(games   = coalesce(games, overall_w + overall_l + overall_t),
+         win_pct = coalesce(win_pct, (overall_w + 0.5 * overall_t) / (overall_w + overall_l + overall_t)),
          gf_pg   = goals_for / games,        # goals scored per game
          ga_pg   = goals_against / games) %>%  # goals conceded per game
   group_by(season_year) %>%
@@ -137,6 +186,50 @@ padj <- function(x, poss) x * (100 - 50) / (100 - poss)
 # The on-ball version: teams that have the ball more make more on-ball mistakes
 # (more touches, more chances to lose it). Scale to a 50% possession game.
 padj_own <- function(x, poss) x * 50 / poss
+
+# Columns a data file doesn't have (e.g. pressing duels in the real export) are added
+# as empty, so every stat below can be defined; stats that end up empty are dropped
+# from the weights further down.
+stat_cols <- c(
+  "xG against / 90",
+  "Accelerations / 90",
+  "Aerial duels / 90 minutes",
+  "Aerial duels won (%)",
+  "Assists / 90",
+  "Clearances / 90",
+  "Crosses / 90",
+  "Defensive duels / 90 minutes",
+  "Defensive duels won (%)",
+  "Dribbles %",
+  "Dribbles / 90",
+  "Duels won (%)",
+  "Exits, per 90 mins",
+  "Goals / 90",
+  "Interceptions / per 30 minutes of opponent possession",
+  "Key passes / 90",
+  "Loose ball duels / 90 minutes",
+  "Losses / 90",
+  "Offensive Duels %",
+  "Offensive Duels / 90",
+  "Pass accuracy",
+  "Passes / 90",
+  "Pressing duels, per 90",
+  "Prevented goals / 90",
+  "Red cards / 90 minutes",
+  "Save rate (%)",
+  "Shot assists / 90",
+  "Shots / 90",
+  "Shots against / 90",
+  "Shots blocked / 90",
+  "Shots on target %",
+  "Sliding tackles / per 30 minutes of opponent possession",
+  "Through passes / 90",
+  "Yellow cards / 90 minutes",
+  "xA / 90",
+  "xG / 90")
+for (nm in setdiff(stat_cols, names(players))) players[[nm]] <- NA_real_
+if (!"team_possession_pct" %in% names(players)) players$team_possession_pct <- 50
+players$team_possession_pct <- coalesce(players$team_possession_pct, 50)
 
 players <- players %>%
   mutate(
@@ -174,10 +267,21 @@ players <- players %>%
     through_passes   = z(`Through passes / 90`),
     duels_won        = z(`Offensive Duels / 90`) * z(`Offensive Duels %`) / 100 + aerial_won,
     shots_against    = `Shots against / 90`,
-    exits            = `Exits, per 90 mins`
+    exits            = `Exits, per 90 mins`,
+    # In the real export only (empty on simulated data):
+    shots_blocked    = padj(z(`Shots blocked / 90`), team_possession_pct),
+    duel_win_pct     = `Duels won (%)`,
+    prevented_goals  = `Prevented goals / 90`,   # GK: xG faced minus goals conceded, per 90
+    save_pct         = `Save rate (%)`
   )
 
 missing_stats <- setdiff(unique(weights_cfg$stat), names(players))
+empty_stats <- Filter(function(st) st %in% names(players) && all(is.na(players[[st]]) | players[[st]] == 0),
+                      unique(weights_cfg$stat))
+if (length(empty_stats)) {
+  cat("Not in this data, dropped from the weights:", paste(empty_stats, collapse = ", "), "\n")
+  weights_cfg <- filter(weights_cfg, !stat %in% empty_stats)
+}
 if (length(missing_stats)) stop(WEIGHTS_FILE, " uses stats that aren't defined: ",
                                 paste(missing_stats, collapse = ", "))
 
@@ -197,7 +301,8 @@ long <- long %>%
   group_by(season_year, position, stat) %>%
   mutate(prior = mean(raw[qualified], na.rm = TRUE),
          raw   = coalesce(raw, prior),
-         value = (raw * minutes_played + prior * PRIOR_MIN) / (minutes_played + PRIOR_MIN)) %>%
+         pm    = coalesce(unname(STAT_PRIOR_MIN[stat]), PRIOR_MIN),
+         value = (raw * minutes_played + prior * pm) / (minutes_played + pm)) %>%
   ungroup()
 
 # ---- 5. Strength-of-schedule adjustment -------------------------------------
@@ -215,19 +320,20 @@ if (ADJUST_SOS) {
     mutate(value = value - sos_slope * (sos_pct - 0.5))
 }
 
-# ---- 6. Scale each stat 0-1 within position and season ----------------------
+# ---- 6. Position averages (stats stay in their raw units) -------------------
+# No rescaling and no caps: every stat keeps its own units (per 90, %, ...), after
+# the shrinkage and schedule adjustment above. Each player is compared with the
+# minutes-weighted average at his position that season.
 
 long <- long %>%
   group_by(season_year, position, stat) %>%
-  mutate(lo = quantile(value[qualified], SCALE_LO, na.rm = TRUE),
-         hi = quantile(value[qualified], SCALE_HI, na.rm = TRUE),
-         scaled = if_else(stat %in% GOAL_UNIT_STATS, value,      # already in goals: keep as is
-                          if_else(hi > lo,
-                                  if (CAP_SCALE) pmin(pmax((value - lo) / (hi - lo), 0), 1)
-                                  else (value - lo) / (hi - lo),   # 0 = 5th pct, 1 = 95th pct, no cap
-                                  0.5)),
-         # league average for the position, weighted by minutes
-         scaled_avg = weighted.mean(scaled, minutes_played)) %>%
+  mutate(val = value,
+         pos_avg = weighted.mean(val, minutes_played)) %>%
+  ungroup() %>%
+  # how spread out each stat is at the position (for reading the weights and for
+  # manual weights, which are set per standard deviation); no caps, context only
+  group_by(position, stat) %>%
+  mutate(pos_sd = sd(val[qualified], na.rm = TRUE)) %>%
   ungroup() %>%
   # goal-unit stats share one feature across positions ("all:xg"), so an expected
   # goal is worth the same whoever produces it
@@ -235,9 +341,54 @@ long <- long %>%
                            paste(position, stat, sep = ":")))
 
 
+# ---- 6b. Attack by sharing each team's chances --------------------------------
+# A team's chances are measured by its xG. Each chance is credited to the players
+# who made it:
+#   shooter: his xG, minus the passer's share on chances that were set up for him
+#   passer:  PASSER_SHARE x his xA (the xG of the shots he set up)
+# We don't know which of a shooter's shots were assisted, so each team's assisted
+# share (team xA / team xG) is used for all its shooters. Summed over a team, the
+# credits add back up to the team's xG, so nothing is counted twice.
+# xG and xA get the same small-sample shrinkage and schedule adjustment as other stats.
+if (ATTACK_MODEL == "chance_share") {
+  ch <- players %>%
+    select(all_of(id_cols), xg, xa, shots90 = `Shots / 90`, sa90 = `Shot assists / 90`) %>%
+    mutate(shots90 = z(shots90), sa90 = z(sa90), qualified = minutes_played >= MIN_QUAL)
+  assisted <- ch %>%
+    group_by(season_year, team) %>%
+    summarise(team_xg = sum(xg * minutes_played / 90), team_xa = sum(xa * minutes_played / 90),
+              .groups = "drop") %>%
+    mutate(assisted_share = pmin(1, if_else(team_xg > 0, team_xa / team_xg, 0)))
+  ch <- ch %>%
+    pivot_longer(c(xg, xa), names_to = "stat", values_to = "raw") %>%
+    group_by(season_year, position, stat) %>%
+    mutate(prior = mean(raw[qualified], na.rm = TRUE),
+           value = (raw * minutes_played + prior * PRIOR_MIN) / (minutes_played + PRIOR_MIN)) %>%
+    ungroup()
+  if (ADJUST_SOS) {
+    ch_fx <- ch %>%
+      filter(qualified) %>%
+      group_by(position, stat) %>%
+      summarise(sos_slope = coef(lm(value ~ sos_pct + win_pct))[["sos_pct"]], .groups = "drop")
+    ch <- ch %>%
+      left_join(ch_fx, by = c("position", "stat")) %>%
+      mutate(value = value - sos_slope * (sos_pct - 0.5))
+  }
+  chance_tab <- ch %>%
+    select(player_id, season_year, team, position, minutes_played, stat, value, shots90, sa90) %>%
+    pivot_wider(names_from = stat, values_from = value) %>%
+    left_join(assisted %>% select(season_year, team, assisted_share), by = c("season_year", "team")) %>%
+    mutate(shot_credit = xg * (1 - PASSER_SHARE * assisted_share),   # per 90
+           pass_credit = PASSER_SHARE * xa,                            # per 90
+           att         = XG_GOAL_VALUE * (shot_credit + pass_credit)) %>%
+    group_by(season_year, position) %>%
+    mutate(att_avg = weighted.mean(att, minutes_played)) %>%
+    ungroup()
+}
+
 # ---- 7. Two weight fits: attack -> goals scored, defense -> goals conceded --
 # Team-level feature for each position x stat, exactly as in player_war.R:
-#   x = sum over the team's players of (scaled - position avg) x minutes / (90 x games)
+#   x = sum over the team's players of (stat value - position average) x minutes / (90 x games)
 # Attack fit:   team goals SCORED per game    = start + sum(weight x x) + schedule
 # Defense fit:  team goals PREVENTED per game = start + sum(weight x x) + schedule
 #   "goals prevented" is minus goals conceded, so in both fits a positive weight
@@ -247,7 +398,7 @@ if (!"side" %in% names(weights_cfg) || !all(weights_cfg$side %in% c("attack", "d
   stop(WEIGHTS_FILE, " needs a 'side' column with attack or defense on every row")
 
 team_features <- long %>%
-  mutate(x = (scaled - scaled_avg) * minutes_played / (90 * games)) %>%
+  mutate(x = (val - pos_avg) * minutes_played / (90 * games)) %>%
   group_by(season_year, team, feature) %>%
   summarise(x = sum(x), .groups = "drop") %>%
   pivot_wider(names_from = feature, values_from = x, values_fill = 0) %>%
@@ -265,7 +416,8 @@ targets      <- list(attack = fit_rows$gf_pg, defense = -fit_rows$ga_pg)
 target_label <- c(attack = "goals scored", defense = "goals conceded")
 r2_oos       <- c(attack = NA_real_, defense = NA_real_)
 
-for (sd in c("attack", "defense")) {
+sides_fit <- if (ATTACK_MODEL == "chance_share") "defense" else c("attack", "defense")
+for (sd in sides_fit) {
   cs    <- cfg$side == sd
   feats <- unique(cfg$feature[cs])
   dir_f <- cfg$direction[cs][match(feats, cfg$feature[cs])]
@@ -275,7 +427,9 @@ for (sd in c("attack", "defense")) {
     # direction is fixed by the weights file; the fit only picks the size
     lower <- c(ifelse(dir_f > 0, 0, -Inf), -Inf)
     upper <- c(ifelse(dir_f > 0, Inf, 0),  Inf)
-    folds <- as.integer(factor(fit_rows$season_year))   # leave one season out
+    # leave one season out; with one season (real data), 10 random groups of teams
+    folds <- if (n_distinct(fit_rows$season_year) >= 3) as.integer(factor(fit_rows$season_year)) else
+      sample(rep_len(1:10, nrow(fit_rows)))
     cv <- cv.glmnet(X, y, alpha = 0, foldid = folds, keep = TRUE,
                     lower.limits = lower, upper.limits = upper,
                     # goal-unit stats and schedule aren't shrunk; everything else is
@@ -284,11 +438,33 @@ for (sd in c("attack", "defense")) {
     cfg$weight[cs] <- unname(b[cfg$feature[cs]])
     pred_oos <- cv$fit.preval[, which(cv$lambda == cv$lambda.min)]
     r2_oos[[sd]] <- 1 - sum((y - pred_oos)^2) / sum((y - mean(y))^2)
-    cat(sprintf("%s fit: team %s per game explained, held-out seasons: %.2f\n",
+    cat(sprintf("%s fit: team %s per game explained, held-out data: %.2f\n",
                 tools::toTitleCase(sd), target_label[[sd]], r2_oos[[sd]]))
   } else {
-    cfg$weight[cs] <- cfg$direction[cs] * cfg$manual_weight[cs]
+    # manual_weight = goals-scale importance per 1 standard deviation of the stat at the
+    # position (so a % stat and a per-90 count are comparable); xG/xA: per 1.0 expected goal
+    sds <- long %>% distinct(position, stat, pos_sd)
+    sd_cs <- sds$pos_sd[match(paste(cfg$position[cs], cfg$stat[cs]), paste(sds$position, sds$stat))]
+    per_unit <- ifelse(cfg$stat[cs] %in% GOAL_UNIT_STATS, 1, 1 / pmax(sd_cs, 1e-9))
+    cfg$weight[cs] <- cfg$direction[cs] * cfg$manual_weight[cs] * per_unit
   }
+}
+
+# Stats already measured in goals get their weight set, not fitted
+fx <- cfg$stat %in% names(FIXED_WEIGHTS)
+if (any(fx) && WEIGHT_MODE == "learned") cfg$weight[fx] <- unname(FIXED_WEIGHTS[cfg$stat[fx]])
+
+if (ATTACK_MODEL == "chance_share") {
+  # check: do team chances (xG) line up with team goals? Uses the raw totals.
+  chk_xg <- assisted %>%
+    inner_join(teams, by = c("season_year", "team")) %>%
+    filter(!season_year %in% FIT_EXCLUDE, !is.na(gf_pg)) %>%
+    mutate(xg_pg = team_xg / games)
+  m_xg <- lm(gf_pg ~ xg_pg, data = chk_xg)
+  r2_oos[["attack"]] <- summary(m_xg)$r.squared
+  cat(sprintf(paste0("Attack (chance sharing, %d%% to the passer): team xG explains %.2f of team goals ",
+                     "scored; 1 xG = %.2f goals (XG_GOAL_VALUE uses %.2f)\n"),
+              round(100 * PASSER_SHARE), r2_oos[["attack"]], coef(m_xg)[["xg_pg"]], XG_GOAL_VALUE))
 }
 
 # Position calibration (manual mode only): converts each position's attack and
@@ -298,10 +474,10 @@ if (WEIGHT_MODE == "learned") {
 } else {
   pos_feats <- long %>%
     left_join(cfg %>% select(position, stat, side, weight), by = c("position", "stat")) %>%
-    mutate(x = weight * (scaled - scaled_avg) * minutes_played / (90 * games)) %>%
+    mutate(x = weight * (val - pos_avg) * minutes_played / (90 * games)) %>%
     group_by(season_year, team, side, position) %>%
     summarise(x = sum(x), .groups = "drop")
-  calib <- map_dfr(c("attack", "defense"), function(sd) {
+  calib <- map_dfr(sides_fit, function(sd) {
     dd <- pos_feats %>%
       filter(side == sd) %>%
       pivot_wider(names_from = position, values_from = x, values_fill = 0, names_prefix = "pos_") %>%
@@ -319,28 +495,60 @@ if (WEIGHT_MODE == "learned") {
             paste(with(filter(calib, beta <= 0), paste(position, side)), collapse = ", "))
 }
 
+pct_stats <- c("def_duel_win_pct", "aerial_win_pct", "pass_acc", "duel_win_pct", "save_pct")
 weights_used <- cfg %>%
   left_join(calib, by = c("position", "side")) %>%
+  left_join(long %>% distinct(position, stat, pos_sd), by = c("position", "stat")) %>%
   mutate(goal_weight = weight * beta,
-         units = if_else(stat %in% GOAL_UNIT_STATS, "goals per 1.0 per 90", "0-1 scale (5th-95th pct)"),
-         # goals added (attack) or prevented (defense) over a full season
-         # (1,800 min) by going from the 5th-percentile player on this stat to the 95th
-         goals_per_season_5_to_95 = goal_weight * 1800 / 90) %>%
-  select(position, side, stat, units, direction, goal_weight, goals_per_season_5_to_95, note) %>%
-  arrange(position, side, desc(abs(goal_weight)))
+         # goal_weight = goals added (attack) or prevented (defense) per 90 for each
+         # 1 unit of the stat above the position average
+         units = case_when(stat %in% GOAL_UNIT_STATS ~ "goals per 1.0 expected goal",
+                           stat %in% pct_stats       ~ "goals per 90 per percentage point",
+                           TRUE                      ~ "goals per 90 per 1.0 of the stat (per 90)"),
+         # to compare stats: a player 1 standard deviation above the position average
+         # over a full season (1,800 minutes) adds this many goals
+         goals_per_season_1sd = goal_weight * pos_sd * 1800 / 90) %>%
+  select(position, side, stat, units, direction, goal_weight, stat_sd_at_position = pos_sd,
+         goals_per_season_1sd, note) %>%
+  arrange(position, side, desc(abs(goals_per_season_1sd)))
+if (ATTACK_MODEL == "chance_share") {
+  weights_used <- bind_rows(
+    tibble(position = "all", side = "attack", stat = c("xg (shooter)", "xa (passer)"),
+           units = "goals per expected goal", direction = 1,
+           goal_weight = XG_GOAL_VALUE * c(1 - PASSER_SHARE * mean(assisted$assisted_share), PASSER_SHARE),
+           note = c(sprintf(paste0("shooter keeps all of his unassisted chances and %d%% of assisted ones; ",
+                                   "%.2f = league average (each team's own assisted share is used)"),
+                            round(100 * (1 - PASSER_SHARE)),
+                            1 - PASSER_SHARE * mean(assisted$assisted_share)),
+                    sprintf("passer gets %d%% of the xG of every shot he sets up", round(100 * PASSER_SHARE)))),
+    weights_used)
+}
 write_csv(weights_used, file.path(OUT_DIR, "weights_used.csv"))
 
 # ---- 8. Attack index, defense index, replacement level, GAR -----------------
 
-player_index <- long %>%
+stat_sums <- long %>%
   left_join(weights_used %>% select(position, stat, side, goal_weight), by = c("position", "stat")) %>%
-  group_by(across(all_of(c(id_cols, "qualified")))) %>%
-  summarise(att     = sum(goal_weight * scaled     * (side == "attack")),
-            att_avg = sum(goal_weight * scaled_avg * (side == "attack")),
-            def     = sum(goal_weight * scaled     * (side == "defense")),
-            def_avg = sum(goal_weight * scaled_avg * (side == "defense")),
-            .groups = "drop") %>%
-  mutate(net = att + def, net_avg = att_avg + def_avg)
+  group_by(player_id, season_year) %>%
+  summarise(att     = sum(goal_weight * val     * (side == "attack")),
+            att_avg = sum(goal_weight * pos_avg * (side == "attack")),
+            def     = sum(goal_weight * val     * (side == "defense")),
+            def_avg = sum(goal_weight * pos_avg * (side == "defense")),
+            .groups = "drop")
+
+# every player who played, including positions with no defensive stats (W, CF)
+player_index <- players %>%
+  select(all_of(id_cols)) %>%
+  mutate(qualified = minutes_played >= MIN_QUAL) %>%
+  left_join(stat_sums, by = c("player_id", "season_year")) %>%
+  mutate(across(c(att, att_avg, def, def_avg), ~ coalesce(.x, 0)))
+if (ATTACK_MODEL == "chance_share") {
+  player_index <- player_index %>%
+    select(-att, -att_avg) %>%
+    left_join(chance_tab %>% select(player_id, season_year, att, att_avg),
+              by = c("player_id", "season_year"))
+}
+player_index <- player_index %>% mutate(net = att + def, net_avg = att_avg + def_avg)
 
 # Goals -> wins: how many extra wins one goal of goal difference is worth
 gw_rows <- filter(teams, !season_year %in% FIT_EXCLUDE, !is.na(gf_pg))
@@ -380,13 +588,14 @@ player_gar <- player_index %>%
 #                                                come from (a few big chances = noisier)
 # The noise shrinks with minutes, and the same shrinkage toward the position average
 # as step 4 is applied (PRIOR_MIN). Stats are combined using their weights:
-#   noise of the rating = sqrt( sum of weight^2 x noise of each scaled stat )
+#   noise of the rating = sqrt( sum of weight^2 x noise of each stat )
 # Stats are treated as independent, so ranges are a little narrow if stats move together.
 z_range <- qnorm(0.5 + RANGE_LEVEL / 2)
 helper <- players %>%
   transmute(player_id, season_year,
             vol_def  = z(`Defensive duels / 90 minutes`), vol_aer = z(`Aerial duels / 90 minutes`),
-            vol_pass = z(`Passes / 90`), shots90 = z(`Shots / 90`), sa90 = z(`Shot assists / 90`))
+            vol_pass = z(`Passes / 90`), shots90 = z(`Shots / 90`), sa90 = z(`Shot assists / 90`),
+            xga90 = z(`xG against / 90`))
 unc <- long %>%
   inner_join(weights_used %>% select(position, stat, goal_weight), by = c("position", "stat")) %>%
   left_join(helper, by = c("player_id", "season_year")) %>%
@@ -397,12 +606,28 @@ unc <- long %>%
          c = case_when(!is.na(attempts) ~ pmax(value, 0) * pmax(100 - value, 0) / pmax(attempts, 0.5),
                        stat == "xg" ~ 2 * pmax(value, 0) * pmin(pmax(value, 0) / pmax(shots90, 0.1), 0.6),
                        stat == "xa" ~ 2 * pmax(value, 0) * pmin(pmax(value, 0) / pmax(sa90, 0.1), 0.6),
+                       stat == "prevented_goals" ~ xga90,   # goals conceded vary like a count
                        TRUE ~ pmax(value, 0)),
-         post_var   = c * 90 / (minutes_played + PRIOR_MIN),          # after shrinkage
-         scaled_var = if_else(stat %in% GOAL_UNIT_STATS, post_var,
-                              if_else(hi > lo, post_var / (hi - lo)^2, 0))) %>%
+         post_var   = c * 90 / (minutes_played + pm),                    # after shrinkage
+         stat_var = post_var) %>%
   group_by(player_id, season_year) %>%
-  summarise(se_per_90 = sqrt(sum(goal_weight^2 * scaled_var, na.rm = TRUE)), .groups = "drop")
+  summarise(stat_var_sum = sum(goal_weight^2 * stat_var, na.rm = TRUE), .groups = "drop")
+
+# chance-sharing attack: noise of xG and xA, weighted by the shooter / passer shares
+att_var <- if (ATTACK_MODEL == "chance_share") {
+  chance_tab %>%
+    mutate(v_xg = 2 * pmax(xg, 0) * pmin(pmax(xg, 0) / pmax(shots90, 0.1), 0.6) * 90 / (minutes_played + PRIOR_MIN),
+           v_xa = 2 * pmax(xa, 0) * pmin(pmax(xa, 0) / pmax(sa90, 0.1), 0.6) * 90 / (minutes_played + PRIOR_MIN),
+           att_var = XG_GOAL_VALUE^2 * ((1 - PASSER_SHARE * assisted_share)^2 * v_xg + PASSER_SHARE^2 * v_xa)) %>%
+    select(player_id, season_year, att_var)
+} else tibble(player_id = character(), season_year = numeric(), att_var = numeric())
+
+unc <- player_index %>%
+  distinct(player_id, season_year) %>%
+  left_join(unc, by = c("player_id", "season_year")) %>%
+  left_join(att_var, by = c("player_id", "season_year")) %>%
+  mutate(se_per_90 = sqrt(coalesce(stat_var_sum, 0) + coalesce(att_var, 0))) %>%
+  select(player_id, season_year, se_per_90)
 
 player_gar <- player_gar %>%
   left_join(unc, by = c("player_id", "season_year")) %>%
@@ -536,7 +761,7 @@ p1 <- ggplot(top_parts, aes(goals, label, fill = part)) +
   scale_fill_manual(values = side_cols, breaks = names(side_cols)) +
   labs(title = sprintf("Top 25 players by GAR, %d", LATEST),
        subtitle = sprintf("Goals above replacement: attack + defense + replacement value\nDot = net GAR; line = %d%% range", round(100 * RANGE_LEVEL)),
-       x = "Goals", y = NULL, caption = "Simulated player data") +
+       x = "Goals", y = NULL, caption = DATA_CAPTION) +
   theme_gar + theme(panel.grid.major.y = element_blank())
 save(p1, "01_top25_gar.png", w = 10, h = 8)
 
@@ -566,7 +791,7 @@ for (ps in pos_order) {
     scale_fill_manual(values = side_cols, breaks = names(side_cols), drop = FALSE) +
     labs(title = sprintf("Top %d %s by GAR, %d", nrow(top_p), pos_names[[ps]], LATEST),
          subtitle = sprintf("Goals above replacement: attack + defense + replacement value\nDot = net GAR; line = %d%% range", round(100 * RANGE_LEVEL)),
-         x = "Goals", y = NULL, caption = "Simulated player data") +
+         x = "Goals", y = NULL, caption = DATA_CAPTION) +
     theme_gar + theme(panel.grid.major.y = element_blank())
   save(pp, file.path("by_position", sprintf("01_top25_gar_%s.png", ps)), w = 10, h = 8)
 }
@@ -605,10 +830,12 @@ for (ps in pos_order) {
     guides(colour = guide_legend(nrow = 2)) +
     coord_cartesian(clip = "off") +
     labs(title = sprintf("Who would upgrade %s's %s? %d", FOCUS_TEAM, pos_names[[ps]], ROSTER_SEASON),
-         subtitle = sprintf(paste0("Top %d by GAR per 90 (%d+ minutes), with %d%% range. Maroon lines = our regulars;\n"),
+         subtitle = sprintf(paste0("Top %d by GAR per 90 (%d+ minutes), with %d%% range. Maroon lines = our regulars;\n",
+                                   "solid line + shading = our weakest regular, %s, and his range.\n",
+                                   "Label: chance he is better than %s | goals gained over a %s-minute season"),
                             nrow(tg), COMPARE_MIN, round(100 * RANGE_LEVEL), bm$benchmark_player,
                             sub(".* ", "", bm$benchmark_player), format(PROJ_MINUTES, big.mark = ",")),
-         x = "GAR per 90 (goals above replacement)", y = NULL, caption = "Simulated player data") +
+         x = "GAR per 90 (goals above replacement)", y = NULL, caption = DATA_CAPTION) +
     theme_gar + theme(panel.grid.major.y = element_blank(), plot.margin = margin(12, 12, 6, 6))
   save(pv, file.path("vs_roster", sprintf("upgrade_%s.png", ps)), w = 10, h = 8)
 }
@@ -638,7 +865,7 @@ p2 <- ggplot(sc, aes(off_per_90, def_per_90)) +
        subtitle = sprintf("Goals above an average player at the same position, per 90\nPlayers with %d+ minutes; maroon = %s",
                           SCORE_MIN, FOCUS_TEAM),
        x = "Attack (goals added per 90)", y = "Defense (goals prevented per 90)",
-       caption = "Simulated player data") +
+       caption = DATA_CAPTION) +
   theme_gar
 save(p2, "02_attack_vs_defense.png", w = 9, h = 8)
 
@@ -663,9 +890,8 @@ p3 <- ggplot(by_pos, aes(position, goals, fill = group)) +
   facet_wrap(~ side, ncol = 1) +
   scale_fill_manual(values = c("#861F41", "#eb6834", "#1baf7a")) +
   labs(title = sprintf("%s vs. top programs: attack and defense by position", FOCUS_TEAM),
-       subtitle = sprintf("Average goals above an average player, per team-season, %d-%d (2020 excluded)",
-                          LATEST - 4, LATEST),
-       x = NULL, y = "Goals", caption = "Simulated player data") +
+       subtitle = sprintf("Average goals above an average player, per team-season, %s", SEASON_SPAN),
+       x = NULL, y = "Goals", caption = DATA_CAPTION) +
   theme_gar + theme(panel.grid.major.x = element_blank())
 save(p3, "03_team_vs_top_programs.png", h = 7)
 
@@ -684,7 +910,7 @@ p4 <- ggplot(team_long, aes(rating, actual)) +
        subtitle = sprintf("Each dot is a team-season; maroon = %s. Defense should slope down: better rating, fewer conceded",
                           FOCUS_TEAM),
        x = "Team rating per game (sum of players' goals above average / games)", y = "Actual goals per game",
-       caption = "Simulated player data") +
+       caption = DATA_CAPTION) +
   theme_gar
 save(p4, "04_team_ratings_vs_goals.png", w = 11, h = 5.5)
 
@@ -692,14 +918,14 @@ save(p4, "04_team_ratings_vs_goals.png", w = 11, h = 5.5)
 # Same as player_war.R, on GAR per 90. Skipped automatically on real data.
 
 if (all(c("true_talent", "team_strength_z") %in% names(players))) {
-  
+
   sc_data <- player_gar %>%
     filter(minutes_played >= SCORE_MIN, !season_year %in% FIT_EXCLUDE) %>%
     inner_join(players %>% select(player_id, season_year, true_talent, team_strength_z),
                by = c("player_id", "season_year"))
-  
+
   partial_r <- function(x, y, z) cor(resid(lm(x ~ z)), resid(lm(y ~ z)))
-  
+
   by_position <- sc_data %>%
     group_by(position) %>%
     summarise(n                = n(),
@@ -708,7 +934,7 @@ if (all(c("true_talent", "team_strength_z") %in% names(players))) {
               r_team           = cor(gar_per_90, team_strength_z),
               talent_vs_team   = cor(true_talent, team_strength_z),
               .groups = "drop")
-  
+
   scorecard <- bind_rows(
     by_position,
     by_position %>%
@@ -724,7 +950,7 @@ if (all(c("true_talent", "team_strength_z") %in% names(players))) {
     mutate(version = VERSION, weight_mode = WEIGHT_MODE,
            run_time = format(Sys.time(), "%Y-%m-%d %H:%M"), value = round(value, 3)) %>%
     relocate(version, weight_mode, run_time)
-  
+
   hist_file <- file.path(OUT_DIR, "scorecard_history.csv")
   history <- if (file.exists(hist_file)) {
     read_csv(hist_file, col_types = cols(n = col_integer(), value = col_double(),
@@ -734,12 +960,12 @@ if (all(c("true_talent", "team_strength_z") %in% names(players))) {
   history <- bind_rows(history, scorecard)
   write_csv(scorecard, file.path(OUT_DIR, "scorecard.csv"))
   write_csv(history, hist_file)
-  
+
   cat(sprintf("\nScorecard (%s): r with true talent, team strength removed\n", VERSION))
   print(scorecard %>% filter(metric == "r_talent_no_team") %>%
           select(position, n, value) %>%
           arrange(match(position, c(pos_order, "Average"))), n = 20)
-  
+
   # 05: this run, by position
   metric_labels <- c(r_talent_no_team = "GAR vs true talent, team strength removed (main score)",
                      r_talent         = "GAR vs true talent",
@@ -752,7 +978,7 @@ if (all(c("true_talent", "team_strength_z") %in% names(players))) {
            metric   = factor(metric_labels[metric], levels = metric_labels))
   mv <- with(filter(scorecard, position == "Model"), setNames(value, metric))
   fmt <- function(v) ifelse(is.na(v), "n/a", sprintf("%.2f", v))
-  
+
   p5 <- ggplot(sc_plot, aes(value, position, colour = metric, shape = metric,
                             group = factor(metric, levels = rev(metric_labels)))) +
     geom_vline(xintercept = 0, colour = ink2, linewidth = 0.3) +
@@ -770,7 +996,7 @@ if (all(c("true_talent", "team_strength_z") %in% names(players))) {
          caption = "Simulated player data; true talent is the simulation's answer key") +
     theme_gar + theme(panel.grid.major.y = element_blank())
   save(p5, "05_scorecard.png", h = 7)
-  
+
   # 06: main score across versions (once there are at least two)
   if (n_distinct(history$version) >= 2) {
     hist_plot <- history %>%
@@ -783,11 +1009,11 @@ if (all(c("true_talent", "team_strength_z") %in% names(players))) {
       geom_point(size = 2.8) +
       geom_hline(yintercept = 0, colour = ink2, linewidth = 0.3) +
       { if (n_distinct(hist_plot$version) <= 6)
-        scale_colour_manual(values = c("#a8a6a0", "#2a78d6", "#eb6834", "#1baf7a", "#eda100", "#7b5cd6")) } +
+          scale_colour_manual(values = c("#a8a6a0", "#2a78d6", "#eb6834", "#1baf7a", "#eda100", "#7b5cd6")) } +
       scale_y_continuous(limits = c(min(0, hist_plot$value), 1)) +
       labs(title = "Is the method getting better?",
            subtitle = "GAR vs true talent with team strength removed, by version (higher is better)",
-           x = NULL, y = "Correlation", caption = "Simulated player data") +
+           x = NULL, y = "Correlation", caption = DATA_CAPTION) +
       theme_gar + theme(panel.grid.major.x = element_blank())
     save(p6, "06_scorecard_history.png")
   }

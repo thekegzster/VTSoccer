@@ -40,27 +40,47 @@ library(scales)
 DATA_DIR     <- "."            # folder with the input CSVs
 OUT_DIR      <- "war_output"
 STANDINGS_FILE <- "simulated_standings.csv"   # simulated results (players cause winning).
-# Use "rpi_standings_all_fixed.csv" with real player data.
+                               # Use "rpi_standings_all_fixed.csv" with real player data.
 WEIGHTS_FILE <- "war_weights_compiled.csv"  # which stat list to use:
-#   "war_weights_original.csv" = original (goals, assists, duplicates)
-#   "war_weights_compiled.csv" = one stat per idea, xG and xA
+                               #   "war_weights_original.csv" = original (goals, assists, duplicates)
+                               #   "war_weights_compiled.csv" = one stat per idea, xG and xA
 WEIGHT_MODE  <- "learned"      # "learned" or "manual"
 MIN_QUAL     <- 300            # minutes to count toward min/max and replacement level
+STAT_PRIOR_MIN <- c(prevented_goals = 1800)  # stats that need more minutes before they're
+                               # trusted: goalkeeper shot-stopping swings a lot by luck, so a keeper
+                               # is treated as if he also had 1,800 average minutes (PRIOR_MIN for others)
 PRIOR_MIN    <- 270            # shrinkage: a player is treated as if he also played
-# this many minutes at the position average
+                               # this many minutes at the position average
 SCALE_LO     <- 0.05           # percentile used as the scaling "min"
 SCALE_HI     <- 0.95           # percentile used as the scaling "max"
 REPL_PCTL    <- 0.20           # replacement level = this percentile of qualified
-# players at the position, each season
+                               # players at the position, each season
 ADJUST_SOS   <- TRUE           # adjust stats for strength of schedule
 FIT_EXCLUDE  <- c(2020)        # seasons left out of the weight fit (COVID)
 FOCUS_TEAM   <- "Virginia Tech"
-LATEST       <- 2025           # most recent complete season (for charts)
+LATEST       <- 2025           # most recent complete season (for charts); NA = latest in the data
 VERSION      <- ""             # label for this run in the scorecard. Leave "" to name it
-# automatically from the weights file and mode, e.g.
-# "war_weights_compiled (learned)". Set your own label when you
-# change something else (shrinkage, replacement level, ...)
+                               # automatically from the weights file and mode, e.g.
+                               # "war_weights_compiled (learned)". Set your own label when you
+                               # change something else (shrinkage, replacement level, ...)
 SCORE_MIN    <- 600            # minutes needed to count in the scorecard
+
+# ---- Which data: simulated or real ------------------------------------------
+# "simulated" = simulated_player_metrics.csv / simulated_standings.csv (many seasons)
+# "real"      = the files prepare_real_data.R writes from the Wyscout export
+#               (one season, conference games only). Run prepare_real_data.R first.
+DATA_SOURCE  <- "real"
+PLAYERS_FILE <- "simulated_player_metrics.csv"
+if (DATA_SOURCE == "real") {
+  PLAYERS_FILE   <- "real_player_metrics.csv"
+  STANDINGS_FILE <- "real_standings.csv"
+  WEIGHTS_FILE   <- "war_weights_real.csv"   # stat list without stats the export lacks
+  OUT_DIR        <- "war_output_real"
+  ADJUST_SOS     <- FALSE   # the Adjusted sheet already corrects for conference strength
+  LATEST         <- NA      # = the latest season in the file (2026)
+  MIN_QUAL       <- 270     # a season so far is ~5-11 conference games, so lower minute cut-offs
+  SCORE_MIN      <- 360
+}
 
 # Optional overrides from the command line, so you can switch without editing:
 #   Rscript player_war.R war_weights_original.csv manual
@@ -79,25 +99,39 @@ dir.create(OUT_DIR, showWarnings = FALSE)
 
 # ---- 1. Load ----------------------------------------------------------------
 
-players <- read_csv(file.path(DATA_DIR, "simulated_player_metrics.csv"),
+players <- read_csv(file.path(DATA_DIR, PLAYERS_FILE),
                     show_col_types = FALSE) %>%
   filter(minutes_played > 0)
+
+if (is.na(LATEST)) LATEST <- max(players$season_year)
+n_seasons <- n_distinct(players$season_year)
+DATA_CAPTION <- if (DATA_SOURCE == "real") sprintf("Wyscout data, conference games, %d season to date", LATEST) else
+  "Simulated player data"
+span_yrs <- intersect(sort(unique(players$season_year)), setdiff((LATEST - 4):LATEST, FIT_EXCLUDE))
+SEASON_SPAN <- if (length(span_yrs) == 1) as.character(span_yrs) else
+  sprintf("%d-%d%s", min(span_yrs), max(span_yrs), if (any(FIT_EXCLUDE %in% min(span_yrs):max(span_yrs))) " (2020 excluded)" else "")
+cat(sprintf("Data: %s (%d players, %d season%s; charts show %d)\n", PLAYERS_FILE, nrow(players),
+            n_seasons, if (n_seasons == 1) "" else "s", LATEST))
 
 standings <- read_csv(file.path(DATA_DIR, STANDINGS_FILE),
                       show_col_types = FALSE) %>%
   select(season_year, team, conference, rpi_rank, sos_rank,
-         overall_w, overall_l, overall_t) %>%
+         overall_w, overall_l, overall_t, any_of(c("games", "win_pct"))) %>%
   distinct(season_year, team, .keep_all = TRUE)
 
 weights_cfg <- read_csv(file.path(DATA_DIR, WEIGHTS_FILE),
                         show_col_types = FALSE) %>%
   filter(direction != 0)
 
+# games and win_pct can be given directly (real_standings.csv does: the export covers
+# conference games only, so games come from team minutes); otherwise from the record
+for (nm in c("games", "win_pct")) if (!nm %in% names(standings)) standings[[nm]] <- NA_real_
+
 # ---- 2. Team context: record and schedule strength --------------------------
 
 teams <- standings %>%
-  mutate(games   = overall_w + overall_l + overall_t,
-         win_pct = (overall_w + 0.5 * overall_t) / games) %>%
+  mutate(games   = coalesce(games, overall_w + overall_l + overall_t),
+         win_pct = coalesce(win_pct, (overall_w + 0.5 * overall_t) / (overall_w + overall_l + overall_t))) %>%
   group_by(season_year) %>%
   # 1 = toughest schedule that season, 0 = easiest
   mutate(sos_pct = 1 - percent_rank(sos_rank)) %>%
@@ -122,6 +156,49 @@ padj <- function(x, poss) x * (100 - 50) / (100 - poss)
 # The on-ball version: teams that have the ball more make more on-ball mistakes
 # (more touches, more chances to lose it). Scale to a 50% possession game.
 padj_own <- function(x, poss) x * 50 / poss
+
+# Columns a data file doesn't have (e.g. pressing duels in the real export) are added
+# as empty, so every stat below can be defined; stats that end up empty are dropped
+# from the weights further down.
+stat_cols <- c(
+  "Accelerations / 90",
+  "Aerial duels / 90 minutes",
+  "Aerial duels won (%)",
+  "Assists / 90",
+  "Clearances / 90",
+  "Crosses / 90",
+  "Defensive duels / 90 minutes",
+  "Defensive duels won (%)",
+  "Dribbles %",
+  "Dribbles / 90",
+  "Duels won (%)",
+  "Exits, per 90 mins",
+  "Goals / 90",
+  "Interceptions / per 30 minutes of opponent possession",
+  "Key passes / 90",
+  "Loose ball duels / 90 minutes",
+  "Losses / 90",
+  "Offensive Duels %",
+  "Offensive Duels / 90",
+  "Pass accuracy",
+  "Passes / 90",
+  "Pressing duels, per 90",
+  "Prevented goals / 90",
+  "Red cards / 90 minutes",
+  "Save rate (%)",
+  "Shot assists / 90",
+  "Shots / 90",
+  "Shots against / 90",
+  "Shots blocked / 90",
+  "Shots on target %",
+  "Sliding tackles / per 30 minutes of opponent possession",
+  "Through passes / 90",
+  "Yellow cards / 90 minutes",
+  "xA / 90",
+  "xG / 90")
+for (nm in setdiff(stat_cols, names(players))) players[[nm]] <- NA_real_
+if (!"team_possession_pct" %in% names(players)) players$team_possession_pct <- 50
+players$team_possession_pct <- coalesce(players$team_possession_pct, 50)
 
 players <- players %>%
   mutate(
@@ -159,10 +236,21 @@ players <- players %>%
     through_passes   = z(`Through passes / 90`),
     duels_won        = z(`Offensive Duels / 90`) * z(`Offensive Duels %`) / 100 + aerial_won,
     shots_against    = `Shots against / 90`,
-    exits            = `Exits, per 90 mins`
+    exits            = `Exits, per 90 mins`,
+    # In the real export only (empty on simulated data):
+    shots_blocked    = padj(z(`Shots blocked / 90`), team_possession_pct),
+    duel_win_pct     = `Duels won (%)`,
+    prevented_goals  = `Prevented goals / 90`,   # GK: xG faced minus goals conceded, per 90
+    save_pct         = `Save rate (%)`
   )
 
 missing_stats <- setdiff(unique(weights_cfg$stat), names(players))
+empty_stats <- Filter(function(st) st %in% names(players) && all(is.na(players[[st]]) | players[[st]] == 0),
+                      unique(weights_cfg$stat))
+if (length(empty_stats)) {
+  cat("Not in this data, dropped from the weights:", paste(empty_stats, collapse = ", "), "\n")
+  weights_cfg <- filter(weights_cfg, !stat %in% empty_stats)
+}
 if (length(missing_stats)) stop(WEIGHTS_FILE, " uses stats that aren't defined: ",
                                 paste(missing_stats, collapse = ", "))
 
@@ -182,7 +270,8 @@ long <- long %>%
   group_by(season_year, position, stat) %>%
   mutate(prior = mean(raw[qualified], na.rm = TRUE),
          raw   = coalesce(raw, prior),
-         value = (raw * minutes_played + prior * PRIOR_MIN) / (minutes_played + PRIOR_MIN)) %>%
+         pm    = coalesce(unname(STAT_PRIOR_MIN[stat]), PRIOR_MIN),
+         value = (raw * minutes_played + prior * pm) / (minutes_played + pm)) %>%
   ungroup()
 
 # ---- 5. Strength-of-schedule adjustment -------------------------------------
@@ -239,18 +328,20 @@ if (WEIGHT_MODE == "learned") {
   # direction is fixed by war_weights.csv; the fit only picks the size
   lower <- c(ifelse(cfg$direction > 0, 0, -Inf), -Inf)
   upper <- c(ifelse(cfg$direction > 0, Inf, 0),  Inf)
-  folds <- as.integer(factor(fit_rows$season_year))   # leave one season out
-  
+  # leave one season out; with one season (real data), 10 random groups of teams
+  folds <- if (n_distinct(fit_rows$season_year) >= 3) as.integer(factor(fit_rows$season_year)) else
+    sample(rep_len(1:10, nrow(fit_rows)))
+
   cv <- cv.glmnet(X, y, alpha = 0, foldid = folds, keep = TRUE,
                   lower.limits = lower, upper.limits = upper,
                   penalty.factor = c(rep(1, nrow(cfg)), 0))
   b <- coef(cv, s = "lambda.min")[, 1]
   cfg$weight <- unname(b[cfg$feature])
-  
+
   pred_oos <- cv$fit.preval[, which(cv$lambda == cv$lambda.min)]
   r2_oos   <- 1 - sum((y - pred_oos)^2) / sum((y - mean(y))^2)
   r2_sos   <- summary(lm(y ~ fit_rows$sos_pct))$r.squared
-  cat(sprintf("\nTeam win %% explained, held-out seasons: %.2f (schedule alone: %.2f)\n",
+  cat(sprintf("\nTeam win %% explained, held-out data: %.2f (schedule alone: %.2f)\n",
               r2_oos, r2_sos))
 } else {
   cfg$weight <- cfg$direction * cfg$manual_weight
@@ -376,7 +467,7 @@ p1 <- ggplot(top, aes(war, reorder(label, war), fill = group)) +
   scale_x_continuous(expand = expansion(mult = c(0, 0.05))) +
   labs(title = sprintf("Top 25 players by WAR, %d", LATEST),
        subtitle = "Wins added compared with a replacement-level player at the same position",
-       x = "WAR", y = NULL, caption = "Simulated player data") +
+       x = "WAR", y = NULL, caption = DATA_CAPTION) +
   theme_war + theme(panel.grid.major.y = element_blank())
 save(p1, "01_top25_war.png", h = 8)
 
@@ -398,8 +489,8 @@ p2 <- ggplot(by_pos, aes(position, war, fill = group)) +
   geom_hline(yintercept = 0, colour = ink2, linewidth = 0.4) +
   scale_fill_manual(values = c("#2a78d6", "#eb6834", "#1baf7a")) +
   labs(title = sprintf("%s WAR by position vs. top programs", FOCUS_TEAM),
-       subtitle = sprintf("Average total WAR per team-season, %d-%d (2020 excluded)", LATEST - 4, LATEST),
-       x = NULL, y = "WAR", caption = "Simulated player data") +
+       subtitle = sprintf("Average total WAR per team-season, %s", SEASON_SPAN),
+       x = NULL, y = "WAR", caption = DATA_CAPTION) +
   theme_war + theme(panel.grid.major.x = element_blank())
 save(p2, "02_team_vs_top_programs_by_position.png")
 
@@ -412,7 +503,7 @@ p3 <- ggplot(chk, aes(team_war, win_pct)) +
   labs(title = "Does team WAR line up with winning?",
        subtitle = sprintf("Each dot is a team-season; orange = %s. r = %.2f",
                           FOCUS_TEAM, cor(chk$team_war, chk$win_pct)),
-       x = "Total team WAR", y = "Win % (ties = half)", caption = "Simulated player data") +
+       x = "Total team WAR", y = "Win % (ties = half)", caption = DATA_CAPTION) +
   theme_war
 save(p3, "03_team_war_vs_win_pct.png")
 
@@ -424,7 +515,7 @@ p4 <- ggplot(yoy, aes(war_per_90 * 1000 / 90, next_war_per_90 * 1000 / 90)) +
        subtitle = sprintf("Returning players with %d+ minutes in both seasons. r = %.2f",
                           MIN_QUAL, yoy_r),
        x = "WAR per 1,000 minutes, this season", y = "WAR per 1,000 minutes, next season",
-       caption = "Simulated player data") +
+       caption = DATA_CAPTION) +
   theme_war
 save(p4, "04_war_year_to_year.png")
 
@@ -440,7 +531,7 @@ p5 <- ggplot(chk, aes(team_war, rpi_rank)) +
   labs(title = "Does team WAR line up with RPI?",
        subtitle = sprintf("Each dot is a team-season; orange = %s. Spearman r = %.2f",
                           FOCUS_TEAM, rpi_r),
-       x = "Total team WAR", y = "RPI rank", caption = "Simulated player data") +
+       x = "Total team WAR", y = "RPI rank", caption = DATA_CAPTION) +
   theme_war
 save(p5, "05_team_war_vs_rpi.png")
 cat(sprintf("Team WAR vs RPI rank: Spearman r = %.2f\n", rpi_r))
@@ -464,15 +555,15 @@ cat(sprintf("Team WAR vs RPI rank: Spearman r = %.2f\n", rpi_r))
 pos_order <- c("GK", "CB", "FB", "DM", "CM", "AM", "W", "CF")
 
 if (all(c("true_talent", "team_strength_z") %in% names(players))) {
-  
+
   sc_data <- player_war %>%
     filter(minutes_played >= SCORE_MIN, !season_year %in% FIT_EXCLUDE) %>%
     inner_join(players %>% select(player_id, season_year, true_talent, team_strength_z),
                by = c("player_id", "season_year"))
-  
+
   # correlation of x and y after removing z from both (partial correlation)
   partial_r <- function(x, y, z) cor(resid(lm(x ~ z)), resid(lm(y ~ z)))
-  
+
   by_position <- sc_data %>%
     group_by(position) %>%
     summarise(n                = n(),
@@ -481,7 +572,7 @@ if (all(c("true_talent", "team_strength_z") %in% names(players))) {
               r_team           = cor(war_per_90, team_strength_z),
               talent_vs_team   = cor(true_talent, team_strength_z),
               .groups = "drop")
-  
+
   scorecard <- bind_rows(
     by_position,
     by_position %>%   # simple average across positions, so each position counts equally
@@ -498,7 +589,7 @@ if (all(c("true_talent", "team_strength_z") %in% names(players))) {
     mutate(version = VERSION, weight_mode = WEIGHT_MODE,
            run_time = format(Sys.time(), "%Y-%m-%d %H:%M"), value = round(value, 3)) %>%
     relocate(version, weight_mode, run_time)
-  
+
   hist_file <- file.path(OUT_DIR, "scorecard_history.csv")
   history <- if (file.exists(hist_file)) {
     read_csv(hist_file, col_types = cols(n = col_integer(), value = col_double(),
@@ -508,12 +599,12 @@ if (all(c("true_talent", "team_strength_z") %in% names(players))) {
   history <- bind_rows(history, scorecard)
   write_csv(scorecard, file.path(OUT_DIR, "scorecard.csv"))
   write_csv(history, hist_file)
-  
+
   cat(sprintf("\nScorecard (%s): r with true talent, team strength removed\n", VERSION))
   print(scorecard %>% filter(metric == "r_talent_no_team") %>%
           select(position, n, value) %>%
           arrange(match(position, c(pos_order, "Average"))), n = 20)
-  
+
   # 06: this run, by position
   metric_labels <- c(r_talent_no_team = "WAR vs true talent, team strength removed (main score)",
                      r_talent         = "WAR vs true talent",
@@ -525,7 +616,7 @@ if (all(c("true_talent", "team_strength_z") %in% names(players))) {
     mutate(position = factor(position, levels = rev(c(pos_order, "Average"))),
            metric   = factor(metric_labels[metric], levels = metric_labels))
   model_vals <- with(filter(scorecard, position == "Model"), setNames(value, metric))
-  
+
   p6 <- ggplot(sc_plot, aes(value, position, colour = metric, shape = metric,
                             group = factor(metric, levels = rev(metric_labels)))) +  # main score on top
     geom_vline(xintercept = 0, colour = ink2, linewidth = 0.3) +
@@ -544,7 +635,7 @@ if (all(c("true_talent", "team_strength_z") %in% names(players))) {
          x = "Correlation", y = NULL, caption = "Simulated player data; true talent is the simulation's answer key") +
     theme_war + theme(panel.grid.major.y = element_blank())
   save(p6, "06_scorecard.png", h = 7)
-  
+
   # 07: main score across versions (only once there are at least two)
   if (n_distinct(history$version) >= 2) {
     hist_plot <- history %>%
@@ -558,11 +649,11 @@ if (all(c("true_talent", "team_strength_z") %in% names(players))) {
       geom_hline(yintercept = 0, colour = ink2, linewidth = 0.3) +
       # same palette as the other charts; ggplot's defaults take over past 6 versions
       { if (n_distinct(hist_plot$version) <= 6)
-        scale_colour_manual(values = c("#a8a6a0", "#2a78d6", "#eb6834", "#1baf7a", "#eda100", "#7b5cd6")) } +
+          scale_colour_manual(values = c("#a8a6a0", "#2a78d6", "#eb6834", "#1baf7a", "#eda100", "#7b5cd6")) } +
       scale_y_continuous(limits = c(min(0, hist_plot$value), 1)) +
       labs(title = "Is the method getting better?",
            subtitle = "WAR vs true talent with team strength removed, by version (higher is better)",
-           x = NULL, y = "Correlation", caption = "Simulated player data") +
+           x = NULL, y = "Correlation", caption = DATA_CAPTION) +
       theme_war + theme(panel.grid.major.x = element_blank())
     save(p7, "07_scorecard_history.png")
   }

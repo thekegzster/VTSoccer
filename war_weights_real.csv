@@ -1,0 +1,55 @@
+position,stat,direction,manual_weight,note
+GK,shots_against,0,1,"EXCLUDED: shots faced depends on the whole team's defense, so it hands team quality to the keeper. Saves, goals conceded, goal mistakes and penalty saves are not in the data"
+GK,exits,1,1,
+GK,pass_acc,1,1,
+GK,prevented_goals,1,1,goals prevented per 90 (xG faced minus goals conceded); real export only
+CB,def_duel_win_pct,1,1,defending 1v1: share of defensive duels won (replaces def_duels_won). Team goals conceded and blocked shots are not in the data
+CB,aerial_win_pct,1,1,aerial ability: share of aerial duels won (replaces aerial_won)
+CB,interceptions,1,1,
+CB,sliding_tackles,1,1,
+CB,cards,-1,1,
+CB,pass_acc,1,1,
+CB,shots_blocked,1,1,"blocked shots per 90, possession-adjusted; real export only"
+FB,accelerations,1,1,
+FB,crosses,1,1,
+FB,def_duel_win_pct,1,1,defending 1v1: share of defensive duels won; not inflated by facing more attacks (replaces def_duels_won)
+FB,sliding_tackles,1,1,
+FB,xa,1,1,chance creation: expected assists per 90 (replaces key_passes)
+FB,interceptions,1,1,
+FB,dribbles_won,1,1,
+FB,shots_blocked,1,1,"blocked shots per 90, possession-adjusted; real export only"
+DM,xg,1,1,shooting: expected goals per 90 (replaces goals and shots_on_target)
+DM,xa,1,1,chance creation: expected assists per 90 (replaces chances_created and assists)
+DM,dribbles_won,1,1,
+DM,passes,1,1,
+DM,through_passes,1,1,
+DM,sliding_tackles,1,1,
+DM,interceptions,1,1,
+DM,shots_blocked,1,1,"blocked shots per 90, possession-adjusted; real export only"
+DM,def_duel_win_pct,1,1,"defending 1v1 (replaces loose-ball duels, not in the real export)"
+DM,aerial_win_pct,1,1,"aerial ability (replaces loose-ball duels, not in the real export)"
+CM,xg,1,1,shooting: expected goals per 90 (replaces goals and shots_on_target)
+CM,xa,1,1,chance creation: expected assists per 90 (replaces chances_created and assists)
+CM,through_passes,1,1,
+CM,interceptions,1,1,
+CM,def_duel_win_pct,1,1,defending 1v1: share of defensive duels won (replaces def_duels_won)
+CM,aerial_win_pct,1,1,aerial ability: share of aerial duels won (replaces aerial_won)
+AM,xg,1,1,shooting: expected goals per 90 (replaces goals and shots_on_target)
+AM,xa,1,1,chance creation: expected assists per 90 (replaces chances_created and assists)
+AM,dribbles_won,1,1,
+AM,through_passes,1,1,
+AM,crosses,1,1,
+AM,accelerations,1,1,
+W,xg,1,1,shooting: expected goals per 90 (replaces goals and shots_on_target)
+W,xa,1,1,chance creation: expected assists per 90 (replaces chances_created and assists)
+W,through_passes,1,1,
+W,crosses,1,1,
+W,accelerations,1,1,
+W,dribbles_won,1,1,
+W,aerial_win_pct,1,1,aerial ability: share of aerial duels won (replaces aerial_won)
+CF,xg,1,1,"shooting: expected goals per 90 (replaces goals, shots and shots_on_target). Link-up plays are not in the data"
+CF,xa,1,1,chance creation: expected assists per 90 (replaces chances_created and assists)
+CF,through_passes,1,1,
+CF,dribbles_won,1,1,
+CF,duels_won,1,1,
+CF,crosses,1,1,
