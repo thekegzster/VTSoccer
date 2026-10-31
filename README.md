@@ -362,17 +362,49 @@ The data is the **2017–18 season**. With `SAMPLE_MATCHES = 100`, only roughly 
 
 ---
 
-## Switching to real data
+## Real data (Wyscout export, 2026)
 
-1. **Player data:** replace `simulated_player_metrics.csv` with real data that has the same column names, the Wyscout metric names. Each row needs `season_year`, `team`, `player_id`, `player_name`, `position` (GK/CB/FB/DM/CM/AM/W/CF), `minutes_played` and `team_possession_pct`.
-2. **Standings:** set `STANDINGS_FILE <- "rpi_standings_all_fixed.csv"` in `player_war.R`.
-3. **GAR:** add `goals_for` and `goals_against` (season totals) to the standings file. They're available from NCAA team stats.
-4. **Team names** must match exactly between the player and standings files.
-5. **Validate without an answer key.** The scorecard turns itself off on real data. Use instead:
-   - year-to-year stability of WAR per 90
-   - whether one season's team WAR predicts the next season's results
-   - agreement with outside judgments: All-Conference and All-American teams, MLS draft picks, pro signings
-   - the coaching staff's view of the top players at each position
+### What was sent
+
+| File | What's in it | Used for |
+|---|---|---|
+| `Player_Stats_Conference_Adjusted.xlsx` | 4,684 players, 207 teams, 22 conferences. Sheet **Raw** = Wyscout per-90s plus totals, age, height, foot, portal status. Sheet **Adjusted** = the same per-90s corrected for conference strength (`adjusted = raw - effect x (conference rating - 7.74)`; only stats with a clear conference effect are changed). Also Adjustment Factors, Conference Ratings (Massey), Notes. | The models (main input) |
+| `wyscout_complete_positions.xlsx` | The original export, one sheet per conference (117 columns, incl. market value and portal date), plus team position counts. The Team Positions sheet is Excel formulas, so it reads as empty outside Excel. | Optional extras: market value, portal date |
+| `Top30_Massey_Team_Makeup.xlsx` | Massey ratings 2022-2026 for all teams, the top 30 programs' roster makeup, and Massey-to-Wyscout team names. | Roster-tier work (not the models) |
+
+What matters for the models:
+- **One season, conference games only:** 2026 to date, about 5-11 games per team (max 1,205 minutes).
+- **No player id or class year.** `prepare_real_data.R` builds an id from team + name.
+- **No team results.** Goals for = the players' goals; goals against = the goalkeepers' goals conceded; games = team minutes / 990. The win-loss record comes from the RPI file's conference record, which can lag the export by a game or two.
+- **Missing stats:** pressing duels, clearances, loose-ball duels, losses, recoveries, missed balls, progressive passes allowed and team possession. **New stats:** shots blocked, goals prevented, save rate and goals conceded.
+- The Wyscout "PAdj" interceptions and sliding tackles stand in for the per-30-minutes-of-opponent-possession versions.
+
+### Running it
+
+```r
+source("prepare_real_data.R")   # writes real_player_metrics.csv, real_standings.csv, real_team_name_map.csv
+source("player_gar.R")          # DATA_SOURCE <- "real" (the default) -> GAR_output_real/
+source("player_war.R")          # -> war_output_real/
+shiny::runApp("recruiting_app") # DATA_SOURCE <- "real" in app.R
+```
+
+Set `DATA_SOURCE <- "simulated"` in any of the three to go back to the simulated files. Those results are unchanged.
+
+With `DATA_SOURCE "real"`, the models use:
+- `gar_weights_real.csv` / `war_weights_real.csv`: the missing stats are removed. Shots blocked (CB, FB, DM) and goals prevented (GK) are added, and DM gains duel and aerial win %.
+- `ADJUST_SOS <- FALSE`, because the Adjusted sheet already corrects for conference strength.
+- Lower minute cut-offs (MIN_QUAL 270, COMPARE_MIN 360).
+- 10 random groups of teams for cross-validation, instead of leaving out one season.
+- Goals prevented: fixed at 1 goal per goal (`FIXED_WEIGHTS`) and shrunk with 1,800 prior minutes (`STAT_PRIOR_MIN`), because a keeper's shot-stopping over 8 games is mostly luck.
+
+Check `real_team_name_map.csv` once. It shows how each Wyscout team name ("Virginia Tech Hokies") was matched to the RPI name ("Virginia Tech"). Fix any mistakes in `TEAM_FIXES`.
+
+### Validating without an answer key
+The scorecard turns itself off on real data. Use instead:
+- year-to-year stability, once there is a second season
+- whether team GAR tracks team goal difference (printed when the model runs)
+- agreement with outside judgments: All-Conference and All-American teams, MLS draft picks, pro signings
+- the coaching staff's view of the top players at each position
 
 ---
 
