@@ -1,0 +1,10 @@
+check,measure,gar,baseline,baseline_name,verdict,meaning
+1. Non-conference games,r with non-conference win %,0.44,0.314,Conference xG difference per game,GAR beats raw stats,Out-of-sample games: the most honest team-level test
+1. Non-conference games,extra R-squared over goal difference,0.124,,,adds information,p = 0.000
+2. Massey ratings,r with Massey team rating,0.676,0.547,Conference goal difference per game,GAR beats raw stats,"Massey uses the whole season (all games, opponents); partly shares data with GAR"
+3. Coaches' choices,share of teammate pairs where higher rating = more minutes,0.542,0.514,Simple stat by position,GAR beats raw stats,Coaches see every practice; 0.50 = no agreement
+4. Reliability,share of real player differences GAR captures (0-1),0.53,,,"moderate: compare tiers, not exact ranks","players with 360+ minutes; r with true level about 0.73. Counts sampling noise only, not model error, so this is a best case"
+5. Team-strength leak,average rank correlation of player GAR with team quality,0.266,0.077,Simple stat by position,fine,Lower is better for judging players who will change teams
+6. Sensitivity,lowest rank correlation after small setting tweaks,0.99,,,robust,worst: More shrinkage (540 min); lowest top-50 overlap 78%
+6. Sensitivity,rank correlation with hand-set (manual) defense weights,0.622,,,defense depends on how weights are set,top-50 overlap 46%; the fitted defensive weights drive many rankings
+7. Year to year,r between back-to-back seasons,,,,needs a second season,Re-run once 2027 data (or 2025 data in the same format) is added

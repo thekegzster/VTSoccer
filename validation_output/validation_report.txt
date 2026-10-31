@@ -1,0 +1,111 @@
+Validating GAR_output_real/player_gar.csv: season 2026, 4681 players (2053 with 360+ minutes)
+
+1. OUT-OF-SAMPLE GAMES: does conference-game GAR predict non-conference results?
+# A tibble: 4 x 4
+  predictor                               r    lo    hi
+  <chr>                               <dbl> <dbl> <dbl>
+1 Team GAR per game                    0.44  0.35  0.53
+2 Conference goal difference per game  0.27  0.15  0.38
+3 Conference xG difference per game    0.31  0.21  0.42
+4 Conference win %                     0.18  0.08  0.28
+   Teams: 207, about 8 non-conference games each.
+   GAR on top of goal difference: +0.124 R-squared (p = 0.000)
+
+2. OUTSIDE JUDGMENT: does team GAR line up with Massey ratings?
+   r(team GAR, Massey) = 0.68 (90% CI 0.60 to 0.73); r(goal difference, Massey) = 0.55
+
+3. COACHES' CHOICES: within a team and position, does the higher-rated player play more?
+# A tibble: 8 x 3
+  position `GAR per 90` `Simple stat`
+  <chr>           <dbl>         <dbl>
+1 AM               0.57          0.55
+2 CB               0.54          0.52
+3 CF               0.53          0.53
+4 CM               0.57          0.51
+5 DM               0.51          0.44
+6 FB               0.54          0.48
+7 GK               0.48          0.5 
+8 W                0.55          0.54
+   Overall: GAR 0.54 vs simple stat 0.51 (0.50 = no better than a coin flip)
+   Simple stat = xG + xA per 90 (AM, CM, W, CF), successful defensive actions per 90 (CB, FB, DM),
+   goals prevented per 90 (GK). Note: low-minute players are pulled toward average, which helps both.
+
+4. RELIABILITY: how much of the real differences between players does GAR capture?
+# A tibble: 8 x 7
+  position     n sd_gar avg_uncertainty reliability r_with_truth sure_vs_5_lower
+  <chr>    <int>  <dbl>           <dbl>       <dbl>        <dbl>           <dbl>
+1 AM         230   0.08            0.07        0.61         0.78            0.08
+2 CB         451   0.09            0.09        0.5          0.71            0   
+3 CF         242   0.11            0.1         0.57         0.75            0   
+4 CM         215   0.08            0.05        0.7          0.84            0.12
+5 DM         182   0.06            0.04        0.67         0.82            0.12
+6 FB         403   0.06            0.06        0.54         0.74            0   
+7 GK         195   0.08            0.21        0.14         0.37            0   
+8 W          135   0.06            0.06        0.49         0.7             0   
+   Reliability 0.53 overall: GAR's correlation with players' true per-90 level is about 0.73
+   'sure_vs_5_lower' = share of top-25 players we're 80% sure rate above the player 5 places below.
+
+5. TEAM-STRENGTH LEAK: how strongly does player GAR follow team quality?
+# A tibble: 8 x 3
+  position r_gar r_naive
+  <chr>    <dbl>   <dbl>
+1 AM        0.29    0.31
+2 CB        0.27   -0.21
+3 CF        0.27    0.31
+4 CM        0.35    0.38
+5 DM        0.3    -0.26
+6 FB        0.32   -0.23
+7 GK        0.05    0.06
+8 W         0.27    0.26
+   Some link is expected (good teams recruit good players); above ~0.5 suggests team credit leaking in.
+
+   Rank correlation of GAR per 90 with plain xG + xA per 90 (near 1 = GAR adds little for that position):
+# A tibble: 8 x 2
+  position r_with_xg_xa
+  <chr>           <dbl>
+1 AM               0.96
+2 CB               0.49
+3 CF               0.98
+4 CM               0.65
+5 DM               0.81
+6 FB               0.64
+7 GK               0.07
+8 W                0.96
+
+6. SENSITIVITY: re-running player_gar.R with other settings
+   Passer share 25%             ... rank r = 0.99, top-50 overlap 96% (12s)
+   Passer share 55%             ... rank r = 0.99, top-50 overlap 92% (12s)
+   Less shrinkage (135 min)     ... rank r = 1.00, top-50 overlap 92% (12s)
+   More shrinkage (540 min)     ... rank r = 0.99, top-50 overlap 78% (13s)
+   Replacement = 10th pct       ... rank r = 0.99, top-50 overlap 90% (12s)
+   Replacement = 30th pct       ... rank r = 0.99, top-50 overlap 94% (13s)
+   Manual defense weights       ... rank r = 0.62, top-50 overlap 46% (13s)
+
+7. YEAR TO YEAR: does a player's GAR repeat the next season?
+   Not enough returning players yet (needs a second season of data).
+
+8. AWARDS: do honored players rate high?
+   No awards.csv. Fill in awards_template.csv (player_name and team as in player_gar.csv,
+   e.g. 'All-ACC First Team') and save it as awards.csv.
+
+==================== SUMMARY ====================
+1. Non-conference games    r with non-conference win %                                    GAR   0.44  vs Conference xG difference per game 0.31
+   -> GAR beats raw stats. Out-of-sample games: the most honest team-level test
+1. Non-conference games    extra R-squared over goal difference                           GAR   0.12
+   -> adds information. p = 0.000
+2. Massey ratings          r with Massey team rating                                      GAR   0.68  vs Conference goal difference per game 0.55
+   -> GAR beats raw stats. Massey uses the whole season (all games, opponents); partly shares data with GAR
+3. Coaches' choices        share of teammate pairs where higher rating = more minutes     GAR   0.54  vs Simple stat by position 0.51
+   -> GAR beats raw stats. Coaches see every practice; 0.50 = no agreement
+4. Reliability             share of real player differences GAR captures (0-1)            GAR   0.53
+   -> moderate: compare tiers, not exact ranks. players with 360+ minutes; r with true level about 0.73. Counts sampling noise only, not model error, so this is a best case
+5. Team-strength leak      average rank correlation of player GAR with team quality       GAR   0.27  vs Simple stat by position 0.08
+   -> fine. Lower is better for judging players who will change teams
+6. Sensitivity             lowest rank correlation after small setting tweaks             GAR   0.99
+   -> robust. worst: More shrinkage (540 min); lowest top-50 overlap 78%
+6. Sensitivity             rank correlation with hand-set (manual) defense weights        GAR   0.62
+   -> defense depends on how weights are set. top-50 overlap 46%; the fitted defensive weights drive many rankings
+7. Year to year            r between back-to-back seasons                                 GAR    —
+   -> needs a second season. Re-run once 2027 data (or 2025 data in the same format) is added
+
+Charts and validation_summary.csv are in validation_output/
