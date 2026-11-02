@@ -36,7 +36,9 @@ suppressPackageStartupMessages({
 # searches the nearby folders for it. You can also give full paths with forward
 # slashes, e.g. "C:/Users/you/Documents/project/GAR_output".
 GAR_DIR       <- "../GAR_output"                      # output folder of player_gar.R
+PAR_DIR       <- "../par_output"                      # output folder of player_war.R (OUTCOME "points")
 METRICS_FILE  <- "../simulated_player_metrics.csv"    # the Wyscout-style player file
+STATS_FILE    <- METRICS_FILE                         # season stats for the Season stats tab
 FOCUS_TEAM    <- "Virginia Tech"
 ROSTER_SEASON <- 2025      # season player_gar.R compares against (ROSTER_SEASON there)
 PROJ_MINUTES  <- 1500      # season length behind "+Goals" (PROJ_MINUTES there)
@@ -49,7 +51,9 @@ DATA_NOTE     <- "Simulated data: names and numbers are made up"
 DATA_SOURCE   <- "real"
 if (DATA_SOURCE == "real") {
   GAR_DIR       <- "../GAR_output_real"
+  PAR_DIR       <- "../par_output_real"
   METRICS_FILE  <- "../real_player_metrics.csv"
+  STATS_FILE    <- "../real_player_stats_raw.csv"   # real counts, not conference-adjusted
   ROSTER_SEASON <- 2026
   COMPARE_MIN   <- 360     # one season so far, conference games only
   PCT_MIN       <- 270
@@ -61,7 +65,12 @@ GOALS_PER_WIN <- round(1 / 0.23, 1)
 MAROON <- "#861F41"
 ORANGE <- "#E5751F"
 GREY   <- "#B9B3AE"
-SLATE  <- "#44546A"   # the comparison player
+SLATE  <- "#44546A"
+# Player colors in comparisons: Virginia Tech players in VT orange, everyone else in blue.
+# When both players are on the same side, the comparison player gets a lighter shade.
+VT_ORANGE  <- "#E5751F"; VT_ORANGE2 <- "#F4B886"
+BLUE       <- "#2F6DB5"; BLUE2      <- "#9CBFE6"
+DEFENSE_COL <- "#3A7D7C"   # GAR's defense part (teal, so it isn't confused with VT orange)
 
 # ---- Skill list: id, Wyscout column, label, group, lower is better ----------
 SKILLS <- tribble(
@@ -69,6 +78,7 @@ SKILLS <- tribble(
   "goals_90", "Goals / 90", "Goals per 90", "Shooting", FALSE,
   "npg_90", "Non-penalty goals, per 90 mins", "Non-penalty goals per 90", "Shooting", FALSE,
   "xg_90", "xG / 90", "Expected goals (xG) per 90", "Shooting", FALSE,
+  "npxg_90", "npxG / 90", "Non-penalty xG per 90", "Shooting", FALSE,
   "shots_90", "Shots / 90", "Shots per 90", "Shooting", FALSE,
   "sot_pct", "Shots on target %", "Shots on target %", "Shooting", FALSE,
   "conversion_pct", "Goal conversion (%)", "Goal conversion %", "Shooting", FALSE,
@@ -192,6 +202,15 @@ for (f in c("portal_vs_roster.csv", "our_roster.csv"))
 METRICS_FILE <- find_file(METRICS_FILE, "player metrics")
 
 gar <- read_csv(file.path(GAR_DIR, "player_gar.csv"), show_col_types = FALSE)
+# PAR (points above replacement) from player_war.R with OUTCOME <- "points". Optional:
+# without it the app shows GAR only.
+par_file <- tryCatch(find_file(file.path(PAR_DIR, "player_par.csv"), "PAR ratings"), error = function(e) NA)
+HAS_PAR <- !is.na(par_file)
+if (!HAS_PAR) message("No player_par.csv found: run player_war.R with OUTCOME <- \"points\" to add PAR.")
+par <- if (HAS_PAR) read_csv(par_file, show_col_types = FALSE) %>%
+  select(season_year, player_id, par, par_per_90, par_rank_pos) else
+  tibble(season_year = numeric(), player_id = character(), par = numeric(),
+         par_per_90 = numeric(), par_rank_pos = numeric())
 portal <- read_csv(file.path(GAR_DIR, "portal_vs_roster.csv"), show_col_types = FALSE)
 roster <- read_csv(file.path(GAR_DIR, "our_roster.csv"), show_col_types = FALSE)
 
@@ -216,6 +235,7 @@ players <- gar %>%
                                any_of(c("portal_status", "portal_initiated", "market_value"))),
             by = c("season_year", "player_id")) %>%
   left_join(portal_join, by = c("player_name", "team", "position", "season_year")) %>%
+  left_join(par, by = c("season_year", "player_id")) %>%
   mutate(search = tolower(paste(player_name, team, conference)))
 for (nm in c("portal_status", "portal_initiated", "market_value"))
   if (!nm %in% names(players)) players[[nm]] <- NA
@@ -233,6 +253,118 @@ benchmarks <- roster %>%
             by = c("player_name", "position"))
 
 SEASONS <- sort(unique(players$season_year), decreasing = TRUE)
+
+# Key skills use non-penalty xG when the data has it
+if ("npxg_90" %in% SKILLS$id) KEY_SKILLS <- lapply(KEY_SKILLS, function(k) sub("^xg_90$", "npxg_90", k))
+
+# ---- Season stats (the Season stats tab) ------------------------------------------
+# One row per stat: where to find it in the real export (Raw sheet) and in the
+# simulated file. kind: count (shown as a total or per 90), pct (a percentage),
+# info (shown as is). gk: TRUE = goalkeepers only, FALSE = outfield only, NA = everyone.
+STAT_ROWS <- tribble(
+  ~label, ~group, ~kind, ~real_tot, ~real_p90, ~sim_tot, ~sim_p90, ~gk,
+  "Matches played", "Playing time", "info", "Matches played", NA, "matches_played", NA, NA,
+  "Minutes", "Playing time", "info", "Minutes played", NA, "minutes_played", NA, NA,
+  "Goals", "Scoring", "count", "Goals", "Goals per 90", "Goals", "Goals / 90", FALSE,
+  "Non-penalty goals", "Scoring", "count", "Non-penalty goals", "Non-penalty goals per 90", "Non-penalty goals, total", "Non-penalty goals, per 90 mins", FALSE,
+  "Penalties", "Scoring", "pens", "Penalties taken", "Penalty conversion, %", NA, NA, FALSE,
+  "xG", "Scoring", "count", "xG", "xG per 90", "xG, Total", "xG / 90", FALSE,
+  "Non-penalty xG", "Scoring", "npxg", NA, NA, NA, NA, FALSE,
+  "Shots", "Scoring", "count", "Shots", "Shots per 90", "Shots, total", "Shots / 90", FALSE,
+  "Shots on target %", "Scoring", "pct", NA, "Shots on target, %", NA, "Shots on target %", FALSE,
+  "Goal conversion %", "Scoring", "pct", NA, "Goal conversion, %", NA, "Goal conversion (%)", FALSE,
+  "Headed goals", "Scoring", "count", "Head goals", "Head goals per 90", "Head goals, total", "Head goals, avg per 90 mins", FALSE,
+  "Touches in the box", "Scoring", "count", NA, "Touches in box per 90", NA, "Touches in box, per 90", FALSE,
+  "Assists", "Creating", "count", "Assists", "Assists per 90", NA, "Assists / 90", NA,
+  "xA", "Creating", "count", "xA", "xA per 90", NA, "xA / 90", NA,
+  "Shot assists", "Creating", "count", NA, "Shot assists per 90", NA, "Shot assists / 90", FALSE,
+  "Key passes", "Creating", "count", NA, "Key passes per 90", NA, "Key passes / 90", FALSE,
+  "Second assists", "Creating", "count", NA, "Second assists per 90", NA, "Second assists / 90", FALSE,
+  "Through passes", "Creating", "count", NA, "Through passes per 90", NA, "Through passes / 90", FALSE,
+  "Passes into the box", "Creating", "count", NA, "Passes to penalty area per 90", NA, "Passes to penalty area / 90", FALSE,
+  "Crosses", "Creating", "count", NA, "Crosses per 90", NA, "Crosses / 90", FALSE,
+  "Cross accuracy %", "Creating", "pct", NA, "Accurate crosses, %", NA, "Cross accuracy", FALSE,
+  "Passes", "Passing", "count", NA, "Passes per 90", NA, "Passes / 90", NA,
+  "Pass accuracy %", "Passing", "pct", NA, "Accurate passes, %", NA, "Pass accuracy", NA,
+  "Progressive passes", "Passing", "count", NA, "Progressive passes per 90", NA, "Progressive passes / 90", NA,
+  "Passes into the final third", "Passing", "count", NA, "Passes to final third per 90", NA, "Passes to final third / 90", NA,
+  "Long passes", "Passing", "count", NA, "Long passes per 90", NA, "Long passes / 90 minutes", NA,
+  "Long pass accuracy %", "Passing", "pct", NA, "Accurate long passes, %", NA, "Accurate long passes (%)", NA,
+  "Dribbles", "Carrying", "count", NA, "Dribbles per 90", NA, "Dribbles / 90", FALSE,
+  "Dribble success %", "Carrying", "pct", NA, "Successful dribbles, %", NA, "Dribbles %", FALSE,
+  "Progressive runs", "Carrying", "count", NA, "Progressive runs per 90", NA, "Progressive runs / 90", FALSE,
+  "Defensive duels", "Defending", "count", NA, "Defensive duels per 90", NA, "Defensive duels / 90 minutes", FALSE,
+  "Defensive duels won %", "Defending", "pct", NA, "Defensive duels won, %", NA, "Defensive duels won (%)", FALSE,
+  "Aerial duels", "Defending", "count", NA, "Aerial duels per 90", NA, "Aerial duels / 90 minutes", FALSE,
+  "Aerial duels won %", "Defending", "pct", NA, "Aerial duels won, %", NA, "Aerial duels won (%)", FALSE,
+  "Interceptions", "Defending", "count", NA, "Interceptions per 90", NA, "Interceptions / 90 minutes", FALSE,
+  "Sliding tackles", "Defending", "count", NA, "Sliding tackles per 90", NA, NA, FALSE,
+  "Shots blocked", "Defending", "count", NA, "Shots blocked per 90", NA, NA, FALSE,
+  "Successful defensive actions", "Defending", "count", NA, "Successful defensive actions per 90", NA, "Successful defensive actions / 90", FALSE,
+  "Fouls", "Discipline", "count", NA, "Fouls per 90", NA, "Fouls / 90", NA,
+  "Yellow cards", "Discipline", "count", "Yellow cards", "Yellow cards per 90", "Yellow cards, total", "Yellow cards / 90 minutes", NA,
+  "Red cards", "Discipline", "count", "Red cards", "Red cards per 90", "Red cards, total", "Red cards / 90 minutes", NA,
+  "Goals conceded", "Goalkeeping", "count", "Conceded goals", "Conceded goals per 90", NA, NA, TRUE,
+  "Shots faced", "Goalkeeping", "count", "Shots against", "Shots against per 90", NA, "Shots against / 90", TRUE,
+  "Save rate %", "Goalkeeping", "pct", NA, "Save rate, %", NA, NA, TRUE,
+  "xG faced", "Goalkeeping", "count", "xG against", "xG against per 90", NA, NA, TRUE,
+  "Goals prevented (xG faced - conceded)", "Goalkeeping", "count", "Prevented goals", "Prevented goals per 90", NA, NA, TRUE,
+  "Clean sheets", "Goalkeeping", "count", "Clean sheets", NA, NA, NA, TRUE,
+  "Exits", "Goalkeeping", "count", NA, "Exits per 90", NA, "Exits, per 90 mins", TRUE
+)
+PEN_XG <- 0.76   # xG of a penalty (same as prepare_real_data.R)
+stats_src <- if (DATA_SOURCE == "real") "real" else "sim"
+stats_file <- tryCatch(find_file(STATS_FILE, "season stats"), error = function(e) NA)
+stat_cols <- unique(na.omit(c(STAT_ROWS[[paste0(stats_src, "_tot")]], STAT_ROWS[[paste0(stats_src, "_p90")]],
+                              "Penalties taken", "Penalty conversion, %", "xG", "xG, Total")))
+season_stats <- if (!is.na(stats_file)) {
+  read_csv(stats_file, show_col_types = FALSE, guess_max = 10000,
+           col_select = any_of(c("season_year", "player_id", "team", "position",
+                                 "Minutes played", "minutes_played", stat_cols)))
+} else tibble(season_year = numeric(), player_id = character())
+if (!"minutes_played" %in% names(season_stats) && "Minutes played" %in% names(season_stats))
+  season_stats$minutes_played <- season_stats[["Minutes played"]]
+
+# One player's season stats as a stat x season table
+stat_table <- function(pid, mode = "tot", is_gk = FALSE) {
+  d <- season_stats %>% filter(player_id == pid) %>% arrange(desc(season_year))
+  if (!nrow(d)) return(NULL)
+  num <- function(df, col) if (!is.na(col) && col %in% names(df)) suppressWarnings(as.numeric(df[[col]])) else rep(NA_real_, nrow(df))
+  rows <- STAT_ROWS %>% filter(is.na(gk) | gk == is_gk)
+  out <- lapply(seq_len(nrow(rows)), function(i) {
+    r <- rows[i, ]; tc <- r[[paste0(stats_src, "_tot")]]; pc <- r[[paste0(stats_src, "_p90")]]
+    mins <- d$minutes_played
+    v <- switch(r$kind,
+      info = num(d, tc),
+      pct  = num(d, pc),
+      pens = num(d, tc),   # penalties taken (shown below as scored/taken)
+      npxg = {
+        xg_t <- coalesce(num(d, if (stats_src == "real") "xG" else "xG, Total"), num(d, if (stats_src == "real") "xG per 90" else "xG / 90") * mins / 90)
+        tot <- pmax(xg_t - PEN_XG * coalesce(num(d, "Penalties taken"), 0), 0)
+        if (mode == "tot") tot else tot * 90 / mins
+      },
+      count = {
+        tot <- coalesce(num(d, tc), num(d, pc) * mins / 90)
+        p90 <- coalesce(num(d, pc), num(d, tc) * 90 / mins)
+        if (mode == "tot") tot else p90
+      })
+    # Penalties: scored out of taken, e.g. 3/4 (scored = taken x conversion %)
+    pen_scored <- if (r$kind == "pens") round(num(d, tc) * num(d, pc) / 100) else NULL
+    shown <- vapply(seq_along(v), function(j) {
+      x <- v[j]
+      if (r$kind == "pens") return(if (is.na(x)) "—" else sprintf("%d/%d", as.integer(coalesce(pen_scored[j], 0)), as.integer(x)))
+      if (is.na(x)) return("—")
+      if (r$kind == "pct") return(sprintf("%.1f%%", x))
+      if (r$kind == "info") return(format(round(x), big.mark = ","))
+      expected <- grepl("xG|xA|prevented", r$label)   # expected-goal stats keep decimals
+      if (mode == "tot" && !expected) return(format(round(x), big.mark = ","))
+      sprintf("%.2f", x)
+    }, character(1))
+    c(Group = r$group, Stat = r$label, setNames(shown, as.character(d$season_year)))
+  })
+  tab <- as_tibble(do.call(rbind, out))
+  tab[apply(tab[, -(1:2), drop = FALSE], 1, function(x) any(x != "—")), ]
+}
 CONFS   <- sort(unique(players$conference))
 
 # Percentile of x within a reference vector (0-100), flipped when lower is better
@@ -302,6 +434,9 @@ ui <- page_sidebar(
     .vd-l { font-size: .74rem; color: #6b6b6b; }
     .legend-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%%; margin: 0 4px 0 10px; vertical-align: -1px; }
     .note { font-size: .78rem; color: #6b6b6b; }
+    .pos-box .shiny-options-group { display: grid; grid-template-columns: repeat(4, 1fr); column-gap: 4px; }
+    .pos-box .checkbox { margin: 0 0 2px; font-size: .88rem; }
+    .pos-box { margin-bottom: 12px; }
     .facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px 16px; font-size: .85rem; }
     .facts b { display: block; font-weight: 600; }
     .facts span { color: #6b6b6b; font-size: .75rem; }
@@ -310,18 +445,22 @@ ui <- page_sidebar(
     width = 270,
     textInput("q", "Search", placeholder = "Name, team or conference"),
     selectInput("season", "Season", choices = SEASONS, selected = ROSTER_SEASON),
-    selectInput("pos", "Position", choices = c("All positions" = "", setNames(names(POS_LABELS), POS_LABELS))),
-    selectInput("conf", "Conference", choices = c("All conferences" = "", CONFS)),
-    if (HAS_CLASS) selectInput("cls", "Class", choices = c("All classes" = "", setNames(names(CLASS_LABELS), CLASS_LABELS))),
+    div(class = "pos-box",
+        div(class = "d-flex justify-content-between align-items-baseline",
+            tags$label(class = "control-label", "Positions"),
+            div(class = "small", actionLink("pos_all", "All"), " \u00b7 ", actionLink("pos_none", "None"))),
+        checkboxGroupInput("pos", NULL, choices = names(POS_LABELS), selected = names(POS_LABELS))),
+    selectInput("conf", "Conference", choices = c("All conferences" = "all", CONFS)),
+    if (HAS_CLASS) selectInput("cls", "Class", choices = c("All classes" = "all", setNames(names(CLASS_LABELS), CLASS_LABELS))),
     if (HAS_PORTAL) selectInput("portal", "Transfer portal",
-                                choices = c("Anyone" = "", sort(unique(na.omit(players$portal_status))))),
+                                choices = c("Anyone" = "all", sort(unique(na.omit(players$portal_status))))),
     sliderInput("minmin", "Minimum minutes", min = 0, max = 2500, value = 300, step = 90),
     checkboxInput("upg", "Likely upgrades only"),
     div(class = "d-flex gap-2",
         actionButton("reset", "Reset", class = "btn-outline-secondary btn-sm"),
         downloadButton("dl", "Download", class = "btn-outline-secondary btn-sm"))
   ),
-  
+
   layout_columns(
     col_widths = breakpoints(sm = 12, xl = c(5, 7)),
     card(
@@ -329,82 +468,99 @@ ui <- page_sidebar(
       card_header(textOutput("n_match", inline = TRUE)),
       DTOutput("tbl"),
       card_footer(class = "note",
-                  sprintf("GAR = goals added over a replacement-level backup. Chance better = chance he rates above our weakest regular at his position (%d+ min).", COMPARE_MIN))
+        sprintf("GAR = goals added over a replacement-level backup. PAR = league points added (3 for a win, 1 for a draw). Chance better = chance he rates above our weakest regular at his position (%d+ min).", COMPARE_MIN))
     ),
     card(
       full_screen = TRUE,
       card_header(uiOutput("who")),
       card_body(
+      div(class = "cmp-row",
+          selectizeInput("cmp", "Compare with", choices = NULL, width = "340px"),
+          radioButtons("scale", NULL, inline = TRUE,
+                       choices = c("Per 90" = "p90", "Season total" = "tot"))),
+      navset_underline(
+      id = "tab",
+      nav_panel("Head to head",
+        uiOutput("verdict"),
+        uiOutput("legend"),
+        plotOutput("gar_cmp", height = "170px"),
+        if (HAS_PAR) plotOutput("par_cmp", height = "130px"),
+        h6("Key skills (percentile at his position)", class = "mt-3 mb-0"),
+        plotOutput("radar", height = "380px")
+      ),
+      nav_panel("Skills",
+        uiOutput("legend2"),
         div(class = "cmp-row",
-            selectizeInput("cmp", "Compare with", choices = NULL, width = "340px"),
-            radioButtons("scale", NULL, inline = TRUE,
-                         choices = c("Per 90" = "p90", "Season total" = "tot"))),
-        navset_underline(
-          id = "tab",
-          nav_panel("Head to head",
-                    uiOutput("verdict"),
-                    uiOutput("legend"),
-                    plotOutput("gar_cmp", height = "170px"),
-                    h6("Key skills (percentile at his position)", class = "mt-3 mb-0"),
-                    plotOutput("radar", height = "380px")
-          ),
-          nav_panel("Skills",
-                    uiOutput("legend2"),
-                    div(class = "cmp-row",
-                        radioButtons("skmode", NULL, inline = TRUE,
-                                     choices = c("Key skills" = "key", "Biggest gaps" = "gaps", "All skills" = "all"))),
-                    p(class = "note mb-1", sprintf(
-                      "Percentile among same-season players at his position with %d+ minutes (higher is better; flipped where fewer is better). Hover a dot for the per-90 value.", PCT_MIN)),
-                    plotOutput("dumbbell", height = "auto", hover = hoverOpts("db_hover", delay = 80)),
-                    uiOutput("db_tip")
-          ),
-          nav_panel("History & info",
-                    h6("GAR per 90 by season", class = "mb-0"),
-                    plotOutput("hist", height = "240px"),
-                    h6("Player info", class = "mt-3"),
-                    uiOutput("facts")
-          )
-        )))
+            radioButtons("skmode", NULL, inline = TRUE,
+                         choices = c("Key skills" = "key", "Biggest gaps" = "gaps", "All skills" = "all"))),
+        p(class = "note mb-1", sprintf(
+          "Percentile among same-season players at his position with %d+ minutes (higher is better; flipped where fewer is better). Hover a dot for the per-90 value.", PCT_MIN)),
+        plotOutput("dumbbell", height = "auto", hover = hoverOpts("db_hover", delay = 80)),
+        uiOutput("db_tip")
+      ),
+      nav_panel("Season stats",
+        div(class = "cmp-row",
+            radioButtons("st_mode", NULL, inline = TRUE, choices = c("Season totals" = "tot", "Per 90" = "p90"))),
+        p(class = "note mb-1", if (DATA_SOURCE == "real")
+          "Actual Wyscout numbers (not conference-adjusted). Totals without a Wyscout total are per-90 x minutes / 90." else
+          "Totals without a total in the data are per-90 x minutes / 90."),
+        DTOutput("stats_tbl")
+      ),
+      nav_panel("History & info",
+        h6("GAR per 90 by season", class = "mb-0"),
+        plotOutput("hist", height = "240px"),
+        h6("Player info", class = "mt-3"),
+        uiOutput("facts")
+      )
+    )))
   )
 )
 
 # ---- Server ------------------------------------------------------------------
 server <- function(input, output, session) {
-  
+
   observeEvent(input$reset, {
     updateTextInput(session, "q", value = "")
     updateSelectInput(session, "season", selected = ROSTER_SEASON)
-    for (id in c("pos", "conf", "cls", "portal")) updateSelectInput(session, id, selected = "")
+    for (id in c("conf", "cls", "portal")) updateSelectInput(session, id, selected = "all")
+    updateCheckboxGroupInput(session, "pos", selected = names(POS_LABELS))
     updateSliderInput(session, "minmin", value = 300)
     updateCheckboxInput(session, "upg", value = FALSE)
   })
-  
+
   q_slow <- debounce(reactive(input$q), 300)
-  
+  observeEvent(input$pos_all,  updateCheckboxGroupInput(session, "pos", selected = names(POS_LABELS)))
+  observeEvent(input$pos_none, updateCheckboxGroupInput(session, "pos", selected = character(0)))
+  # A dropdown filters only when something other than its "All ..." option is picked.
+  # ("All" options use the value "all", not "": the dropdown hides an option whose value
+  # is empty once something else is picked, so you could never get back to it.)
+  picked <- function(v) !is.null(v) && length(v) == 1 && nzchar(v) && v != "all"
+
   filtered <- reactive({
     d <- players %>% filter(season_year == as.numeric(input$season), minutes_played >= input$minmin)
     q <- trimws(tolower(q_slow() %||% ""))
     if (nzchar(q))                    d <- filter(d, grepl(q, search, fixed = TRUE))
-    if (nzchar(input$pos))            d <- filter(d, position == input$pos)
-    if (nzchar(input$conf))           d <- filter(d, conference == input$conf)
-    if (nzchar(input$cls %||% ""))    d <- filter(d, class_year == input$cls)
-    if (nzchar(input$portal %||% "")) d <- filter(d, portal_status == input$portal)
+    d <- filter(d, position %in% (input$pos %||% character(0)))   # only the checked positions
+    if (picked(input$conf))   d <- filter(d, conference == input$conf)
+    if (picked(input$cls))    d <- filter(d, class_year == input$cls)
+    if (picked(input$portal)) d <- filter(d, portal_status == input$portal)
     if (isTRUE(input$upg))            d <- filter(d, !is.na(chance_better), chance_better >= UPGRADE_MIN)
     arrange(d, desc(gar))
   })
-  
+
   output$n_match <- renderText({
     sprintf("%s players, %s season", format(nrow(filtered()), big.mark = ","), input$season)
   })
-  
+
   output$tbl <- renderDT({
     d <- filtered() %>%
       transmute(Player = player_name, Team = team, Pos = position,
                 Class = class_year, Portal = portal_status,
-                Min = minutes_played, GAR = gar, `GAR/90` = gar_per_90,
+                Min = minutes_played, GAR = gar, `GAR/90` = gar_per_90, PAR = par,
                 `Chance better` = chance_better)
     if (!HAS_CLASS)  d$Class  <- NULL
     if (!HAS_PORTAL) d$Portal <- NULL
+    if (!HAS_PAR)    d$PAR    <- NULL
     datatable(
       d, rownames = FALSE, selection = list(mode = "single", selected = 1),
       class = "compact hover nowrap",
@@ -414,13 +570,14 @@ server <- function(input, output, session) {
     ) %>%
       formatRound("GAR", 2) %>%
       formatRound("GAR/90", 3) %>%
+      formatRound(intersect("PAR", names(d)), 2) %>%
       formatRound("Min", 0) %>%
       formatPercentage("Chance better", 0) %>%
       formatStyle("GAR", background = styleColorBar(range(c(0, d$GAR), na.rm = TRUE), "#EAD3DA"),
                   backgroundSize = "95% 70%", backgroundRepeat = "no-repeat",
                   backgroundPosition = "center")
   })
-  
+
   # The selected player: the clicked row, or the top row of the list
   sel <- reactive({
     d <- filtered()
@@ -430,7 +587,7 @@ server <- function(input, output, session) {
     if (is.na(i) || i > nrow(d)) i <- 1
     d[i, ]
   })
-  
+
   # ---- Comparison player ------------------------------------------------------
   observeEvent(input$season, {
     season_players <- players %>%
@@ -446,22 +603,22 @@ server <- function(input, output, session) {
                          selected = if (!is.null(keep) && keep %in% ch) keep else "bench",
                          options = list(placeholder = "Type a name"))
   })
-  
+
   comp <- reactive({
     s <- sel()
     v <- input$cmp %||% "bench"
     id <- switch(v,
-                 bench = benchmarks$player_id[benchmarks$position == s$position][1],
-                 best  = best_regulars$player_id[best_regulars$position == s$position][1],
-                 NA)
+      bench = benchmarks$player_id[benchmarks$position == s$position][1],
+      best  = best_regulars$player_id[best_regulars$position == s$position][1],
+      NA)
     row <- if (v %in% c("bench", "best")) players %>% filter(season_year == ROSTER_SEASON, player_id == id)
-    else players %>% filter(key == v)
+           else players %>% filter(key == v)
     if (!nrow(row) || row$key[1] == s$key) return(NULL)
     row[1, ] %>% mutate(role = switch(v, bench = sprintf("our weakest regular at %s", s$position),
-                                      best = sprintf("our best regular at %s", s$position),
-                                      sprintf("%s, %s", team, season_year)))
+                                         best = sprintf("our best regular at %s", s$position),
+                                         sprintf("%s, %s", team, season_year)))
   })
-  
+
   comp_msg <- reactive({
     s <- sel(); v <- input$cmp %||% "bench"
     if (!is.null(comp())) return(NULL)
@@ -470,7 +627,7 @@ server <- function(input, output, session) {
     else if (v %in% c("bench", "best")) sprintf("We have no regular at %s to compare with.", s$position)
     else "Pick a different player to compare with."
   })
-  
+
   # Skill percentiles for any player, against the SELECTED player's position and season
   ref_set <- reactive({
     s <- sel()
@@ -491,7 +648,18 @@ server <- function(input, output, session) {
     b <- if (!is.null(c)) skill_vals(c, ref, groups) %>% mutate(who = "b") else NULL
     bind_rows(a, b) %>% filter(!is.na(pct))
   })
-  
+
+  # Colors for the selected player (a) and the comparison player (b)
+  pcols <- reactive({
+    s <- sel(); c <- comp()
+    a_vt <- s$team == FOCUS_TEAM
+    b_vt <- !is.null(c) && c$team == FOCUS_TEAM
+    a <- if (a_vt) VT_ORANGE else BLUE
+    b <- if (b_vt) VT_ORANGE else BLUE
+    if (!is.null(c) && a_vt == b_vt) b <- if (b_vt) VT_ORANGE2 else BLUE2
+    c(a = a, b = b)
+  })
+
   # ---- Header -------------------------------------------------------------------
   output$who <- renderUI({
     s <- sel()
@@ -505,12 +673,12 @@ server <- function(input, output, session) {
       div(class = "who-sub", sprintf("%s \u00b7 %s", POS_LABELS[[s$position]], s$team)),
       div(class = "kpis mt-2",
           kpi(fmt(s$gar), "GAR"),
-          kpi(fmt(s$gar_per_90, 3), "GAR per 90"),
+          if (HAS_PAR) kpi(fmt(s$par), "PAR (points)") else kpi(fmt(s$gar_per_90, 3), "GAR per 90"),
           kpi(paste0("#", s$gar_rank_pos), sprintf("of %s %ss", sum(players$season_year == s$season_year & players$position == s$position), s$position)),
           kpi(format(s$minutes_played, big.mark = ","), "minutes"))
     )
   })
-  
+
   # ---- Head to head -------------------------------------------------------------
   output$verdict <- renderUI({
     s <- sel(); c <- comp()
@@ -525,20 +693,44 @@ server <- function(input, output, session) {
         vd(fmt(chance, pct = TRUE), sprintf("chance he's better than %s", c$player_name),
            if (chance >= 0.7) "#1E7B3A" else if (chance <= 0.3) "#B3261E" else "inherit"),
         vd(fmt(diff, 3, TRUE), "GAR per 90 gap"),
-        vd(fmt(goals, 1, TRUE), sprintf("goals over a %s-min season (80%%: %s to %s)",
-                                        format(PROJ_MINUTES, big.mark = ","), fmt(goals - half, 1, TRUE), fmt(goals + half, 1, TRUE))))
+        vd(fmt(goals, 1, TRUE), sprintf("Goals Above Replacement over a %s-min season",
+                                         format(PROJ_MINUTES, big.mark = ","))),
+        if (HAS_PAR && !is.na(s$par_per_90) && !is.na(c$par_per_90))
+          vd(fmt((s$par_per_90 - c$par_per_90) * PROJ_MINUTES / 90, 1, TRUE),
+             sprintf("Points Above Replacement over a %s-min season", format(PROJ_MINUTES, big.mark = ","))))
   })
-  
+
   output_legend <- function() {
     s <- sel(); c <- comp()
     div(class = "note",
-        span(class = "legend-dot", style = sprintf("background:%s;margin-left:0", MAROON)), s$player_name,
-        if (!is.null(c)) tagList(span(class = "legend-dot", style = sprintf("background:%s", SLATE)),
+        span(class = "legend-dot", style = sprintf("background:%s;margin-left:0", pcols()[["a"]])), s$player_name,
+        if (!is.null(c)) tagList(span(class = "legend-dot", style = sprintf("background:%s", pcols()[["b"]])),
                                  sprintf("%s (%s)", c$player_name, c$role)))
   }
   output$legend <- renderUI(output_legend())
-  
+
   output$legend2 <- renderUI(output_legend())
+  output$par_cmp <- renderPlot({
+    s <- sel(); c <- comp()
+    p90 <- !identical(input$scale, "tot")
+    d <- bind_rows(s, c) %>%
+      transmute(name = factor(player_name, levels = rev(unique(player_name))),
+                who = c("a", "b")[seq_len(n())],
+                v = if (p90) par_per_90 else par)
+    validate(need(any(!is.na(d$v)), "No PAR for this player."))
+    ggplot(d, aes(v, name, fill = who)) +
+      geom_col(width = 0.55) +
+      geom_vline(xintercept = 0, colour = "grey45") +
+      geom_text(aes(label = fmt_vec(v, if (p90) 3 else 2), hjust = ifelse(v >= 0, -0.2, 1.2)), size = 3.6) +
+      scale_fill_manual(values = pcols(), guide = "none") +
+      scale_x_continuous(expand = expansion(mult = c(0.08, 0.15))) +
+      labs(x = if (p90) "PAR per 90: league points above replacement (3 for a win, 1 for a draw)"
+               else "PAR this season: league points above replacement (3 for a win, 1 for a draw)",
+           y = NULL) +
+      theme_board() +
+      theme(panel.grid.major.y = element_blank(), axis.text.y = element_text(size = 12, face = "bold"))
+  })
+
   output$gar_cmp <- renderPlot({
     s <- sel(); c <- comp()
     rows <- bind_rows(s, c)
@@ -560,7 +752,7 @@ server <- function(input, output, session) {
       geom_errorbarh(data = d, aes(xmin = lo, xmax = hi), height = 0.22, linewidth = 0.6) +
       geom_point(data = d, aes(x = total), shape = 21, size = 3.2, fill = "white", stroke = 1) +
       geom_text(data = d, aes(x = hi, label = fmt_vec(total, if (p90) 3 else 2)), hjust = -0.25, size = 3.6) +
-      scale_fill_manual(values = c(Attack = MAROON, Defense = ORANGE, Replacement = GREY),
+      scale_fill_manual(values = c(Attack = MAROON, Defense = DEFENSE_COL, Replacement = GREY),
                         breaks = c("Attack", "Defense", "Replacement"),
                         labels = c("Attack", "Defense", "Average over replacement")) +
       scale_x_continuous(expand = expansion(mult = c(0.05, 0.12))) +
@@ -569,7 +761,7 @@ server <- function(input, output, session) {
       theme_board() +
       theme(panel.grid.major.y = element_blank(), axis.text.y = element_text(size = 12, face = "bold"))
   })
-  
+
   output$radar <- renderPlot({
     s <- sel(); c <- comp()
     keys <- intersect(KEY_SKILLS[[s$position]], SKILLS$id)
@@ -595,12 +787,12 @@ server <- function(input, output, session) {
       geom_point(data = poly, aes(x, y, colour = who), size = 2) +
       geom_text(data = spokes, aes(lx, ly, label = lab), size = 3.3, lineheight = 0.9,
                 hjust = ifelse(abs(cos(spokes$a)) < 0.2, 0.5, ifelse(cos(spokes$a) > 0, 0, 1))) +
-      scale_fill_manual(values = c(a = MAROON, b = SLATE), guide = "none") +
-      scale_colour_manual(values = c(a = MAROON, b = SLATE), guide = "none") +
+      scale_fill_manual(values = pcols(), guide = "none") +
+      scale_colour_manual(values = pcols(), guide = "none") +
       coord_equal(xlim = c(-175, 175), ylim = c(-125, 125), clip = "off") +
       theme_void()
   })
-  
+
   # ---- Skills tab ----------------------------------------------------------------
   db_data <- reactive({
     s <- sel(); c <- comp()
@@ -621,7 +813,7 @@ server <- function(input, output, session) {
     wide %>% mutate(group = factor(group, levels = unique(c("Key skills", "Biggest gaps", GROUP_ORDER))),
                     y = factor(paste(group, label, sep = "::"), levels = rev(unique(paste(group, label, sep = "::")))))
   })
-  
+
   output$dumbbell <- renderPlot({
     d <- db_data()
     validate(need(nrow(d) > 0, "No skill data for this player."))
@@ -629,8 +821,8 @@ server <- function(input, output, session) {
       geom_vline(xintercept = 50, colour = "#E6E1DC") +
       geom_segment(aes(x = pct_b, xend = pct_a, yend = y), colour = "#CFC8C1", linewidth = 2.2, na.rm = TRUE,
                    lineend = "round") +
-      geom_point(aes(x = pct_b), colour = SLATE, size = 3.4, na.rm = TRUE) +
-      geom_point(aes(x = pct_a), colour = MAROON, size = 3.6) +
+      geom_point(aes(x = pct_b), colour = pcols()[["b"]], size = 3.4, na.rm = TRUE) +
+      geom_point(aes(x = pct_a), colour = pcols()[["a"]], size = 3.6) +
       facet_grid(group ~ ., scales = "free_y", space = "free_y") +
       scale_y_discrete(labels = function(x) sub("^.*::", "", x)) +
       scale_x_continuous(limits = c(0, 100), breaks = c(0, 25, 50, 75, 100), expand = expansion(add = 2)) +
@@ -640,7 +832,7 @@ server <- function(input, output, session) {
             strip.text.y = if (identical(input$skmode, "all")) element_text(angle = 0, face = "bold", hjust = 0) else element_blank(),
             axis.text.y = element_text(size = 11), panel.spacing.y = unit(8, "pt"))
   }, height = function() 70 + 26 * nrow(db_data()) + 10 * length(unique(db_data()$group)))
-  
+
   output$db_tip <- renderUI({
     h <- input$db_hover
     if (is.null(h)) return(p(class = "note", " "))
@@ -654,7 +846,7 @@ server <- function(input, output, session) {
       sprintf("%s %s (%s pct)", s$player_name, f(r$value_a, r$id), round(r$pct_a)),
       if (!is.null(c)) sprintf("\u00b7 %s %s (%s pct)", c$player_name, f(r$value_b, r$id), round(r$pct_b)))
   })
-  
+
   # ---- History & info ------------------------------------------------------------
   output$hist <- renderPlot({
     s <- sel(); c <- comp()
@@ -668,14 +860,27 @@ server <- function(input, output, session) {
       geom_errorbar(aes(ymin = gar_per_90_lo, ymax = gar_per_90_hi),
                     position = position_dodge2(preserve = "single", padding = 0.75),
                     width = min(0.7, 0.18 * n_distinct(d$season_year) + 0.2), linewidth = 0.5) +
-      scale_fill_manual(values = c(a = MAROON, b = SLATE),
+      scale_fill_manual(values = pcols(),
                         labels = c(a = s$player_name, b = if (!is.null(c)) c$player_name else ""), name = NULL,
                         drop = TRUE) +
       labs(x = NULL, y = "GAR per 90") +
       theme_board() +
       theme(panel.grid.major.x = element_blank())
   })
-  
+
+  output$stats_tbl <- renderDT({
+    s <- sel()
+    tab <- stat_table(s$player_id, input$st_mode %||% "tot", s$position == "GK")
+    validate(need(!is.null(tab) && nrow(tab) > 0, "No season stats for this player."))
+    # show each group's name once, on its first row
+    first <- !duplicated(tab$Group)
+    tab$Group[!first] <- ""
+    datatable(tab, rownames = FALSE, class = "compact", colnames = c("", "Stat", names(tab)[-(1:2)]),
+              options = list(dom = "t", paging = FALSE, ordering = FALSE,
+                             columnDefs = list(list(className = "dt-right", targets = 2:(ncol(tab) - 1))))) %>%
+      formatStyle("Group", fontWeight = "600", color = MAROON)
+  })
+
   output$facts <- renderUI({
     s <- sel()
     fact <- function(l, v) div(span(l), tags$b(v))
@@ -689,10 +894,11 @@ server <- function(input, output, session) {
         if (HAS_PORTAL) fact("Portal", if (is.na(s$portal_status)) "—" else
           paste0(s$portal_status, if (!is.na(s$portal_initiated)) paste0(" (", s$portal_initiated, ")") else "")),
         fact("Overall rank", paste0("#", format(s$gar_rank, big.mark = ","))),
-        fact("Wins above replacement", fmt(s$war_equiv)),
+        if (HAS_PAR) fact("PAR rank at position", if (is.na(s$par_rank_pos)) "—" else paste0("#", s$par_rank_pos)),
+        if (HAS_PAR) fact("PAR per 90", fmt(s$par_per_90, 3)),
         fact("Attack / defense", sprintf("%s / %s", fmt(s$off_gaa, 2, TRUE), fmt(s$def_gaa, 2, TRUE))))
   })
-  
+
   output$dl <- downloadHandler(
     filename = function() sprintf("portal_board_%s.csv", input$season),
     content = function(file) write_csv(select(filtered(), -search, -key), file)
