@@ -44,6 +44,8 @@ STAT_SHEET     <- "Adjusted"    # "Adjusted" (conference-adjusted per-90s) or "R
 OUT_PLAYERS    <- "real_player_metrics.csv"
 OUT_STANDINGS  <- "real_standings.csv"
 OUT_TEAM_MAP   <- "real_team_name_map.csv"
+OUT_RAW_STATS  <- "real_player_stats_raw.csv"   # the Raw sheet as is, with player ids (for the app's Stats tab)
+PEN_XG         <- 0.76          # xG of one penalty in Wyscout's model; used to remove penalties from xG
 
 # Wyscout team names that don't start with the RPI name (Wyscout -> RPI)
 TEAM_FIXES <- c(
@@ -166,7 +168,8 @@ TOTAL_MAP <- c(
   "Yellow cards, total" = "Yellow cards", "Red cards, total" = "Red cards",
   "Assists, total" = "Assists", "xA, total" = "xA",
   "Conceded goals, total" = "Conceded goals", "xG against, total" = "xG against",
-  "Prevented goals, total" = "Prevented goals", "Clean sheets" = "Clean sheets"
+  "Prevented goals, total" = "Prevented goals", "Clean sheets" = "Clean sheets",
+  "Penalties taken" = "Penalties taken"
 )
 
 # ---- 1. Read ----------------------------------------------------------------
@@ -234,6 +237,15 @@ for (nm in names(STAT_MAP))  players[[nm]] <- pick(stats, STAT_MAP[[nm]])
 for (nm in names(TOTAL_MAP)) players[[nm]] <- pick(raw, TOTAL_MAP[[nm]])
 players[["xG + xA / 90"]] <- players[["xG / 90"]] + players[["xA / 90"]]
 
+# Non-penalty xG and shots. Penalties go to whoever the coach picks to take them, so they
+# say little about a player's own chance quality. Each penalty is worth about PEN_XG xG.
+pens   <- coalesce(players[["Penalties taken"]], 0)
+pen90  <- if_else(players$minutes_played > 0, pens * 90 / players$minutes_played, 0)
+players[["npxG, total"]]               <- pmax(players[["xG, Total"]] - PEN_XG * pens, 0)
+players[["npxG / 90"]]                 <- pmax(players[["xG / 90"]] - PEN_XG * pen90, 0)
+players[["Non-penalty shots / 90"]]    <- pmax(players[["Shots / 90"]] - pen90, 0)
+players[["npxG + xA / 90"]]            <- players[["npxG / 90"]] + players[["xA / 90"]]
+
 # GK-only stats are blank for outfield players and vice versa, as in the simulated file
 gk_only <- c("Exits, per 90 mins", "Shots against / 90", "Conceded goals / 90", "Save rate (%)",
              "xG against / 90", "Prevented goals / 90")
@@ -292,6 +304,14 @@ players <- players %>%
   left_join(standings %>% select(team, team_rpi_rank = rpi_rank, team_games = games), by = "team")
 
 write_csv(players, OUT_PLAYERS, na = "")
+
+# The Raw sheet as it is (real counts and per-90s, not conference-adjusted), with the same
+# season, team and player id as above, for the app's Stats tab
+raw_out <- raw %>%
+  mutate(season_year = SEASON, team = players$team, player_id = players$player_id,
+         position = players$position) %>%
+  relocate(season_year, team, player_id, position)
+write_csv(raw_out, OUT_RAW_STATS, na = "")
 write_csv(standings, OUT_STANDINGS, na = "")
 
 cat(sprintf("Wrote %s: %d players, %d teams, season %d (%s sheet)\n",

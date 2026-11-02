@@ -322,7 +322,7 @@ if (RUN_SENSITIVITY && file.exists("player_gar.R")) {
   sens <- list()
   for (nm in names(variants)) {
     tag <- gsub("[^a-z0-9]+", "_", tolower(nm)); od <- file.path(OUT_DIR, paste0("tmp_", tag))
-    lines <- append(src, c(sprintf("DATA_SOURCE <- '%s'", DATA_SOURCE), variants[[nm]],
+    lines <- append(src, c(sprintf("DATA_SOURCE <- '%s'", DATA_SOURCE), variants[[nm]], "MAKE_PLOTS <- FALSE",
                            sprintf("OUT_DIR <- '%s'", od)), after = anchor - 1)
     # the DATA_SOURCE line must come before the real/simulated block, so set it at the top too
     lines <- sub('^DATA_SOURCE  <- ".*"', sprintf('DATA_SOURCE  <- "%s"', DATA_SOURCE), lines)

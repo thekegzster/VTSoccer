@@ -45,6 +45,8 @@ MIN_QUAL     <- 300            # minutes to count toward scaling and replacement
 STAT_PRIOR_MIN <- c(prevented_goals = 1800)  # stats that need more minutes before they're
                                # trusted: goalkeeper shot-stopping swings a lot by luck, so a keeper
                                # is treated as if he also had 1,800 average minutes (PRIOR_MIN for others)
+MAKE_PLOTS   <- TRUE           # FALSE = skip the charts and only write the CSV files (much faster)
+NON_PENALTY  <- TRUE           # use non-penalty xG (npxG) when the data has it
 PRIOR_MIN    <- 270            # shrinkage: a player is treated as if he also played
                                # this many minutes at the position average
 REPL_PCTL    <- 0.20           # replacement level = this percentile of qualified
@@ -99,6 +101,7 @@ if (DATA_SOURCE == "real") {
 # Optional overrides from the command line:
 #   Rscript player_gar.R gar_weights.csv manual
 args <- commandArgs(trailingOnly = TRUE)
+if ("--no-plots" %in% args) { MAKE_PLOTS <- FALSE; args <- setdiff(args, "--no-plots") }
 if (length(args) >= 1) WEIGHTS_FILE <- args[1]
 if (length(args) >= 2) WEIGHT_MODE  <- args[2]
 if (length(args) >= 3) VERSION      <- args[3]
@@ -230,6 +233,16 @@ stat_cols <- c(
 for (nm in setdiff(stat_cols, names(players))) players[[nm]] <- NA_real_
 if (!"team_possession_pct" %in% names(players)) players$team_possession_pct <- 50
 players$team_possession_pct <- coalesce(players$team_possession_pct, 50)
+
+# Non-penalty xG: penalties go to whoever the coach picks to take them, so they say
+# little about a player's own chances. When the data has npxG (prepare_real_data.R
+# makes it), it replaces xG, and non-penalty shots replace shots, everywhere below.
+use_np <- NON_PENALTY && "npxG / 90" %in% names(players) && any(!is.na(players[["npxG / 90"]]))
+if (use_np) {
+  players[["xG / 90"]]    <- players[["npxG / 90"]]
+  players[["Shots / 90"]] <- coalesce(players[["Non-penalty shots / 90"]], players[["Shots / 90"]])
+  cat("Using non-penalty xG (npxG) for xG\n")
+}
 
 players <- players %>%
   mutate(
@@ -739,7 +752,8 @@ theme_gar <- theme_minimal(base_size = 12) +
         legend.position  = "top", legend.justification = "left",
         legend.title     = element_blank())
 
-save <- function(p, name, w = 9, h = 6) ggsave(file.path(OUT_DIR, name), p, width = w, height = h, dpi = 150)
+# Charts are only drawn and saved when MAKE_PLOTS is TRUE (the slow part of a run)
+save <- function(p, name, w = 9, h = 6) if (MAKE_PLOTS) ggsave(file.path(OUT_DIR, name), p, width = w, height = h, dpi = 150)
 
 # 01: top 25 players, with where their GAR comes from
 top <- player_gar %>%
@@ -1021,4 +1035,4 @@ if (all(c("true_talent", "team_strength_z") %in% names(players))) {
   cat("\nNo true_talent column: scorecard skipped (expected on real data).\n")
 }
 
-cat("\nDone. Outputs in", OUT_DIR, "\n")
+cat("\nDone. Outputs in", OUT_DIR, if (!MAKE_PLOTS) "(charts skipped: MAKE_PLOTS is FALSE)" else "", "\n")
