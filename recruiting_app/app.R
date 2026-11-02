@@ -396,50 +396,137 @@ Z80 <- qnorm(0.9)
 
 theme_board <- function(base = 12) {
   theme_minimal(base_size = base) +
-    theme(panel.grid.minor = element_blank(),
+    theme(text = element_text(colour = "#3A3A3F"),
+          axis.text = element_text(colour = "#6B6B70"),
+          axis.title = element_text(colour = "#6B6B70", size = base - 1),
+          panel.grid.major = element_line(colour = "#EEEAE6"),
+          panel.grid.minor = element_blank(),
           plot.title = element_text(face = "bold", size = base),
           legend.position = "top", legend.justification = "left",
           legend.margin = margin(0, 0, 0, 0), legend.text = element_text(size = base - 1))
 }
 
+# Short definitions shown when hovering over a column or tab name
+TIPS <- c(
+  GAR = "Goals above replacement: goals a player adds over a replacement-level backup at his position",
+  `GAR/90` = "GAR per 90 minutes",
+  PAR = "Points above replacement: league points added (3 for a win, 1 for a draw)",
+  `Chance better` = sprintf("Chance he rates above our weakest regular at his position (%d+ minutes)", COMPARE_MIN),
+  Portal = "Transfer portal status",
+  Min = "Minutes played",
+  Pos = "Position", Class = "Class year"
+)
+
 # ---- UI ----------------------------------------------------------------------
 theme <- bs_theme(version = 5, primary = MAROON, secondary = ORANGE,
+                  bg = "#FFFFFF", fg = "#1F1F23",
                   base_font = font_google("Inter", local = FALSE),
-                  heading_font = font_google("Inter", local = FALSE))
+                  heading_font = font_google("Barlow Semi Condensed", wght = c(500, 600, 700), local = FALSE),
+                  "border-radius" = "8px", "font-size-base" = "0.92rem")
+
+CSS <- "
+  :root { --vt-maroon: #861F41; --vt-maroon-dark: #6A1833; --vt-orange: #E5751F;
+          --ink: #1F1F23; --muted: #6B6B70; --line: #E6E2DE; --soft: #F5F3F0; }
+  body { background: var(--soft); }
+
+  /* Header bar */
+  .bslib-page-title, .navbar { background: var(--vt-maroon) !important; color: #fff !important;
+    border-bottom: 3px solid var(--vt-orange) !important; padding: 10px 20px !important; }
+  .brand { display: flex; align-items: center; justify-content: space-between; width: 100%;
+    background: var(--vt-maroon); color: #fff; padding: 10px 22px; border-bottom: 3px solid var(--vt-orange); }
+  .bslib-page-title:has(.brand) { padding: 0 !important; background: var(--vt-maroon) !important; border: 0 !important; }
+  .brand-left { display: flex; align-items: center; gap: 12px; }
+  /* www/vt_logo.png on a small white badge so its maroon fill stands out from the header */
+  .brand-logo { height: 34px; width: auto; display: block; background: #fff; padding: 4px 8px; border-radius: 6px; }
+  .brand-name { font-family: 'Barlow Semi Condensed', sans-serif; font-weight: 600; font-size: 1.35rem;
+    letter-spacing: .02em; color: #fff; }
+  .brand-team { font-size: .8rem; color: rgba(255,255,255,.75); letter-spacing: .04em; text-transform: uppercase; }
+
+  /* Sidebar */
+  .bslib-sidebar-layout > .sidebar { background: #fff; border-right: 1px solid var(--line); }
+  .sidebar .control-label, .sidebar .form-label, .sec-label {
+    font-size: .7rem; font-weight: 600; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); }
+  .form-control, .selectize-input { border-color: var(--line); border-radius: 6px; box-shadow: none; }
+  .form-control:focus, .selectize-input.focus { border-color: var(--vt-maroon);
+    box-shadow: 0 0 0 3px rgba(134,31,65,.12); }
+  .form-check-input:checked { background-color: var(--vt-maroon); border-color: var(--vt-maroon); }
+  .form-check-input:focus { box-shadow: 0 0 0 3px rgba(134,31,65,.15); border-color: var(--vt-maroon); }
+  .pos-box .shiny-options-group { display: grid; grid-template-columns: repeat(4, 1fr); column-gap: 4px; }
+  .pos-box .checkbox, .pos-box .form-check { margin: 0 0 2px; font-size: .86rem; }
+  .pos-box { margin-bottom: 14px; }
+  .pos-box .form-group, .pos-box .shiny-input-container { margin-bottom: 0; }
+  .pos-links a { color: var(--vt-maroon); text-decoration: none; font-size: .75rem; font-weight: 600; }
+  .irs--shiny .irs-bar { background: var(--vt-maroon); border-color: var(--vt-maroon); }
+  .irs--shiny .irs-single { background: var(--vt-maroon); }
+  .irs--shiny .irs-handle { border-color: var(--vt-maroon); }
+  .irs--shiny .irs-min, .irs--shiny .irs-max { background: var(--soft); color: var(--muted); }
+  .btn-vt { background: var(--vt-maroon); border-color: var(--vt-maroon); color: #fff; }
+  .btn-vt:hover { background: var(--vt-maroon-dark); border-color: var(--vt-maroon-dark); color: #fff; }
+  .btn-quiet { background: #fff; border: 1px solid var(--line); color: var(--ink); }
+  .btn-quiet:hover { border-color: var(--vt-maroon); color: var(--vt-maroon); background: #fff; }
+
+  /* Cards */
+  .card { border: 1px solid var(--line); border-radius: 10px; box-shadow: none; }
+  .card-header { background: #fff; border-bottom: 1px solid var(--line); }
+  .list-head { font-size: .7rem; font-weight: 600; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); }
+
+  /* Player list */
+  table.dataTable { font-size: .83rem; }
+  table.dataTable thead th { font-size: .68rem; font-weight: 600; text-transform: uppercase; letter-spacing: .05em;
+    color: var(--muted); border-bottom: 1px solid var(--line) !important; cursor: help; }
+  table.dataTable th, table.dataTable td { white-space: nowrap; }
+  table.dataTable tbody tr { cursor: pointer; }
+  table.dataTable tbody tr:hover > * { background: #FBF4F6 !important; }
+  table.dataTable tbody tr.selected > * { box-shadow: inset 0 0 0 9999px var(--vt-maroon) !important; color: #fff !important; }
+  table.dataTable.no-footer { border-bottom: 1px solid var(--line); }
+
+  /* Player header */
+  .who-name { font-family: 'Barlow Semi Condensed', sans-serif; font-size: 1.75rem; font-weight: 700;
+    line-height: 1.1; margin: 0; color: var(--ink); }
+  .who-sub { color: var(--muted); font-size: .86rem; margin-top: 2px; }
+  .chip { display: inline-block; font-family: Inter, sans-serif; font-size: .68rem; font-weight: 600;
+    padding: 2px 9px; border-radius: 999px; margin-left: 8px; vertical-align: 5px; letter-spacing: .02em; }
+  .chip-portal { background: #FDEBDD; color: #A4500F; }
+  .chip-ours { background: var(--vt-maroon); color: #fff; }
+  .kpis { display: flex; flex-wrap: wrap; gap: 0; margin: 12px 0 2px; }
+  .kpis > div { padding: 0 22px; border-left: 1px solid var(--line); }
+  .kpis > div:first-child { padding-left: 0; border-left: 0; }
+  .kpi-v { font-family: 'Barlow Semi Condensed', sans-serif; font-size: 1.7rem; font-weight: 600; line-height: 1.05;
+    font-variant-numeric: tabular-nums; color: var(--ink); }
+  .kpi-l { font-size: .68rem; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin-top: 2px; }
+
+  /* Comparison controls and tabs */
+  .cmp-row { display: flex; flex-wrap: wrap; gap: 18px; align-items: end; margin-bottom: 6px; }
+  .cmp-row .form-group { margin-bottom: 0; }
+  .cmp-row .control-label { font-size: .7rem; font-weight: 600; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); }
+  .nav-underline { border-bottom: 1px solid var(--line); gap: 22px; margin: 6px 0 12px; }
+  .nav-underline .nav-link { color: var(--muted); font-weight: 600; font-size: .86rem; padding: 8px 0; }
+  .nav-underline .nav-link.active, .nav-underline .nav-link:hover { color: var(--vt-maroon); border-bottom-color: var(--vt-maroon); }
+  .sec-title { font-family: 'Barlow Semi Condensed', sans-serif; font-size: 1.05rem; font-weight: 600;
+    color: var(--ink); margin: 16px 0 2px; }
+
+  /* Head-to-head numbers */
+  .verdict { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); margin: 4px 0 8px; }
+  .vd { background: var(--soft); border-radius: 8px; padding: 10px 14px; border-top: 3px solid var(--vt-maroon); }
+  .vd-v { font-family: 'Barlow Semi Condensed', sans-serif; font-size: 1.45rem; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .vd-l { font-size: .74rem; color: var(--muted); }
+  .note { font-size: .78rem; color: var(--muted); }
+
+  /* Player info */
+  .facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px 18px; font-size: .88rem; }
+  .facts b { display: block; font-weight: 600; color: var(--ink); }
+  .facts span { color: var(--muted); font-size: .68rem; text-transform: uppercase; letter-spacing: .06em; }
+"
 
 ui <- page_sidebar(
-  title = div(strong("Portal Recruiting Board"),
-              span(class = "text-muted small ms-2", DATA_NOTE)),
+  window_title = "VT Portal Recruiting Board",
+  title = div(class = "brand",
+              div(class = "brand-left", tags$img(src = "vt_logo.png", class = "brand-logo", alt = "Virginia Tech"),
+                  span(class = "brand-name", "Portal Recruiting Board")),
+              span(class = "brand-team", "Virginia Tech Men's Soccer")),
   theme = theme,
   fillable = FALSE,
-  tags$head(tags$style(HTML(sprintf("
-    table.dataTable tbody tr.selected > * { box-shadow: inset 0 0 0 9999px rgba(134,31,65,.9) !important; color: #fff !important; }
-    table.dataTable { font-size: .82rem; }
-    table.dataTable th, table.dataTable td { white-space: nowrap; }
-    table.dataTable tbody tr { cursor: pointer; }
-    .who-name { font-size: 1.45rem; font-weight: 600; line-height: 1.15; margin: 0; }
-    .who-sub { color: #6b6b6b; font-size: .88rem; margin-top: 2px; }
-    .chip { display: inline-block; font-size: .72rem; font-weight: 600; padding: 2px 8px; border-radius: 999px;
-            margin-left: 6px; vertical-align: 3px; }
-    .chip-portal { background: #FCE9DC; color: #9A4A12; }
-    .chip-ours { background: #F3E1E7; color: %s; }
-    .kpis { display: flex; flex-wrap: wrap; gap: 28px; margin: 4px 0 2px; }
-    .kpi-v { font-size: 1.5rem; font-weight: 600; line-height: 1.1; font-variant-numeric: tabular-nums; }
-    .kpi-l { font-size: .75rem; color: #6b6b6b; }
-    .cmp-row { display: flex; flex-wrap: wrap; gap: 16px; align-items: end; }
-    .cmp-row .form-group { margin-bottom: 0; }
-    .verdict { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); margin: 6px 0 4px; }
-    .vd { background: #F7F5F3; border-radius: 8px; padding: 8px 12px; }
-    .vd-v { font-size: 1.25rem; font-weight: 600; font-variant-numeric: tabular-nums; }
-    .vd-l { font-size: .74rem; color: #6b6b6b; }
-    .note { font-size: .78rem; color: #6b6b6b; }
-    .pos-box .shiny-options-group { display: grid; grid-template-columns: repeat(4, 1fr); column-gap: 4px; }
-    .pos-box .checkbox { margin: 0 0 2px; font-size: .88rem; }
-    .pos-box { margin-bottom: 12px; }
-    .facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px 16px; font-size: .85rem; }
-    .facts b { display: block; font-weight: 600; }
-    .facts span { color: #6b6b6b; font-size: .75rem; }
-  ", MAROON)))),
+  tags$head(tags$style(HTML(CSS))),
   sidebar = sidebar(
     width = 270,
     textInput("q", "Search", placeholder = "Name, team or conference"),
@@ -447,7 +534,7 @@ ui <- page_sidebar(
     div(class = "pos-box",
         div(class = "d-flex justify-content-between align-items-baseline",
             tags$label(class = "control-label", "Positions"),
-            div(class = "small", actionLink("pos_all", "All"), " \u00b7 ", actionLink("pos_none", "None"))),
+            div(class = "pos-links", actionLink("pos_all", "All"), " · ", actionLink("pos_none", "None"))),
         checkboxGroupInput("pos", NULL, choices = names(POS_LABELS), selected = names(POS_LABELS))),
     selectInput("conf", "Conference", choices = c("All conferences" = "all", CONFS)),
     if (HAS_CLASS) selectInput("cls", "Class", choices = c("All classes" = "all", setNames(names(CLASS_LABELS), CLASS_LABELS))),
@@ -455,19 +542,17 @@ ui <- page_sidebar(
                                 choices = c("Anyone" = "all", sort(unique(na.omit(players$portal_status))))),
     sliderInput("minmin", "Minimum minutes", min = 0, max = 2500, value = 300, step = 90),
     checkboxInput("upg", "Likely upgrades only"),
-    div(class = "d-flex gap-2",
-        actionButton("reset", "Reset", class = "btn-outline-secondary btn-sm"),
-        downloadButton("dl", "Download", class = "btn-outline-secondary btn-sm"))
+    div(class = "d-flex gap-2 mt-1",
+        actionButton("reset", "Reset", class = "btn-quiet btn-sm"),
+        downloadButton("dl", "Export list", class = "btn-vt btn-sm"))
   ),
 
   layout_columns(
     col_widths = breakpoints(sm = 12, xl = c(5, 7)),
     card(
       full_screen = TRUE,
-      card_header(textOutput("n_match", inline = TRUE)),
-      DTOutput("tbl"),
-      card_footer(class = "note",
-        sprintf("GAR = goals added over a replacement-level backup. PAR = league points added (3 for a win, 1 for a draw). Chance better = chance he rates above our weakest regular at his position (%d+ min).", COMPARE_MIN))
+      card_header(div(class = "list-head", textOutput("n_match", inline = TRUE))),
+      DTOutput("tbl")
     ),
     card(
       full_screen = TRUE,
@@ -483,30 +568,30 @@ ui <- page_sidebar(
         uiOutput("verdict"),
         plotOutput("gar_cmp", height = "170px"),
         if (HAS_PAR) plotOutput("par_cmp", height = "130px"),
-        h6("Key skills (percentile at his position)", class = "mt-3 mb-0"),
+        div(class = "sec-title", title = "Percentile among players at his position this season", "Key skills"),
         plotOutput("radar", height = "380px")
       ),
-      nav_panel("Skills",
+      nav_panel(span("Skills", title = sprintf(
+          "Percentile among same-season players at his position with %d+ minutes. Higher is better (flipped where fewer is better). Hover a dot for the per-90 value.", PCT_MIN)),
+        value = "Skills",
         div(class = "cmp-row",
             radioButtons("skmode", NULL, inline = TRUE,
                          choices = c("Key skills" = "key", "Biggest gaps" = "gaps", "All skills" = "all"))),
-        p(class = "note mb-1", sprintf(
-          "Percentile among same-season players at his position with %d+ minutes (higher is better; flipped where fewer is better). Hover a dot for the per-90 value.", PCT_MIN)),
         plotOutput("dumbbell", height = "auto", hover = hoverOpts("db_hover", delay = 80)),
         uiOutput("db_tip")
       ),
-      nav_panel("Season stats",
+      nav_panel(span("Season stats", title = if (DATA_SOURCE == "real")
+          "Actual Wyscout numbers (not conference-adjusted). Totals without a Wyscout total are per 90 x minutes / 90." else
+          "Totals without a total in the data are per 90 x minutes / 90."),
+        value = "Season stats",
         div(class = "cmp-row",
             radioButtons("st_mode", NULL, inline = TRUE, choices = c("Season totals" = "tot", "Per 90" = "p90"))),
-        p(class = "note mb-1", if (DATA_SOURCE == "real")
-          "Actual Wyscout numbers (not conference-adjusted). Totals without a Wyscout total are per-90 x minutes / 90." else
-          "Totals without a total in the data are per-90 x minutes / 90."),
         DTOutput("stats_tbl")
       ),
       nav_panel("History & info",
-        h6("GAR per 90 by season", class = "mb-0"),
+        div(class = "sec-title", style = "margin-top: 4px", "GAR per 90 by season"),
         plotOutput("hist", height = "240px"),
-        h6("Player info", class = "mt-3"),
+        div(class = "sec-title", "Player info"),
         uiOutput("facts")
       )
     )))
@@ -546,7 +631,7 @@ server <- function(input, output, session) {
   })
 
   output$n_match <- renderText({
-    sprintf("%s players, %s season", format(nrow(filtered()), big.mark = ","), input$season)
+    sprintf("%s players  |  %s season", format(nrow(filtered()), big.mark = ","), input$season)
   })
 
   output$tbl <- renderDT({
@@ -558,8 +643,11 @@ server <- function(input, output, session) {
     if (!HAS_CLASS)  d$Class  <- NULL
     if (!HAS_PORTAL) d$Portal <- NULL
     if (!HAS_PAR)    d$PAR    <- NULL
+    # column names with a short definition on hover
+    head_tips <- htmltools::withTags(table(class = "display", thead(tr(lapply(names(d), function(n)
+      th(n, title = if (n %in% names(TIPS)) TIPS[[n]] else NULL))))))
     datatable(
-      d, rownames = FALSE, selection = list(mode = "single", selected = 1),
+      d, rownames = FALSE, container = head_tips, selection = list(mode = "single", selected = 1),
       class = "compact hover nowrap",
       options = list(dom = "t", paging = FALSE, deferRender = TRUE, scrollY = "640px", scrollCollapse = TRUE,
                      scrollX = TRUE, order = list(list(which(names(d) == "GAR") - 1, "desc")),
