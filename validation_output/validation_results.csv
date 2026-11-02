@@ -1,0 +1,20 @@
+check,measure,model,value,baseline,baseline_name,verdict,meaning
+1. Non-conference games,r with non-conference points per game,GAR,0.44,0.307,Conference xG difference per game,beats the baseline,Games the model never saw: the most honest team-level test
+1. Non-conference games,extra R-squared over conference goal difference,GAR,0.127,,,adds information,p = 0.000
+1. Non-conference games,r with non-conference points per game,PAR,0.403,0.307,Conference xG difference per game,beats the baseline,Games the model never saw: the most honest team-level test
+1. Non-conference games,extra R-squared over conference goal difference,PAR,0.096,,,adds information,p = 0.000
+2. Massey ratings,r with Massey team rating,GAR,0.676,0.547,Conference goal difference per game,beats the baseline,Massey uses the whole season and opponents; partly the same games
+2. Massey ratings,r with Massey team rating,PAR,0.668,0.547,Conference goal difference per game,beats the baseline,Massey uses the whole season and opponents; partly the same games
+3. Coaches' choices,share of teammate pairs where the higher-rated player plays more,GAR,0.535,0.514,Simple stat by position,beats the baseline,0.50 = coin flip; coaches see every practice
+3. Coaches' choices,share of teammate pairs where the higher-rated player plays more,PAR,0.537,0.514,Simple stat by position,beats the baseline,0.50 = coin flip; coaches see every practice
+4. Reliability,share of real player differences captured (0-1),GAR,0.495,,,low: rank in tiers,"sampling noise only, not model error, so a best case"
+4. Reliability,share of real player differences captured (0-1),PAR,,,,not available,the model has no uncertainty ranges
+5. Team-strength leak,average rank correlation of player rating with team quality,GAR,0.276,0.077,Simple stat by position,fine,lower is better for players who will change teams; some link is expected
+5. Team-strength leak,average rank correlation of player rating with team quality,PAR,0.269,0.077,Simple stat by position,fine,lower is better for players who will change teams; some link is expected
+6. Sensitivity,lowest rank correlation after small setting tweaks,GAR,0.99,,,robust,worst: More shrinkage (540 min); lowest top-50 overlap 74%
+6. Sensitivity,rank correlation with hand-set (manual) weights,GAR,0.585,,,depends on how weights are set,top-50 overlap 30%
+6. Sensitivity,lowest rank correlation after small setting tweaks,PAR,0.958,,,robust,worst: Replacement = 10th pct; lowest top-50 overlap 70%
+6. Sensitivity,rank correlation with hand-set (manual) weights,PAR,0.586,,,depends on how weights are set,top-50 overlap 14%
+7. Year to year,r between back-to-back seasons,GAR,,,,needs a second season,
+7. Year to year,r between back-to-back seasons,PAR,,,,needs a second season,
+10. GAR vs PAR,"rank correlation between GAR and PAR (within position, average)",both,0.771,,,mostly agree,lowest: FB 0.44

@@ -1,0 +1,10 @@
+check,measure,GAR,PAR,baseline,baseline_name
+1. Non-conference games,r with non-conference points per game,0.44,0.403,0.307,Conference xG difference per game
+1. Non-conference games,extra R-squared over conference goal difference,0.127,0.096,,
+2. Massey ratings,r with Massey team rating,0.676,0.668,0.547,Conference goal difference per game
+3. Coaches' choices,share of teammate pairs where the higher-rated player plays more,0.535,0.537,0.514,Simple stat by position
+4. Reliability,share of real player differences captured (0-1),0.495,,,
+5. Team-strength leak,average rank correlation of player rating with team quality,0.276,0.269,0.077,Simple stat by position
+6. Sensitivity,lowest rank correlation after small setting tweaks,0.99,0.958,,
+6. Sensitivity,rank correlation with hand-set (manual) weights,0.585,0.586,,
+7. Year to year,r between back-to-back seasons,,,,

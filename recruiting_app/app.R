@@ -432,7 +432,6 @@ ui <- page_sidebar(
     .vd { background: #F7F5F3; border-radius: 8px; padding: 8px 12px; }
     .vd-v { font-size: 1.25rem; font-weight: 600; font-variant-numeric: tabular-nums; }
     .vd-l { font-size: .74rem; color: #6b6b6b; }
-    .legend-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%%; margin: 0 4px 0 10px; vertical-align: -1px; }
     .note { font-size: .78rem; color: #6b6b6b; }
     .pos-box .shiny-options-group { display: grid; grid-template-columns: repeat(4, 1fr); column-gap: 4px; }
     .pos-box .checkbox { margin: 0 0 2px; font-size: .88rem; }
@@ -482,14 +481,12 @@ ui <- page_sidebar(
       id = "tab",
       nav_panel("Head to head",
         uiOutput("verdict"),
-        uiOutput("legend"),
         plotOutput("gar_cmp", height = "170px"),
         if (HAS_PAR) plotOutput("par_cmp", height = "130px"),
         h6("Key skills (percentile at his position)", class = "mt-3 mb-0"),
         plotOutput("radar", height = "380px")
       ),
       nav_panel("Skills",
-        uiOutput("legend2"),
         div(class = "cmp-row",
             radioButtons("skmode", NULL, inline = TRUE,
                          choices = c("Key skills" = "key", "Biggest gaps" = "gaps", "All skills" = "all"))),
@@ -700,16 +697,6 @@ server <- function(input, output, session) {
              sprintf("Points Above Replacement over a %s-min season", format(PROJ_MINUTES, big.mark = ","))))
   })
 
-  output_legend <- function() {
-    s <- sel(); c <- comp()
-    div(class = "note",
-        span(class = "legend-dot", style = sprintf("background:%s;margin-left:0", pcols()[["a"]])), s$player_name,
-        if (!is.null(c)) tagList(span(class = "legend-dot", style = sprintf("background:%s", pcols()[["b"]])),
-                                 sprintf("%s (%s)", c$player_name, c$role)))
-  }
-  output$legend <- renderUI(output_legend())
-
-  output$legend2 <- renderUI(output_legend())
   output$par_cmp <- renderPlot({
     s <- sel(); c <- comp()
     p90 <- !identical(input$scale, "tot")
