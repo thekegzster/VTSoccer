@@ -15,7 +15,7 @@
 #   1. Build each position's stats (per 90) from the raw columns.
 #   2. Shrink small-sample players toward the position average.
 #   3. Adjust each stat for strength of schedule.
-#   4. Scale each stat 0-1 within position and season (5th-95th percentile)
+#   4. Scale each stat within position and season: 0 = 5th percentile, 1 = 95th (no cap by default)
 #   5. Weight the stats. "learned" mode fits the weights to team winning %:
 #      you choose each stat's direction in war_weights.csv, the data chooses
 #      its size. "manual" mode uses manual_weight from the CSV instead.
@@ -55,6 +55,9 @@ PRIOR_MIN    <- 270            # shrinkage: a player is treated as if he also pl
                                # this many minutes at the position average
 SCALE_LO     <- 0.05           # percentile used as the scaling "min"
 SCALE_HI     <- 0.95           # percentile used as the scaling "max"
+CAP_SCALE    <- FALSE          # FALSE = no cap: a player beyond the 95th percentile keeps
+                               # counting (scaled above 1; below the 5th percentile goes below 0).
+                               # TRUE = old behavior: everything is squeezed into 0-1
 REPL_PCTL    <- 0.20           # replacement level = this percentile of qualified
                                # players at the position, each season
 ADJUST_SOS   <- TRUE           # adjust stats for strength of schedule
@@ -329,13 +332,15 @@ if (ADJUST_SOS) {
     mutate(value = value - sos_slope * (sos_pct - 0.5))
 }
 
-# ---- 6. Scale each stat 0-1 within position and season ----------------------
+# ---- 6. Scale each stat within position and season (5th pct = 0, 95th = 1) ---
 
 long <- long %>%
   group_by(season_year, position, stat) %>%
   mutate(lo = quantile(value[qualified], SCALE_LO, na.rm = TRUE),
          hi = quantile(value[qualified], SCALE_HI, na.rm = TRUE),
-         scaled = if_else(hi > lo, pmin(pmax((value - lo) / (hi - lo), 0), 1), 0.5),
+         # 0 = the position's 5th percentile, 1 = its 95th; with no cap, outliers keep their full value
+         scaled = if_else(hi > lo, (value - lo) / (hi - lo), 0.5),
+         scaled = if (CAP_SCALE) pmin(pmax(scaled, 0), 1) else scaled,
          # league average for the position, weighted by minutes
          scaled_avg = weighted.mean(scaled, minutes_played)) %>%
   ungroup() %>%
