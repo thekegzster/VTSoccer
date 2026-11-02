@@ -1,0 +1,54 @@
+position,stat,direction,points_weight,points_per_season_5_to_95,note
+AM,xg,1,0.19959476461617234,3.9918952923234468,shooting: expected goals per 90 (replaces goals and shots_on_target)
+AM,crosses,1,0.07867749537522478,1.5735499075044959,NA
+AM,dribbles_won,1,0.06325129309640452,1.2650258619280905,NA
+AM,accelerations,1,0.0625382916722084,1.250765833444168,NA
+AM,xa,1,0.04322516896916668,0.8645033793833337,chance creation: expected assists per 90 (replaces chances_created and assists)
+AM,through_passes,1,0,0,NA
+CB,aerial_win_pct,1,0.16139847578003746,3.2279695156007495,aerial ability: share of aerial duels won (replaces aerial_won)
+CB,pass_acc,1,0.08040437963569233,1.6080875927138465,NA
+CB,cards,-1,-0.016534230707012793,-0.33068461414025585,NA
+CB,def_duel_win_pct,1,0,0,defending 1v1: share of defensive duels won (replaces def_duels_won). Team goals conceded and blocked shots are not in the data
+CB,interceptions,1,0,0,NA
+CB,sliding_tackles,1,0,0,NA
+CB,shots_blocked,1,0,0,"blocked shots per 90, possession-adjusted; real export only"
+CF,xg,1,0.4267947155893591,8.535894311787182,"shooting: expected goals per 90 (replaces goals, shots and shots_on_target). Link-up plays are not in the data"
+CF,xa,1,0.10171168742243826,2.034233748448765,chance creation: expected assists per 90 (replaces chances_created and assists)
+CF,dribbles_won,1,0.042461334929643046,0.8492266985928609,NA
+CF,crosses,1,0.02067980641898396,0.4135961283796792,NA
+CF,through_passes,1,0,0,NA
+CF,duels_won,1,0,0,NA
+CM,xg,1,0.15207185798749287,3.0414371597498575,shooting: expected goals per 90 (replaces goals and shots_on_target)
+CM,xa,1,0.1344106200657228,2.688212401314456,chance creation: expected assists per 90 (replaces chances_created and assists)
+CM,def_duel_win_pct,1,0.13324704259191858,2.6649408518383715,defending 1v1: share of defensive duels won (replaces def_duels_won)
+CM,through_passes,1,0.11538999742531696,2.307799948506339,NA
+CM,interceptions,1,0.07910134610418769,1.5820269220837537,NA
+CM,aerial_win_pct,1,0.019509191965756047,0.3901838393151209,aerial ability: share of aerial duels won (replaces aerial_won)
+DM,xa,1,0.23573005837271827,4.714601167454365,chance creation: expected assists per 90 (replaces chances_created and assists)
+DM,aerial_win_pct,1,0.1654553198281544,3.309106396563088,"aerial ability (replaces loose-ball duels, not in the real export)"
+DM,sliding_tackles,1,0.07023097699012408,1.4046195398024817,NA
+DM,interceptions,1,0.06631876881234516,1.3263753762469033,NA
+DM,xg,1,0.05086441400631979,1.0172882801263958,shooting: expected goals per 90 (replaces goals and shots_on_target)
+DM,dribbles_won,1,0.03836247671228043,0.7672495342456086,NA
+DM,passes,1,0.030479845105970117,0.6095969021194023,NA
+DM,through_passes,1,0,0,NA
+DM,shots_blocked,1,0,0,"blocked shots per 90, possession-adjusted; real export only"
+DM,def_duel_win_pct,1,0,0,"defending 1v1 (replaces loose-ball duels, not in the real export)"
+FB,xa,1,0.17152607526558433,3.4305215053116864,chance creation: expected assists per 90 (replaces key_passes)
+FB,accelerations,1,0.13202271664586993,2.6404543329173986,NA
+FB,def_duel_win_pct,1,0.04157704772218031,0.8315409544436062,defending 1v1: share of defensive duels won; not inflated by facing more attacks (replaces def_duels_won)
+FB,interceptions,1,0.03339801552865404,0.6679603105730808,NA
+FB,crosses,1,0,0,NA
+FB,sliding_tackles,1,0,0,NA
+FB,dribbles_won,1,0,0,NA
+FB,shots_blocked,1,0,0,"blocked shots per 90, possession-adjusted; real export only"
+GK,prevented_goals,1,0.5633985011214756,11.267970022429513,goals prevented per 90 (xG faced minus goals conceded); real export only
+GK,exits,1,0.02883316291832442,0.5766632583664884,NA
+GK,pass_acc,1,0,0,NA
+W,xg,1,0.4502270004833236,9.0045400096664725,shooting: expected goals per 90 (replaces goals and shots_on_target)
+W,accelerations,1,0.2107634285929839,4.215268571859678,NA
+W,xa,1,0,0,chance creation: expected assists per 90 (replaces chances_created and assists)
+W,through_passes,1,0,0,NA
+W,crosses,1,0,0,NA
+W,dribbles_won,1,0,0,NA
+W,aerial_win_pct,1,0,0,aerial ability: share of aerial duels won (replaces aerial_won)

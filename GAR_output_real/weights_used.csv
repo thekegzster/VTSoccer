@@ -1,5 +1,5 @@
 position,side,stat,units,direction,goal_weight,note,stat_sd_at_position,goals_per_season_1sd
-all,attack,xg (shooter),goals per expected goal,1,0.78493517489351,shooter keeps all of his unassisted chances and 60% of assisted ones; 0.78 = league average (each team's own assisted share is used),NA,NA
+all,attack,xg (shooter),goals per expected goal,1,0.7626632698377459,shooter keeps all of his unassisted chances and 60% of assisted ones; 0.76 = league average (each team's own assisted share is used),NA,NA
 all,attack,xa (passer),goals per expected goal,1,0.4,passer gets 40% of the xG of every shot he sets up,NA,NA
 CB,defense,aerial_win_pct,goals per 90 per percentage point,1,0.0078784383183771,aerial ability: share of aerial duels won (replaces aerial_won),8.23900926850021,1.2982105265283228
 CB,defense,def_duel_win_pct,goals per 90 per percentage point,1,0.004923786167582717,defending 1v1: share of defensive duels won (replaces def_duels_won). Team goals conceded and blocked shots are not in the data,6.96590676091308,0.685972707081095
