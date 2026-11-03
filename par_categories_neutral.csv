@@ -1,0 +1,75 @@
+position,category,stat,direction,weight_in_category,fixed_points_per_season,note
+GK,Shot-stopping,prevented_goals,1,1,,goals prevented per 90: xG faced minus goals conceded (heavily blended toward average: mostly luck over a few games)
+GK,Distribution,pass_acc,1,1,,pass accuracy %
+GK,Distribution,long_pass_acc,1,1,,long pass accuracy %
+GK,Sweeping,exits,1,1,,exits (coming off the line) per 90
+CB,Defending,def_duel_win_pct,1,2,,defensive duels won %: the core 1v1 measure
+CB,Defending,interceptions,1,1,,interceptions per 30 min of opponent possession
+CB,Defending,sliding_tackles,1,1,,sliding tackles per 30 min of opponent possession
+CB,Defending,shots_blocked,1,1,,"shots blocked per 90, possession-adjusted"
+CB,Defending,cards,-1,1,,yellow + 2 x red cards per 90 (fewer is better)
+CB,Aerial,aerial_win_pct,1,2,,aerial duels won %
+CB,Aerial,aerial_won,1,1,,aerial duels won per 90
+CB,Passing & progression,pass_acc,1,1,,pass accuracy %
+CB,Passing & progression,long_pass_acc,1,1,,long pass accuracy %
+CB,Passing & progression,prog_passes,1,1,,progressive passes per 90
+CB,Passing & progression,final_third_passes,1,1,,passes into the final third per 90
+CB,Goal threat,xg,1,1,,"non-penalty xG per 90 (set pieces, mostly)"
+FB,Defending,def_duel_win_pct,1,2,,defensive duels won %
+FB,Defending,interceptions,1,1,,interceptions per 30 min of opponent possession
+FB,Defending,sliding_tackles,1,1,,sliding tackles per 30 min of opponent possession
+FB,Defending,shots_blocked,1,1,,"shots blocked per 90, possession-adjusted"
+FB,Chance creation,xa,1,2,,expected assists per 90
+FB,Chance creation,crosses,1,1,,crosses per 90
+FB,Chance creation,box_passes,1,1,,passes into the penalty area per 90
+FB,Progression,prog_runs,1,1,,progressive runs per 90
+FB,Progression,dribbles_won,1,1,,dribbles completed per 90
+FB,Progression,accelerations,1,1,,accelerations per 90
+FB,Progression,prog_passes,1,1,,progressive passes per 90
+FB,Goal threat,xg,1,1,,non-penalty xG per 90
+DM,Defending,def_duel_win_pct,1,2,,defensive duels won %
+DM,Defending,interceptions,1,2,,interceptions per 30 min of opponent possession
+DM,Defending,sliding_tackles,1,1,,sliding tackles per 30 min of opponent possession
+DM,Defending,shots_blocked,1,1,,"shots blocked per 90, possession-adjusted"
+DM,Aerial,aerial_win_pct,1,1,,aerial duels won %
+DM,Passing & progression,pass_acc,1,1,,pass accuracy %
+DM,Passing & progression,passes,1,1,,passes per 90 (how much the team plays through him)
+DM,Passing & progression,prog_passes,1,1,,progressive passes per 90
+DM,Passing & progression,final_third_passes,1,1,,passes into the final third per 90
+DM,Attacking,xg,1,1,,non-penalty xG per 90
+DM,Attacking,xa,1,1,,expected assists per 90
+CM,Defending,def_duel_win_pct,1,2,,defensive duels won %
+CM,Defending,interceptions,1,1,,interceptions per 30 min of opponent possession
+CM,Defending,aerial_win_pct,1,1,,aerial duels won %
+CM,Passing & progression,pass_acc,1,1,,pass accuracy %
+CM,Passing & progression,prog_passes,1,1,,progressive passes per 90
+CM,Passing & progression,final_third_passes,1,1,,passes into the final third per 90
+CM,Passing & progression,through_passes,1,1,,through passes per 90
+CM,Chance creation,xa,1,2,,expected assists per 90
+CM,Chance creation,key_passes,1,1,,key passes per 90
+CM,Goal threat,xg,1,1,,non-penalty xG per 90
+AM,Goal threat,xg,1,2,,non-penalty xG per 90
+AM,Goal threat,touches_box,1,1,,touches in the penalty area per 90
+AM,Chance creation,xa,1,2,,expected assists per 90
+AM,Chance creation,key_passes,1,1,,key passes per 90
+AM,Chance creation,through_passes,1,1,,through passes per 90
+AM,Chance creation,box_passes,1,1,,passes into the penalty area per 90
+AM,Carrying,dribbles_won,1,1,,dribbles completed per 90
+AM,Carrying,prog_runs,1,1,,progressive runs per 90
+AM,Carrying,accelerations,1,1,,accelerations per 90
+W,Goal threat,xg,1,2,,non-penalty xG per 90
+W,Goal threat,touches_box,1,1,,touches in the penalty area per 90
+W,Chance creation,xa,1,2,,expected assists per 90
+W,Chance creation,crosses,1,1,,crosses per 90
+W,Chance creation,key_passes,1,1,,key passes per 90
+W,Carrying,dribbles_won,1,1,,dribbles completed per 90
+W,Carrying,prog_runs,1,1,,progressive runs per 90
+W,Carrying,accelerations,1,1,,accelerations per 90
+CF,Goal threat,xg,1,2,,non-penalty xG per 90
+CF,Goal threat,touches_box,1,1,,touches in the penalty area per 90
+CF,Chance creation,xa,1,2,,expected assists per 90
+CF,Chance creation,key_passes,1,1,,key passes per 90
+CF,Chance creation,through_passes,1,1,,through passes per 90
+CF,Hold-up & duels,duels_won,1,1,,offensive + aerial duels won per 90
+CF,Hold-up & duels,off_duel_win_pct,1,1,,offensive duels won %
+CF,Hold-up & duels,aerial_win_pct,1,1,,aerial duels won %

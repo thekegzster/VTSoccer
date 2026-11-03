@@ -1,0 +1,75 @@
+position,category,how,points_weight,points_per_season_category,stat,direction,share_of_category,points_per_season_stat,stat_5th_pct,stat_95th_pct,points_per_season_per_unit,note
+GK,Shot-stopping,learned,0.1204,2.407,prevented_goals,1,1,2.407,-0.1794,0.1089,8.35,goals prevented per 90: xG faced minus goals conceded (heavily blended toward average: mostly luck over a few games)
+GK,Distribution,learned,0.0345,0.69,pass_acc,1,0.5,0.345,72.91,88.24,0.02251,pass accuracy %
+GK,Distribution,learned,0.0345,0.69,long_pass_acc,1,0.5,0.345,45.87,67.66,0.01584,long pass accuracy %
+GK,Sweeping,learned,0,0,exits,1,1,0,1.02,2.815,0,exits (coming off the line) per 90
+CB,Passing & progression,learned,0.0916,1.832,pass_acc,1,0.25,0.458,73.26,88.49,0.03006,pass accuracy %
+CB,Passing & progression,learned,0.0916,1.832,long_pass_acc,1,0.25,0.458,38.22,59.95,0.02108,long pass accuracy %
+CB,Passing & progression,learned,0.0916,1.832,prog_passes,1,0.25,0.458,5.783,11.72,0.07715,progressive passes per 90
+CB,Passing & progression,learned,0.0916,1.832,final_third_passes,1,0.25,0.458,3.375,9.39,0.07615,passes into the final third per 90
+CB,Aerial,learned,0.06341,1.268,aerial_win_pct,1,0.667,0.8455,43.89,70.45,0.03183,aerial duels won %
+CB,Aerial,learned,0.06341,1.268,aerial_won,1,0.333,0.4228,1.407,3.94,0.1669,aerial duels won per 90
+CB,Goal threat,learned,0.01078,0.2156,xg,1,1,0.2156,0.01755,0.141,1.746,"non-penalty xG per 90 (set pieces, mostly)"
+CB,Defending,learned,0,0,def_duel_win_pct,1,0.333,0,54.68,77.47,0,defensive duels won %: the core 1v1 measure
+CB,Defending,learned,0,0,interceptions,1,0.167,0,4.548,8.591,0,interceptions per 30 min of opponent possession
+CB,Defending,learned,0,0,sliding_tackles,1,0.167,0,0.07133,0.7161,0,sliding tackles per 30 min of opponent possession
+CB,Defending,learned,0,0,shots_blocked,1,0.167,0,0.2853,1.05,0,"shots blocked per 90, possession-adjusted"
+CB,Defending,learned,0,0,cards,-1,0.167,0,0.04609,0.4014,0,yellow + 2 x red cards per 90 (fewer is better)
+FB,Progression,learned,0.04822,0.9644,prog_runs,1,0.25,0.2411,0.6019,2.513,0.1262,progressive runs per 90
+FB,Progression,learned,0.04822,0.9644,dribbles_won,1,0.25,0.2411,0.3623,2.112,0.1378,dribbles completed per 90
+FB,Progression,learned,0.04822,0.9644,accelerations,1,0.25,0.2411,0.05836,0.5193,0.5231,accelerations per 90
+FB,Progression,learned,0.04822,0.9644,prog_passes,1,0.25,0.2411,5.722,10.9,0.04656,progressive passes per 90
+FB,Chance creation,learned,0.04685,0.9371,xa,1,0.5,0.4685,0.02442,0.1621,3.403,expected assists per 90
+FB,Chance creation,learned,0.04685,0.9371,crosses,1,0.25,0.2343,0.8684,3.471,0.09001,crosses per 90
+FB,Chance creation,learned,0.04685,0.9371,box_passes,1,0.25,0.2343,1.126,3.661,0.09242,passes into the penalty area per 90
+FB,Defending,learned,0.03622,0.7245,def_duel_win_pct,1,0.4,0.2898,50.87,70.78,0.01456,defensive duels won %
+FB,Defending,learned,0.03622,0.7245,interceptions,1,0.2,0.1449,3.66,7.404,0.03869,interceptions per 30 min of opponent possession
+FB,Defending,learned,0.03622,0.7245,sliding_tackles,1,0.2,0.1449,0.1083,0.8779,0.1883,sliding tackles per 30 min of opponent possession
+FB,Defending,learned,0.03622,0.7245,shots_blocked,1,0.2,0.1449,0.08561,0.5937,0.2852,"shots blocked per 90, possession-adjusted"
+FB,Goal threat,learned,0.02813,0.5625,xg,1,1,0.5625,0.01541,0.1408,4.487,non-penalty xG per 90
+DM,Passing & progression,learned,0.09247,1.849,pass_acc,1,0.25,0.4623,71.18,85.99,0.03121,pass accuracy %
+DM,Passing & progression,learned,0.09247,1.849,passes,1,0.25,0.4623,27.2,49.18,0.02103,passes per 90 (how much the team plays through him)
+DM,Passing & progression,learned,0.09247,1.849,prog_passes,1,0.25,0.4623,4.317,8.449,0.1119,progressive passes per 90
+DM,Passing & progression,learned,0.09247,1.849,final_third_passes,1,0.25,0.4623,3.833,9.014,0.08923,passes into the final third per 90
+DM,Aerial,learned,0.08273,1.655,aerial_win_pct,1,1,1.655,29.29,63.26,0.04871,aerial duels won %
+DM,Attacking,learned,0.03773,0.7546,xg,1,0.5,0.3773,0.01957,0.1435,3.044,non-penalty xG per 90
+DM,Attacking,learned,0.03773,0.7546,xa,1,0.5,0.3773,0.01944,0.1444,3.019,expected assists per 90
+DM,Defending,learned,0.01946,0.3893,def_duel_win_pct,1,0.333,0.1298,51.54,71.7,0.006438,defensive duels won %
+DM,Defending,learned,0.01946,0.3893,interceptions,1,0.333,0.1298,3.503,7.092,0.03615,interceptions per 30 min of opponent possession
+DM,Defending,learned,0.01946,0.3893,sliding_tackles,1,0.167,0.06488,0.1012,0.8981,0.08142,sliding tackles per 30 min of opponent possession
+DM,Defending,learned,0.01946,0.3893,shots_blocked,1,0.167,0.06488,0.09715,0.5263,0.1512,"shots blocked per 90, possession-adjusted"
+CM,Passing & progression,learned,0.0646,1.292,pass_acc,1,0.25,0.323,70.9,84.95,0.02298,pass accuracy %
+CM,Passing & progression,learned,0.0646,1.292,prog_passes,1,0.25,0.323,3.744,8.798,0.06391,progressive passes per 90
+CM,Passing & progression,learned,0.0646,1.292,final_third_passes,1,0.25,0.323,3.653,8.728,0.06365,passes into the final third per 90
+CM,Passing & progression,learned,0.0646,1.292,through_passes,1,0.25,0.323,0.1047,0.6428,0.6002,through passes per 90
+CM,Chance creation,learned,0.05094,1.019,xa,1,0.667,0.6792,0.02435,0.1817,4.318,expected assists per 90
+CM,Chance creation,learned,0.05094,1.019,key_passes,1,0.333,0.3396,0.07679,0.5044,0.7942,key passes per 90
+CM,Goal threat,learned,0.04941,0.9881,xg,1,1,0.9881,0.02366,0.1656,6.961,non-penalty xG per 90
+CM,Defending,learned,0.04818,0.9636,def_duel_win_pct,1,0.5,0.4818,52.09,71.56,0.02475,defensive duels won %
+CM,Defending,learned,0.04818,0.9636,interceptions,1,0.25,0.2409,2.992,6.659,0.06569,interceptions per 30 min of opponent possession
+CM,Defending,learned,0.04818,0.9636,aerial_win_pct,1,0.25,0.2409,27.31,62.21,0.006903,aerial duels won %
+AM,Goal threat,learned,0.1049,2.099,xg,1,0.667,1.399,0.08583,0.3291,5.751,non-penalty xG per 90
+AM,Goal threat,learned,0.1049,2.099,touches_box,1,0.333,0.6996,1.398,3.615,0.3155,touches in the penalty area per 90
+AM,Chance creation,learned,0.06358,1.272,xa,1,0.4,0.5087,0.05033,0.2311,2.814,expected assists per 90
+AM,Chance creation,learned,0.06358,1.272,key_passes,1,0.2,0.2543,0.1831,0.9228,0.3438,key passes per 90
+AM,Chance creation,learned,0.06358,1.272,through_passes,1,0.2,0.2543,0.09828,0.6484,0.4623,through passes per 90
+AM,Chance creation,learned,0.06358,1.272,box_passes,1,0.2,0.2543,1.433,3.738,0.1103,passes into the penalty area per 90
+AM,Carrying,learned,0.05368,1.074,dribbles_won,1,0.333,0.3579,0.8392,3.012,0.1647,dribbles completed per 90
+AM,Carrying,learned,0.05368,1.074,prog_runs,1,0.333,0.3579,1.048,3.399,0.1522,progressive runs per 90
+AM,Carrying,learned,0.05368,1.074,accelerations,1,0.333,0.3579,0.08726,0.626,0.6643,accelerations per 90
+W,Goal threat,learned,0.1063,2.126,xg,1,0.667,1.417,0.08104,0.2917,6.729,non-penalty xG per 90
+W,Goal threat,learned,0.1063,2.126,touches_box,1,0.333,0.7087,1.468,3.787,0.3056,touches in the penalty area per 90
+W,Carrying,learned,0.07977,1.595,dribbles_won,1,0.333,0.5318,1.166,3.673,0.2121,dribbles completed per 90
+W,Carrying,learned,0.07977,1.595,prog_runs,1,0.333,0.5318,1.121,3.547,0.2192,progressive runs per 90
+W,Carrying,learned,0.07977,1.595,accelerations,1,0.333,0.5318,0.1005,0.6995,0.8879,accelerations per 90
+W,Chance creation,learned,0.05076,1.015,xa,1,0.5,0.5076,0.04927,0.2242,2.903,expected assists per 90
+W,Chance creation,learned,0.05076,1.015,crosses,1,0.25,0.2538,1.263,3.856,0.09786,crosses per 90
+W,Chance creation,learned,0.05076,1.015,key_passes,1,0.25,0.2538,0.1834,0.8636,0.3731,key passes per 90
+CF,Goal threat,learned,0.1221,2.442,xg,1,0.667,1.628,0.163,0.5044,4.769,non-penalty xG per 90
+CF,Goal threat,learned,0.1221,2.442,touches_box,1,0.333,0.814,2.042,4.759,0.2997,touches in the penalty area per 90
+CF,Chance creation,learned,0.05831,1.166,xa,1,0.5,0.5831,0.03135,0.1615,4.479,expected assists per 90
+CF,Chance creation,learned,0.05831,1.166,key_passes,1,0.25,0.2915,0.1294,0.697,0.5136,key passes per 90
+CF,Chance creation,learned,0.05831,1.166,through_passes,1,0.25,0.2915,0.0571,0.4059,0.836,through passes per 90
+CF,Hold-up & duels,learned,0.0361,0.722,duels_won,1,0.333,0.2407,3.41,7.409,0.06018,offensive + aerial duels won per 90
+CF,Hold-up & duels,learned,0.0361,0.722,off_duel_win_pct,1,0.333,0.2407,24.55,43.62,0.01262,offensive duels won %
+CF,Hold-up & duels,learned,0.0361,0.722,aerial_win_pct,1,0.333,0.2407,19.36,46.59,0.008838,aerial duels won %

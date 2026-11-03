@@ -1,208 +1,420 @@
-wyscout_team,rpi_team,how,team
-Akron Zips,Akron,automatic,Akron
-Albany Great Danes,UAlbany,TEAM_FIXES,UAlbany
-American Eagles,American,automatic,American
-Army West Point Black Knights,Army West Point,automatic,Army West Point
-Bellarmine Knights,Bellarmine,automatic,Bellarmine
-Belmont Bruins,Belmont,automatic,Belmont
-Berkeley Golden Bears,California,TEAM_FIXES,California
-Binghamton BearCats,Binghamton,automatic,Binghamton
-Boston College Eagles,Boston College,automatic,Boston College
-Boston Terriers,Boston U.,TEAM_FIXES,Boston U.
-Bowling Green Falcons,Bowling Green,automatic,Bowling Green
-Bradley Braves,Bradley,automatic,Bradley
-Brown Bears,Brown,automatic,Brown
-Bryant Bulldogs,Bryant,automatic,Bryant
-Bucknell Bison,Bucknell,automatic,Bucknell
-Butler Bulldogs,Butler,automatic,Butler
-Cal Poly Mustangs,Cal Poly,automatic,Cal Poly
-Cal State Fullerton Titans,Cal State Fullerton,automatic,Cal State Fullerton
-California Baptist Lancers,California Baptist,automatic,California Baptist
-Campbell Camels,Campbell,automatic,Campbell
-Canisius Golden Griffins,Canisius,automatic,Canisius
-CCSU Blue Devils,Central Connecticut,TEAM_FIXES,Central Connecticut
-Central Arkansas Bears,Central Arkansas,automatic,Central Arkansas
-Charleston Cougars,College of Charleston,TEAM_FIXES,College of Charleston
-Charlotte 49ers,Charlotte,automatic,Charlotte
-Chicago State Cougars,Chicago State,automatic,Chicago State
-Clemson Tigers,Clemson,automatic,Clemson
-Cleveland State Vikings,Cleveland State,automatic,Cleveland State
-Coastal Carolina Chanticleers,Coastal Carolina,automatic,Coastal Carolina
-Colgate Raiders,Colgate,automatic,Colgate
-Columbia Lions,Columbia,automatic,Columbia
-Cornell Big Red,Cornell,automatic,Cornell
-Creighton Bluejays,Creighton,automatic,Creighton
-CSU Bakersfield Roadrunners,CSU Bakersfield,automatic,CSU Bakersfield
-CSUN Matadors,CSUN,automatic,CSUN
-Dartmouth Big Green,Dartmouth,automatic,Dartmouth
-Davidson Wildcats,Davidson,automatic,Davidson
-Dayton Flyers,Dayton,automatic,Dayton
-Delaware Blue Hens,Delaware,automatic,Delaware
-Denver Pioneers,Denver,automatic,Denver
-DePaul Blue Demons,DePaul,automatic,DePaul
-Detroit Mercy Titans,Detroit Mercy,automatic,Detroit Mercy
-Drake Bulldogs,Drake,automatic,Drake
-Drexel Dragons,Drexel,automatic,Drexel
-Duke Blue Devils,Duke,automatic,Duke
-Duquesne Duke,Duquesne,automatic,Duquesne
-Eastern Illinois Panthers,Eastern Illinois,automatic,Eastern Illinois
-Elon Phoenix,Elon,automatic,Elon
-ETSU Buccaneers,ETSU,automatic,ETSU
-Evansville Purple Aces,Evansville,automatic,Evansville
-Fairfield Stags,Fairfield,automatic,Fairfield
-Fairleigh Dickinson Knights,FDU,TEAM_FIXES,FDU
-FAU Owls,Florida Atlantic,TEAM_FIXES,Florida Atlantic
-FGCU Eagles,FGCU,automatic,FGCU
-FIU Panthers,FIU,automatic,FIU
-Fordham Rams,Fordham,automatic,Fordham
-Furman Paladins,Furman,automatic,Furman
-Gardner-Webb Bulldogs,Gardner-Webb,automatic,Gardner-Webb
-George Mason Patriots,George Mason,automatic,George Mason
-George Washington Colonials,George Washington,automatic,George Washington
-Georgetown Hoyas,Georgetown,automatic,Georgetown
-Georgia Southern Eagles,Georgia Southern,automatic,Georgia Southern
-Georgia State Panthers,Georgia State,automatic,Georgia State
-Gonzaga Bulldogs,Gonzaga,automatic,Gonzaga
-Green Bay Phoenix,Green Bay,automatic,Green Bay
-Harvard Crimson,Harvard,automatic,Harvard
-HCU Huskies,HCU,automatic,HCU
-High Point Panthers,High Point,automatic,High Point
-Hofstra Pride,Hofstra,automatic,Hofstra
-Holy Cross Crusaders,Holy Cross,automatic,Holy Cross
-Howard Bison,Howard,automatic,Howard
-Indiana Hoosiers,Indiana,automatic,Indiana
-Iona Gaels,Iona,automatic,Iona
-IPFW Mastodons,Purdue Fort Wayne,TEAM_FIXES,Purdue Fort Wayne
-IU Indianapolis,IU Indy,TEAM_FIXES,IU Indy
-Jacksonville Dolphins,Jacksonville,automatic,Jacksonville
-JMU Dukes,James Madison,TEAM_FIXES,James Madison
-Kentucky Wildcats,Kentucky,automatic,Kentucky
-La Salle Explorers,La Salle,automatic,La Salle
-Lafayette Leopards,Lafayette,automatic,Lafayette
-Le Moyne Dolphins,Le Moyne,automatic,Le Moyne
-Lehigh Mountain Hawks,Lehigh,automatic,Lehigh
-Liberty Flames,Liberty,automatic,Liberty
-Lindenwood Lions,Lindenwood,automatic,Lindenwood
-Lipscomb Bisons,Lipscomb,automatic,Lipscomb
-LIU Sharks,LIU,automatic,LIU
-LMU Lions,LMU,automatic,LMU
-Longwood Lancers,Longwood,automatic,Longwood
-Louisville Cardinals,Louisville,automatic,Louisville
-Loyola Chicago Ramblers,Loyola Chicago,automatic,Loyola Chicago
-Loyola Greyhounds,Loyola Maryland,TEAM_FIXES,Loyola Maryland
-Manhattan Jaspers,Manhattan,automatic,Manhattan
-Marist Red Foxes,Marist,automatic,Marist
-Marquette Golden Eagles,Marquette,automatic,Marquette
-Marshall Thundering Herd,Marshall,automatic,Marshall
-Maryland College Park Terrapins,Maryland,automatic,Maryland
-Memphis Tigers,Memphis,automatic,Memphis
-Mercer Bears,Mercer,automatic,Mercer
-Mercyhurst Lakers,Mercyhurst,automatic,Mercyhurst
-Merrimack Warriors,Merrimack,automatic,Merrimack
-Michigan State Spartans,Michigan State,automatic,Michigan State
-Michigan Wolverines,Michigan,automatic,Michigan
-Milwaukee Panthers,Milwaukee,automatic,Milwaukee
-Missouri State Bears,Missouri State,automatic,Missouri State
-Monmouth Hawks,Monmouth,automatic,Monmouth
-Mount St. Mary's Mountaineers,Mount St. Mary's,automatic,Mount St. Mary's
-Navy Midshipmen,Navy,automatic,Navy
-NC State Wolfpack,NC State,automatic,NC State
-New Hampshire Wildcats,New Hampshire,automatic,New Hampshire
-New Haven Chargers,New Haven,automatic,New Haven
-Niagara Purple Eagles,Niagara,automatic,Niagara
-NJIT Highlanders,NJIT,automatic,NJIT
-NKU Norse,Northern Kentucky,TEAM_FIXES,Northern Kentucky
-North Carolina Heels,North Carolina,automatic,North Carolina
-North Florida Ospreyes,North Florida,automatic,North Florida
-Northeastern Huskies,Northeastern,automatic,Northeastern
-Northern Illinois Huskies,Northern Illinois,automatic,Northern Illinois
-Northwestern Wildcats,Northwestern,automatic,Northwestern
-Notre Dame Fighting Irish,Notre Dame,automatic,Notre Dame
-Oakland Golden Grizzlies,Oakland,automatic,Oakland
-Ohio State Buckeyes,Ohio State,automatic,Ohio State
-Old Dominion Monarchs,Old Dominion,automatic,Old Dominion
-Omaha Mavericks,Omaha,automatic,Omaha
-Oral Roberts Golden Eagles,Oral Roberts,automatic,Oral Roberts
-Oregon State Beavers,Oregon State,automatic,Oregon State
-Pacific Tigers,Pacific,automatic,Pacific
-Penn Quakers,Penn,automatic,Penn
-Penn State Nittany Lion,Penn State,automatic,Penn State
-Pittsburgh Panthers,Pittsburgh,automatic,Pittsburgh
-Portland Pilots,Portland,automatic,Portland
-Presbyterian BlueHose,Presbyterian,automatic,Presbyterian
-Princeton Tigers,Princeton,automatic,Princeton
-Providence Friars,Providence,automatic,Providence
-Queens Royals,Queens,automatic,Queens
-Quinnipiac Bobcats,Quinnipiac,automatic,Quinnipiac
-Radford Highlanders,Radford,automatic,Radford
-Rhode Island Rhody,Rhode Island,automatic,Rhode Island
-Rider Broncs,Rider,automatic,Rider
-Robert Morris Colonials,Robert Morris,automatic,Robert Morris
-Rutgers Scarlet Knights,Rutgers,automatic,Rutgers
-Sacramento State Hornets,Sacramento State,automatic,Sacramento State
-Saint Joseph's Hawks,Saint Joseph's,automatic,Saint Joseph's
-Saint Louis Billikens,Saint Louis,automatic,Saint Louis
-Saint Peter's Peacocks,Saint Peter's,automatic,Saint Peter's
-San Diego State Aztecs,San Diego State,automatic,San Diego State
-San Diego Toreros,San Diego,automatic,San Diego
-San Francisco Dons,San Francisco,automatic,San Francisco
-Santa Clara Broncos,Santa Clara,automatic,Santa Clara
-Seattle Redhawks,Seattle,automatic,Seattle
-Seton Hall Pirates,Seton Hall,automatic,Seton Hall
-SHU Pioneers,Sacred Heart,TEAM_FIXES,Sacred Heart
-Siena Saints,Siena,automatic,Siena
-SIUE Cougars,SIUE,automatic,SIUE
-SMU Mustangs,SMU,automatic,SMU
-South Carolina Gamecocks,South Carolina,automatic,South Carolina
-Southern Indiana Screaming Eagles,Southern Indiana,automatic,Southern Indiana
-St John's Red Storm,St. John's,TEAM_FIXES,St. John's
-St. Bonaventure Bonnies,St. Bonaventure,automatic,St. Bonaventure
-St. Mary's College of CA Gaels,Saint Mary's,TEAM_FIXES,Saint Mary's
-St. Thomas Tommies,St. Thomas,automatic,St. Thomas
-Stanford Cardinal,Stanford,automatic,Stanford
-Stetson Hatters,Stetson,automatic,Stetson
-Stonehill College Skyhawks,Stonehill,automatic,Stonehill
-Stony Brook Seawolves,Stony Brook,automatic,Stony Brook
-Syracuse Orange,Syracuse,automatic,Syracuse
-Temple Owls,Temple,automatic,Temple
-Tulsa Hurricane,Tulsa,automatic,Tulsa
-UAB Blazers,UAB,automatic,UAB
-UC Irvine Anteaters,UC Irvine,automatic,UC Irvine
-UC Riverside Highlanders,UC Riverside,automatic,UC Riverside
-UC San Diego Tritons,UC San Diego,automatic,UC San Diego
-UC Santa Barbara Gauchos,UC Santa Barbara,automatic,UC Santa Barbara
-UCF Knights,UCF,automatic,UCF
-UCLA Bruins,UCLA,automatic,UCLA
-UCONN Huskies,UConn,TEAM_FIXES,UConn
-UIC Flames,UIC,automatic,UIC
-UIW Cardinals,UIW,automatic,UIW
-UMASS Lowell River Hawks,UMass Lowell,TEAM_FIXES,UMass Lowell
-UMass Minutemen,UMass,automatic,UMass
-UMBC Retrievers,UMBC,automatic,UMBC
-UMKC Kangaroos,Kansas City,TEAM_FIXES,Kansas City
-UNC Asheville Bulldogs,UNC Asheville,automatic,UNC Asheville
-UNCG Spartans,UNCG,automatic,UNCG
-UNCW Seahawks,UNCW,automatic,UNCW
-USC Upstate Spartans,USC Upstate,automatic,USC Upstate
-USF Bulls,South Florida,TEAM_FIXES,South Florida
-Utah Valley Wolverines,Utah Valley,automatic,Utah Valley
-UTRGV Vaqueros,UTRGV,automatic,UTRGV
-VCU Rams,VCU,automatic,VCU
-Vermont Catamouts,Vermont,automatic,Vermont
-Villanova Wildcats,Villanova,automatic,Villanova
-Virginia Cavaliers,Virginia,automatic,Virginia
-Virginia Tech Hokies,Virginia Tech,automatic,Virginia Tech
-VMI Keydets,VMI,automatic,VMI
-Wake Forest Demon Deacon,Wake Forest,automatic,Wake Forest
-Washington Huskies,Washington,automatic,Washington
-West Florida Argos,West Florida,automatic,West Florida
-West Virginia Mountaineers,West Virginia,automatic,West Virginia
-Western Michigan Broncos,Western Michigan,automatic,Western Michigan
-William & Mary Tribe,William & Mary,automatic,William & Mary
-Winthrop Eagles,Winthrop,automatic,Winthrop
-Wisconsin Badgers,Wisconsin,automatic,Wisconsin
-WIU Fighting Leathernecks,Western Illinois,TEAM_FIXES,Western Illinois
-Wofford Terriers,Wofford,automatic,Wofford
-Wright State Raiders,Wright State,automatic,Wright State
-Xavier Musketeers,Xavier,automatic,Xavier
-Yale Bulldogs,Yale,automatic,Yale
+season_year,wyscout_team,rpi_team,how,team
+2025,Air Force Falcons,Air Force,automatic,Air Force
+2025,Akron Zips,Akron,automatic,Akron
+2025,Albany Great Danes,UAlbany,TEAM_FIXES,UAlbany
+2025,American Eagles,American,automatic,American
+2025,Army West Point Black Knights,Army West Point,automatic,Army West Point
+2025,Bellarmine Knights,Bellarmine,automatic,Bellarmine
+2025,Belmont Bruins,Belmont,automatic,Belmont
+2025,Berkeley Golden Bears,California,TEAM_FIXES,California
+2025,Binghamton BearCats,Binghamton,automatic,Binghamton
+2025,Boston College Eagles,Boston College,automatic,Boston College
+2025,Boston Terriers,Boston U.,TEAM_FIXES,Boston U.
+2025,Bowling Green Falcons,Bowling Green,automatic,Bowling Green
+2025,Bradley Braves,Bradley,automatic,Bradley
+2025,Brown Bears,Brown,automatic,Brown
+2025,Bryant Bulldogs,Bryant,automatic,Bryant
+2025,Bucknell Bison,Bucknell,automatic,Bucknell
+2025,Butler Bulldogs,Butler,automatic,Butler
+2025,Cal Poly Mustangs,Cal Poly,automatic,Cal Poly
+2025,Cal State Fullerton Titans,Cal State Fullerton,automatic,Cal State Fullerton
+2025,California Baptist Lancers,California Baptist,automatic,California Baptist
+2025,Campbell Camels,Campbell,automatic,Campbell
+2025,Canisius Golden Griffins,Canisius,automatic,Canisius
+2025,CCSU Blue Devils,Central Connecticut,TEAM_FIXES,Central Connecticut
+2025,Central Arkansas Bears,Central Arkansas,automatic,Central Arkansas
+2025,Charleston Cougars,College of Charleston,TEAM_FIXES,College of Charleston
+2025,Charlotte 49ers,Charlotte,automatic,Charlotte
+2025,Chicago State Cougars,Chicago State,automatic,Chicago State
+2025,Clemson Tigers,Clemson,automatic,Clemson
+2025,Cleveland State Vikings,Cleveland State,automatic,Cleveland State
+2025,Coastal Carolina Chanticleers,Coastal Carolina,automatic,Coastal Carolina
+2025,Colgate Raiders,Colgate,automatic,Colgate
+2025,Columbia Lions,Columbia,automatic,Columbia
+2025,Cornell Big Red,Cornell,automatic,Cornell
+2025,Creighton Bluejays,Creighton,automatic,Creighton
+2025,CSU Bakersfield Roadrunners,CSU Bakersfield,automatic,CSU Bakersfield
+2025,CSUN Matadors,CSUN,automatic,CSUN
+2025,Dartmouth Big Green,Dartmouth,automatic,Dartmouth
+2025,Davidson Wildcats,Davidson,automatic,Davidson
+2025,Dayton Flyers,Dayton,automatic,Dayton
+2025,Delaware Blue Hens,Delaware,automatic,Delaware
+2025,Denver Pioneers,Denver,automatic,Denver
+2025,DePaul Blue Demons,DePaul,automatic,DePaul
+2025,Detroit Mercy Titans,Detroit Mercy,automatic,Detroit Mercy
+2025,Drake Bulldogs,Drake,automatic,Drake
+2025,Drexel Dragons,Drexel,automatic,Drexel
+2025,Duke Blue Devils,Duke,automatic,Duke
+2025,Duquesne Duke,Duquesne,automatic,Duquesne
+2025,Eastern Illinois Panthers,Eastern Illinois,automatic,Eastern Illinois
+2025,Elon Phoenix,Elon,automatic,Elon
+2025,ETSU Buccaneers,ETSU,automatic,ETSU
+2025,Evansville Purple Aces,Evansville,automatic,Evansville
+2025,Fairfield Stags,Fairfield,automatic,Fairfield
+2025,Fairleigh Dickinson Knights,FDU,TEAM_FIXES,FDU
+2025,FAU Owls,Florida Atlantic,TEAM_FIXES,Florida Atlantic
+2025,FGCU Eagles,FGCU,automatic,FGCU
+2025,FIU Panthers,FIU,automatic,FIU
+2025,Fordham Rams,Fordham,automatic,Fordham
+2025,Furman Paladins,Furman,automatic,Furman
+2025,Gardner-Webb Bulldogs,Gardner-Webb,automatic,Gardner-Webb
+2025,George Mason Patriots,George Mason,automatic,George Mason
+2025,George Washington Colonials,George Washington,automatic,George Washington
+2025,Georgetown Hoyas,Georgetown,automatic,Georgetown
+2025,Georgia Southern Eagles,Georgia Southern,automatic,Georgia Southern
+2025,Georgia State Panthers,Georgia State,automatic,Georgia State
+2025,Gonzaga Bulldogs,Gonzaga,automatic,Gonzaga
+2025,Grand Canyon Lopes,Grand Canyon,automatic,Grand Canyon
+2025,Green Bay Phoenix,Green Bay,automatic,Green Bay
+2025,Harvard Crimson,Harvard,automatic,Harvard
+2025,HCU Huskies,HCU,automatic,HCU
+2025,High Point Panthers,High Point,automatic,High Point
+2025,Hofstra Pride,Hofstra,automatic,Hofstra
+2025,Holy Cross Crusaders,Holy Cross,automatic,Holy Cross
+2025,Howard Bison,Howard,automatic,Howard
+2025,Indiana Hoosiers,Indiana,automatic,Indiana
+2025,Iona Gaels,Iona,automatic,Iona
+2025,IPFW Mastodons,Purdue Fort Wayne,TEAM_FIXES,Purdue Fort Wayne
+2025,IU Indianapolis,IU Indy,TEAM_FIXES,IU Indy
+2025,Jacksonville Dolphins,Jacksonville,automatic,Jacksonville
+2025,JMU Dukes,James Madison,TEAM_FIXES,James Madison
+2025,Kentucky Wildcats,Kentucky,automatic,Kentucky
+2025,La Salle Explorers,La Salle,automatic,La Salle
+2025,Lafayette Leopards,Lafayette,automatic,Lafayette
+2025,Le Moyne Dolphins,Le Moyne,automatic,Le Moyne
+2025,Lehigh Mountain Hawks,Lehigh,automatic,Lehigh
+2025,Liberty Flames,Liberty,automatic,Liberty
+2025,Lindenwood Lions,Lindenwood,automatic,Lindenwood
+2025,Lipscomb Bisons,Lipscomb,automatic,Lipscomb
+2025,LIU Sharks,LIU,automatic,LIU
+2025,LMU Lions,LMU,automatic,LMU
+2025,Longwood Lancers,Longwood,automatic,Longwood
+2025,Louisville Cardinals,Louisville,automatic,Louisville
+2025,Loyola Chicago Ramblers,Loyola Chicago,automatic,Loyola Chicago
+2025,Loyola Greyhounds,Loyola Maryland,TEAM_FIXES,Loyola Maryland
+2025,Manhattan Jaspers,Manhattan,automatic,Manhattan
+2025,Marist Red Foxes,Marist,automatic,Marist
+2025,Marquette Golden Eagles,Marquette,automatic,Marquette
+2025,Marshall Thundering Herd,Marshall,automatic,Marshall
+2025,Maryland College Park Terrapins,Maryland,automatic,Maryland
+2025,Memphis Tigers,Memphis,automatic,Memphis
+2025,Mercer Bears,Mercer,automatic,Mercer
+2025,Mercyhurst Lakers,Mercyhurst,automatic,Mercyhurst
+2025,Merrimack Warriors,Merrimack,automatic,Merrimack
+2025,Michigan State Spartans,Michigan State,automatic,Michigan State
+2025,Michigan Wolverines,Michigan,automatic,Michigan
+2025,Milwaukee Panthers,Milwaukee,automatic,Milwaukee
+2025,Missouri State Bears,Missouri State,automatic,Missouri State
+2025,Monmouth Hawks,Monmouth,automatic,Monmouth
+2025,Mount St. Mary's Mountaineers,Mount St. Mary's,automatic,Mount St. Mary's
+2025,Navy Midshipmen,Navy,automatic,Navy
+2025,NC State Wolfpack,NC State,automatic,NC State
+2025,New Hampshire Wildcats,New Hampshire,automatic,New Hampshire
+2025,New Haven Chargers,New Haven,automatic,New Haven
+2025,Niagara Purple Eagles,Niagara,automatic,Niagara
+2025,NJIT Highlanders,NJIT,automatic,NJIT
+2025,NKU Norse,Northern Kentucky,TEAM_FIXES,Northern Kentucky
+2025,North Carolina Heels,North Carolina,automatic,North Carolina
+2025,North Florida Ospreyes,North Florida,automatic,North Florida
+2025,Northeastern Huskies,Northeastern,automatic,Northeastern
+2025,Northern Illinois Huskies,Northern Illinois,automatic,Northern Illinois
+2025,Northwestern Wildcats,Northwestern,automatic,Northwestern
+2025,Notre Dame Fighting Irish,Notre Dame,automatic,Notre Dame
+2025,Oakland Golden Grizzlies,Oakland,automatic,Oakland
+2025,Ohio State Buckeyes,Ohio State,automatic,Ohio State
+2025,Old Dominion Monarchs,Old Dominion,automatic,Old Dominion
+2025,Omaha Mavericks,Omaha,automatic,Omaha
+2025,Oral Roberts Golden Eagles,Oral Roberts,automatic,Oral Roberts
+2025,Oregon State Beavers,Oregon State,automatic,Oregon State
+2025,Pacific Tigers,Pacific,automatic,Pacific
+2025,Penn Quakers,Penn,automatic,Penn
+2025,Penn State Nittany Lion,Penn State,automatic,Penn State
+2025,Pittsburgh Panthers,Pittsburgh,automatic,Pittsburgh
+2025,Portland Pilots,Portland,automatic,Portland
+2025,Presbyterian BlueHose,Presbyterian,automatic,Presbyterian
+2025,Princeton Tigers,Princeton,automatic,Princeton
+2025,Providence Friars,Providence,automatic,Providence
+2025,Queens Royals,Queens,automatic,Queens
+2025,Quinnipiac Bobcats,Quinnipiac,automatic,Quinnipiac
+2025,Radford Highlanders,Radford,automatic,Radford
+2025,Rhode Island Rhody,Rhode Island,automatic,Rhode Island
+2025,Rider Broncs,Rider,automatic,Rider
+2025,Robert Morris Colonials,Robert Morris,automatic,Robert Morris
+2025,Rutgers Scarlet Knights,Rutgers,automatic,Rutgers
+2025,Sacramento State Hornets,Sacramento State,automatic,Sacramento State
+2025,Saint Joseph's Hawks,Saint Joseph's,automatic,Saint Joseph's
+2025,Saint Louis Billikens,Saint Louis,automatic,Saint Louis
+2025,Saint Peter's Peacocks,Saint Peter's,automatic,Saint Peter's
+2025,San Diego State Aztecs,San Diego State,automatic,San Diego State
+2025,San Diego Toreros,San Diego,automatic,San Diego
+2025,San Francisco Dons,San Francisco,automatic,San Francisco
+2025,San Jose State Spartans,San Jose State,automatic,San Jose State
+2025,Santa Clara Broncos,Santa Clara,automatic,Santa Clara
+2025,Seattle Redhawks,Seattle,automatic,Seattle
+2025,Seton Hall Pirates,Seton Hall,automatic,Seton Hall
+2025,SFU Red Flash,Saint Francis,TEAM_FIXES,Saint Francis
+2025,SHU Pioneers,Sacred Heart,TEAM_FIXES,Sacred Heart
+2025,Siena Saints,Siena,automatic,Siena
+2025,SIUE Cougars,SIUE,automatic,SIUE
+2025,SMU Mustangs,SMU,automatic,SMU
+2025,South Carolina Gamecocks,South Carolina,automatic,South Carolina
+2025,Southern Indiana Screaming Eagles,Southern Indiana,automatic,Southern Indiana
+2025,St John's Red Storm,St. John's,TEAM_FIXES,St. John's
+2025,St. Bonaventure Bonnies,St. Bonaventure,automatic,St. Bonaventure
+2025,St. Mary's College of CA Gaels,Saint Mary's,TEAM_FIXES,Saint Mary's
+2025,St. Thomas Tommies,St. Thomas,automatic,St. Thomas
+2025,Stanford Cardinal,Stanford,automatic,Stanford
+2025,Stetson Hatters,Stetson,automatic,Stetson
+2025,Stonehill College Skyhawks,Stonehill,automatic,Stonehill
+2025,Stony Brook Seawolves,Stony Brook,automatic,Stony Brook
+2025,Syracuse Orange,Syracuse,automatic,Syracuse
+2025,Temple Owls,Temple,automatic,Temple
+2025,Tulsa Hurricane,Tulsa,automatic,Tulsa
+2025,UAB Blazers,UAB,automatic,UAB
+2025,UC Davis Aggies,UC Davis,automatic,UC Davis
+2025,UC Irvine Anteaters,UC Irvine,automatic,UC Irvine
+2025,UC Riverside Highlanders,UC Riverside,automatic,UC Riverside
+2025,UC San Diego Tritons,UC San Diego,automatic,UC San Diego
+2025,UC Santa Barbara Gauchos,UC Santa Barbara,automatic,UC Santa Barbara
+2025,UCF Knights,UCF,automatic,UCF
+2025,UCLA Bruins,UCLA,automatic,UCLA
+2025,UCONN Huskies,UConn,TEAM_FIXES,UConn
+2025,UIC Flames,UIC,automatic,UIC
+2025,UIW Cardinals,UIW,automatic,UIW
+2025,UMASS Lowell River Hawks,UMass Lowell,TEAM_FIXES,UMass Lowell
+2025,UMass Minutemen,UMass,automatic,UMass
+2025,UMBC Retrievers,UMBC,automatic,UMBC
+2025,UMKC Kangaroos,Kansas City,TEAM_FIXES,Kansas City
+2025,UNC Asheville Bulldogs,UNC Asheville,automatic,UNC Asheville
+2025,UNCG Spartans,UNCG,automatic,UNCG
+2025,UNCW Seahawks,UNCW,automatic,UNCW
+2025,UNLV Rebels,UNLV,automatic,UNLV
+2025,USC Upstate Spartans,USC Upstate,automatic,USC Upstate
+2025,USF Bulls,South Florida,TEAM_FIXES,South Florida
+2025,Utah Tech Trailblazers,Utah Tech,automatic,Utah Tech
+2025,Utah Valley Wolverines,Utah Valley,automatic,Utah Valley
+2025,VCU Rams,VCU,automatic,VCU
+2025,Vermont Catamouts,Vermont,automatic,Vermont
+2025,Villanova Wildcats,Villanova,automatic,Villanova
+2025,Virginia Cavaliers,Virginia,automatic,Virginia
+2025,Virginia Tech Hokies,Virginia Tech,automatic,Virginia Tech
+2025,VMI Keydets,VMI,automatic,VMI
+2025,Wake Forest Demon Deacon,Wake Forest,automatic,Wake Forest
+2025,Washington Huskies,Washington,automatic,Washington
+2025,West Virginia Mountaineers,West Virginia,automatic,West Virginia
+2025,Western Michigan Broncos,Western Michigan,automatic,Western Michigan
+2025,William & Mary Tribe,William & Mary,automatic,William & Mary
+2025,Winthrop Eagles,Winthrop,automatic,Winthrop
+2025,Wisconsin Badgers,Wisconsin,automatic,Wisconsin
+2025,WIU Fighting Leathernecks,Western Illinois,TEAM_FIXES,Western Illinois
+2025,Wofford Terriers,Wofford,automatic,Wofford
+2025,Wright State Raiders,Wright State,automatic,Wright State
+2025,Xavier Musketeers,Xavier,automatic,Xavier
+2025,Yale Bulldogs,Yale,automatic,Yale
+2026,Akron Zips,Akron,automatic,Akron
+2026,Albany Great Danes,UAlbany,TEAM_FIXES,UAlbany
+2026,American Eagles,American,automatic,American
+2026,Army West Point Black Knights,Army West Point,automatic,Army West Point
+2026,Bellarmine Knights,Bellarmine,automatic,Bellarmine
+2026,Belmont Bruins,Belmont,automatic,Belmont
+2026,Berkeley Golden Bears,California,TEAM_FIXES,California
+2026,Binghamton BearCats,Binghamton,automatic,Binghamton
+2026,Boston College Eagles,Boston College,automatic,Boston College
+2026,Boston Terriers,Boston U.,TEAM_FIXES,Boston U.
+2026,Bowling Green Falcons,Bowling Green,automatic,Bowling Green
+2026,Bradley Braves,Bradley,automatic,Bradley
+2026,Brown Bears,Brown,automatic,Brown
+2026,Bryant Bulldogs,Bryant,automatic,Bryant
+2026,Bucknell Bison,Bucknell,automatic,Bucknell
+2026,Butler Bulldogs,Butler,automatic,Butler
+2026,Cal Poly Mustangs,Cal Poly,automatic,Cal Poly
+2026,Cal State Fullerton Titans,Cal State Fullerton,automatic,Cal State Fullerton
+2026,California Baptist Lancers,California Baptist,automatic,California Baptist
+2026,Campbell Camels,Campbell,automatic,Campbell
+2026,Canisius Golden Griffins,Canisius,automatic,Canisius
+2026,CCSU Blue Devils,Central Connecticut,TEAM_FIXES,Central Connecticut
+2026,Central Arkansas Bears,Central Arkansas,automatic,Central Arkansas
+2026,Charleston Cougars,College of Charleston,TEAM_FIXES,College of Charleston
+2026,Charlotte 49ers,Charlotte,automatic,Charlotte
+2026,Chicago State Cougars,Chicago State,automatic,Chicago State
+2026,Clemson Tigers,Clemson,automatic,Clemson
+2026,Cleveland State Vikings,Cleveland State,automatic,Cleveland State
+2026,Coastal Carolina Chanticleers,Coastal Carolina,automatic,Coastal Carolina
+2026,Colgate Raiders,Colgate,automatic,Colgate
+2026,Columbia Lions,Columbia,automatic,Columbia
+2026,Cornell Big Red,Cornell,automatic,Cornell
+2026,Creighton Bluejays,Creighton,automatic,Creighton
+2026,CSU Bakersfield Roadrunners,CSU Bakersfield,automatic,CSU Bakersfield
+2026,CSUN Matadors,CSUN,automatic,CSUN
+2026,Dartmouth Big Green,Dartmouth,automatic,Dartmouth
+2026,Davidson Wildcats,Davidson,automatic,Davidson
+2026,Dayton Flyers,Dayton,automatic,Dayton
+2026,Delaware Blue Hens,Delaware,automatic,Delaware
+2026,Denver Pioneers,Denver,automatic,Denver
+2026,DePaul Blue Demons,DePaul,automatic,DePaul
+2026,Detroit Mercy Titans,Detroit Mercy,automatic,Detroit Mercy
+2026,Drake Bulldogs,Drake,automatic,Drake
+2026,Drexel Dragons,Drexel,automatic,Drexel
+2026,Duke Blue Devils,Duke,automatic,Duke
+2026,Duquesne Duke,Duquesne,automatic,Duquesne
+2026,Eastern Illinois Panthers,Eastern Illinois,automatic,Eastern Illinois
+2026,Elon Phoenix,Elon,automatic,Elon
+2026,ETSU Buccaneers,ETSU,automatic,ETSU
+2026,Evansville Purple Aces,Evansville,automatic,Evansville
+2026,Fairfield Stags,Fairfield,automatic,Fairfield
+2026,Fairleigh Dickinson Knights,FDU,TEAM_FIXES,FDU
+2026,FAU Owls,Florida Atlantic,TEAM_FIXES,Florida Atlantic
+2026,FGCU Eagles,FGCU,automatic,FGCU
+2026,FIU Panthers,FIU,automatic,FIU
+2026,Fordham Rams,Fordham,automatic,Fordham
+2026,Furman Paladins,Furman,automatic,Furman
+2026,Gardner-Webb Bulldogs,Gardner-Webb,automatic,Gardner-Webb
+2026,George Mason Patriots,George Mason,automatic,George Mason
+2026,George Washington Colonials,George Washington,automatic,George Washington
+2026,Georgetown Hoyas,Georgetown,automatic,Georgetown
+2026,Georgia Southern Eagles,Georgia Southern,automatic,Georgia Southern
+2026,Georgia State Panthers,Georgia State,automatic,Georgia State
+2026,Gonzaga Bulldogs,Gonzaga,automatic,Gonzaga
+2026,Green Bay Phoenix,Green Bay,automatic,Green Bay
+2026,Harvard Crimson,Harvard,automatic,Harvard
+2026,HCU Huskies,HCU,automatic,HCU
+2026,High Point Panthers,High Point,automatic,High Point
+2026,Hofstra Pride,Hofstra,automatic,Hofstra
+2026,Holy Cross Crusaders,Holy Cross,automatic,Holy Cross
+2026,Howard Bison,Howard,automatic,Howard
+2026,Indiana Hoosiers,Indiana,automatic,Indiana
+2026,Iona Gaels,Iona,automatic,Iona
+2026,IPFW Mastodons,Purdue Fort Wayne,TEAM_FIXES,Purdue Fort Wayne
+2026,IU Indianapolis,IU Indy,TEAM_FIXES,IU Indy
+2026,Jacksonville Dolphins,Jacksonville,automatic,Jacksonville
+2026,JMU Dukes,James Madison,TEAM_FIXES,James Madison
+2026,Kentucky Wildcats,Kentucky,automatic,Kentucky
+2026,La Salle Explorers,La Salle,automatic,La Salle
+2026,Lafayette Leopards,Lafayette,automatic,Lafayette
+2026,Le Moyne Dolphins,Le Moyne,automatic,Le Moyne
+2026,Lehigh Mountain Hawks,Lehigh,automatic,Lehigh
+2026,Liberty Flames,Liberty,automatic,Liberty
+2026,Lindenwood Lions,Lindenwood,automatic,Lindenwood
+2026,Lipscomb Bisons,Lipscomb,automatic,Lipscomb
+2026,LIU Sharks,LIU,automatic,LIU
+2026,LMU Lions,LMU,automatic,LMU
+2026,Longwood Lancers,Longwood,automatic,Longwood
+2026,Louisville Cardinals,Louisville,automatic,Louisville
+2026,Loyola Chicago Ramblers,Loyola Chicago,automatic,Loyola Chicago
+2026,Loyola Greyhounds,Loyola Maryland,TEAM_FIXES,Loyola Maryland
+2026,Manhattan Jaspers,Manhattan,automatic,Manhattan
+2026,Marist Red Foxes,Marist,automatic,Marist
+2026,Marquette Golden Eagles,Marquette,automatic,Marquette
+2026,Marshall Thundering Herd,Marshall,automatic,Marshall
+2026,Maryland College Park Terrapins,Maryland,automatic,Maryland
+2026,Memphis Tigers,Memphis,automatic,Memphis
+2026,Mercer Bears,Mercer,automatic,Mercer
+2026,Mercyhurst Lakers,Mercyhurst,automatic,Mercyhurst
+2026,Merrimack Warriors,Merrimack,automatic,Merrimack
+2026,Michigan State Spartans,Michigan State,automatic,Michigan State
+2026,Michigan Wolverines,Michigan,automatic,Michigan
+2026,Milwaukee Panthers,Milwaukee,automatic,Milwaukee
+2026,Missouri State Bears,Missouri State,automatic,Missouri State
+2026,Monmouth Hawks,Monmouth,automatic,Monmouth
+2026,Mount St. Mary's Mountaineers,Mount St. Mary's,automatic,Mount St. Mary's
+2026,Navy Midshipmen,Navy,automatic,Navy
+2026,NC State Wolfpack,NC State,automatic,NC State
+2026,New Hampshire Wildcats,New Hampshire,automatic,New Hampshire
+2026,New Haven Chargers,New Haven,automatic,New Haven
+2026,Niagara Purple Eagles,Niagara,automatic,Niagara
+2026,NJIT Highlanders,NJIT,automatic,NJIT
+2026,NKU Norse,Northern Kentucky,TEAM_FIXES,Northern Kentucky
+2026,North Carolina Heels,North Carolina,automatic,North Carolina
+2026,North Florida Ospreyes,North Florida,automatic,North Florida
+2026,Northeastern Huskies,Northeastern,automatic,Northeastern
+2026,Northern Illinois Huskies,Northern Illinois,automatic,Northern Illinois
+2026,Northwestern Wildcats,Northwestern,automatic,Northwestern
+2026,Notre Dame Fighting Irish,Notre Dame,automatic,Notre Dame
+2026,Oakland Golden Grizzlies,Oakland,automatic,Oakland
+2026,Ohio State Buckeyes,Ohio State,automatic,Ohio State
+2026,Old Dominion Monarchs,Old Dominion,automatic,Old Dominion
+2026,Omaha Mavericks,Omaha,automatic,Omaha
+2026,Oral Roberts Golden Eagles,Oral Roberts,automatic,Oral Roberts
+2026,Oregon State Beavers,Oregon State,automatic,Oregon State
+2026,Pacific Tigers,Pacific,automatic,Pacific
+2026,Penn Quakers,Penn,automatic,Penn
+2026,Penn State Nittany Lion,Penn State,automatic,Penn State
+2026,Pittsburgh Panthers,Pittsburgh,automatic,Pittsburgh
+2026,Portland Pilots,Portland,automatic,Portland
+2026,Presbyterian BlueHose,Presbyterian,automatic,Presbyterian
+2026,Princeton Tigers,Princeton,automatic,Princeton
+2026,Providence Friars,Providence,automatic,Providence
+2026,Queens Royals,Queens,automatic,Queens
+2026,Quinnipiac Bobcats,Quinnipiac,automatic,Quinnipiac
+2026,Radford Highlanders,Radford,automatic,Radford
+2026,Rhode Island Rhody,Rhode Island,automatic,Rhode Island
+2026,Rider Broncs,Rider,automatic,Rider
+2026,Robert Morris Colonials,Robert Morris,automatic,Robert Morris
+2026,Rutgers Scarlet Knights,Rutgers,automatic,Rutgers
+2026,Sacramento State Hornets,Sacramento State,automatic,Sacramento State
+2026,Saint Joseph's Hawks,Saint Joseph's,automatic,Saint Joseph's
+2026,Saint Louis Billikens,Saint Louis,automatic,Saint Louis
+2026,Saint Peter's Peacocks,Saint Peter's,automatic,Saint Peter's
+2026,San Diego State Aztecs,San Diego State,automatic,San Diego State
+2026,San Diego Toreros,San Diego,automatic,San Diego
+2026,San Francisco Dons,San Francisco,automatic,San Francisco
+2026,Santa Clara Broncos,Santa Clara,automatic,Santa Clara
+2026,Seattle Redhawks,Seattle,automatic,Seattle
+2026,Seton Hall Pirates,Seton Hall,automatic,Seton Hall
+2026,SHU Pioneers,Sacred Heart,TEAM_FIXES,Sacred Heart
+2026,Siena Saints,Siena,automatic,Siena
+2026,SIUE Cougars,SIUE,automatic,SIUE
+2026,SMU Mustangs,SMU,automatic,SMU
+2026,South Carolina Gamecocks,South Carolina,automatic,South Carolina
+2026,Southern Indiana Screaming Eagles,Southern Indiana,automatic,Southern Indiana
+2026,St John's Red Storm,St. John's,TEAM_FIXES,St. John's
+2026,St. Bonaventure Bonnies,St. Bonaventure,automatic,St. Bonaventure
+2026,St. Mary's College of CA Gaels,Saint Mary's,TEAM_FIXES,Saint Mary's
+2026,St. Thomas Tommies,St. Thomas,automatic,St. Thomas
+2026,Stanford Cardinal,Stanford,automatic,Stanford
+2026,Stetson Hatters,Stetson,automatic,Stetson
+2026,Stonehill College Skyhawks,Stonehill,automatic,Stonehill
+2026,Stony Brook Seawolves,Stony Brook,automatic,Stony Brook
+2026,Syracuse Orange,Syracuse,automatic,Syracuse
+2026,Temple Owls,Temple,automatic,Temple
+2026,Tulsa Hurricane,Tulsa,automatic,Tulsa
+2026,UAB Blazers,UAB,automatic,UAB
+2026,UC Irvine Anteaters,UC Irvine,automatic,UC Irvine
+2026,UC Riverside Highlanders,UC Riverside,automatic,UC Riverside
+2026,UC San Diego Tritons,UC San Diego,automatic,UC San Diego
+2026,UC Santa Barbara Gauchos,UC Santa Barbara,automatic,UC Santa Barbara
+2026,UCF Knights,UCF,automatic,UCF
+2026,UCLA Bruins,UCLA,automatic,UCLA
+2026,UCONN Huskies,UConn,TEAM_FIXES,UConn
+2026,UIC Flames,UIC,automatic,UIC
+2026,UIW Cardinals,UIW,automatic,UIW
+2026,UMASS Lowell River Hawks,UMass Lowell,TEAM_FIXES,UMass Lowell
+2026,UMass Minutemen,UMass,automatic,UMass
+2026,UMBC Retrievers,UMBC,automatic,UMBC
+2026,UMKC Kangaroos,Kansas City,TEAM_FIXES,Kansas City
+2026,UNC Asheville Bulldogs,UNC Asheville,automatic,UNC Asheville
+2026,UNCG Spartans,UNCG,automatic,UNCG
+2026,UNCW Seahawks,UNCW,automatic,UNCW
+2026,USC Upstate Spartans,USC Upstate,automatic,USC Upstate
+2026,USF Bulls,South Florida,TEAM_FIXES,South Florida
+2026,Utah Valley Wolverines,Utah Valley,automatic,Utah Valley
+2026,UTRGV Vaqueros,UTRGV,automatic,UTRGV
+2026,VCU Rams,VCU,automatic,VCU
+2026,Vermont Catamouts,Vermont,automatic,Vermont
+2026,Villanova Wildcats,Villanova,automatic,Villanova
+2026,Virginia Cavaliers,Virginia,automatic,Virginia
+2026,Virginia Tech Hokies,Virginia Tech,automatic,Virginia Tech
+2026,VMI Keydets,VMI,automatic,VMI
+2026,Wake Forest Demon Deacon,Wake Forest,automatic,Wake Forest
+2026,Washington Huskies,Washington,automatic,Washington
+2026,West Florida Argos,West Florida,automatic,West Florida
+2026,West Virginia Mountaineers,West Virginia,automatic,West Virginia
+2026,Western Michigan Broncos,Western Michigan,automatic,Western Michigan
+2026,William & Mary Tribe,William & Mary,automatic,William & Mary
+2026,Winthrop Eagles,Winthrop,automatic,Winthrop
+2026,Wisconsin Badgers,Wisconsin,automatic,Wisconsin
+2026,WIU Fighting Leathernecks,Western Illinois,TEAM_FIXES,Western Illinois
+2026,Wofford Terriers,Wofford,automatic,Wofford
+2026,Wright State Raiders,Wright State,automatic,Wright State
+2026,Xavier Musketeers,Xavier,automatic,Xavier
+2026,Yale Bulldogs,Yale,automatic,Yale

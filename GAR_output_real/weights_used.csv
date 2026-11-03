@@ -1,23 +1,23 @@
 position,side,stat,units,direction,goal_weight,note,stat_sd_at_position,goals_per_season_1sd
-all,attack,xg (shooter),goals per expected goal,1,0.7626632698377459,shooter keeps all of his unassisted chances and 60% of assisted ones; 0.76 = league average (each team's own assisted share is used),NA,NA
-all,attack,xa (passer),goals per expected goal,1,0.4,passer gets 40% of the xG of every shot he sets up,NA,NA
-CB,defense,aerial_win_pct,goals per 90 per percentage point,1,0.0078784383183771,aerial ability: share of aerial duels won (replaces aerial_won),8.23900926850021,1.2982105265283228
-CB,defense,def_duel_win_pct,goals per 90 per percentage point,1,0.004923786167582717,defending 1v1: share of defensive duels won (replaces def_duels_won). Team goals conceded and blocked shots are not in the data,6.96590676091308,0.685972707081095
-CB,defense,cards,goals per 90 per 1.0 of the stat (per 90),-1,-0.10472914954831564,NA,0.12231513103420386,-0.2561991930020592
-CB,defense,interceptions,goals per 90 per 1.0 of the stat (per 90),1,0,NA,1.2854746076061774,0
-CB,defense,sliding_tackles,goals per 90 per 1.0 of the stat (per 90),1,0,NA,0.21963489970358596,0
-CB,defense,shots_blocked,goals per 90 per 1.0 of the stat (per 90),1,0,"blocked shots per 90, possession-adjusted; real export only",0.24434177886613384,0
-CM,defense,interceptions,goals per 90 per 1.0 of the stat (per 90),1,0.03270227909386026,NA,1.1114937845301698,0.7269675990559318
-CM,defense,aerial_win_pct,goals per 90 per percentage point,1,0.002671153539088897,aerial ability: share of aerial duels won (replaces aerial_won),10.375164806285705,0.5542731638188126
-CM,defense,def_duel_win_pct,goals per 90 per percentage point,1,0,defending 1v1: share of defensive duels won (replaces def_duels_won),6.091120908312607,0
-DM,defense,aerial_win_pct,goals per 90 per percentage point,1,0.0022517611670256695,"aerial ability (replaces loose-ball duels, not in the real export)",10.18687914343389,0.458768377367363
-DM,defense,interceptions,goals per 90 per 1.0 of the stat (per 90),1,6.544569632437255e-4,NA,1.1712761097391216,0.015330996117995802
-DM,defense,sliding_tackles,goals per 90 per 1.0 of the stat (per 90),1,0,NA,0.27106768731506337,0
-DM,defense,shots_blocked,goals per 90 per 1.0 of the stat (per 90),1,0,"blocked shots per 90, possession-adjusted; real export only",0.1661577177706424,0
-DM,defense,def_duel_win_pct,goals per 90 per percentage point,1,0,"defending 1v1 (replaces loose-ball duels, not in the real export)",5.938607302697525,0
-FB,defense,def_duel_win_pct,goals per 90 per percentage point,1,0.00715497492036142,defending 1v1: share of defensive duels won; not inflated by facing more attacks (replaces def_duels_won),6.0043671116530435,0.8592219219304092
-FB,defense,sliding_tackles,goals per 90 per 1.0 of the stat (per 90),1,0,NA,0.26690832599767006,0
-FB,defense,interceptions,goals per 90 per 1.0 of the stat (per 90),1,0,NA,1.1799632806478952,0
-FB,defense,shots_blocked,goals per 90 per 1.0 of the stat (per 90),1,0,"blocked shots per 90, possession-adjusted; real export only",0.15982935302124826,0
-GK,defense,prevented_goals,goals per 90 per 1.0 of the stat (per 90),1,1,goals prevented per 90 (xG faced minus goals conceded); real export only,0.08407163232855079,1.6814326465710157
-GK,defense,exits,goals per 90 per 1.0 of the stat (per 90),1,0,NA,0.5340869991562808,0
+all,attack,xg (shooter),goals per expected goal,1,0.708202366907901,shooter keeps all of his unassisted chances and 60% of assisted ones; 0.76 = league average (each team's own assisted share is used),NA,NA
+all,attack,xa (passer),goals per expected goal,1,0.3725730631020407,passer gets 40% of the xG of every shot he sets up,NA,NA
+CB,defense,aerial_win_pct,goals per 90 per percentage point,1,0.006945713244450127,aerial ability: share of aerial duels won (replaces aerial_won),8.395007538683304,1.1661863009738258
+CB,defense,def_duel_win_pct,goals per 90 per percentage point,1,0.007366862213578731,defending 1v1: share of defensive duels won (replaces def_duels_won). Team goals conceded and blocked shots are not in the data,6.760821508005706,0.9961208100015521
+CB,defense,cards,goals per 90 per 1.0 of the stat (per 90),-1,-0.20142706265575308,NA,0.11768180385453936,-0.47408600156900693
+CB,defense,interceptions,goals per 90 per 1.0 of the stat (per 90),1,0,NA,1.2110940079239005,0
+CB,defense,sliding_tackles,goals per 90 per 1.0 of the stat (per 90),1,0,NA,0.24437801108817106,0
+CB,defense,shots_blocked,goals per 90 per 1.0 of the stat (per 90),1,0,"blocked shots per 90, possession-adjusted; real export only",0.24423054688927043,0
+CM,defense,interceptions,goals per 90 per 1.0 of the stat (per 90),1,0.024618512304174743,NA,1.1445161380598179,0.5635256925430437
+CM,defense,def_duel_win_pct,goals per 90 per percentage point,1,9.783875596427313e-4,defending 1v1: share of defensive duels won (replaces def_duels_won),6.2597686617634665,0.12248959569821607
+CM,defense,aerial_win_pct,goals per 90 per percentage point,1,0,aerial ability: share of aerial duels won (replaces aerial_won),10.152797465860859,0
+DM,defense,aerial_win_pct,goals per 90 per percentage point,1,0.00506984227727665,"aerial ability (replaces loose-ball duels, not in the real export)",9.840517054083815,0.99779738782112
+DM,defense,interceptions,goals per 90 per 1.0 of the stat (per 90),1,0.03195342159551865,NA,1.269804203348512,0.8114917810671339
+DM,defense,sliding_tackles,goals per 90 per 1.0 of the stat (per 90),1,0,NA,0.30375278745534523,0
+DM,defense,shots_blocked,goals per 90 per 1.0 of the stat (per 90),1,0,"blocked shots per 90, possession-adjusted; real export only",0.17157313838280094,0
+DM,defense,def_duel_win_pct,goals per 90 per percentage point,1,0,"defending 1v1 (replaces loose-ball duels, not in the real export)",5.712536460854644,0
+FB,defense,def_duel_win_pct,goals per 90 per percentage point,1,0.007532691242024481,defending 1v1: share of defensive duels won; not inflated by facing more attacks (replaces def_duels_won),6.008494121766787,0.905202620975765
+FB,defense,sliding_tackles,goals per 90 per 1.0 of the stat (per 90),1,0,NA,0.27144111979550795,0
+FB,defense,interceptions,goals per 90 per 1.0 of the stat (per 90),1,0,NA,1.1296671325396856,0
+FB,defense,shots_blocked,goals per 90 per 1.0 of the stat (per 90),1,0,"blocked shots per 90, possession-adjusted; real export only",0.15974859452432122,0
+GK,defense,prevented_goals,goals per 90 per 1.0 of the stat (per 90),1,1,goals prevented per 90 (xG faced minus goals conceded); real export only,0.08418651280479644,1.6837302560959289
+GK,defense,exits,goals per 90 per 1.0 of the stat (per 90),1,0,NA,0.5327913720738354,0

@@ -96,7 +96,7 @@ GAR        = GAR per 90 x minutes / 90
 
 1. **Stats.** Per-90 stats from conference games, already adjusted for conference strength.
 2. **Small samples are pulled toward average.** Each stat is blended with the position average as if the player had also played 270 minutes at average level (`PRIOR_MIN`). Goals prevented (GK) gets 1,800 minutes, because shot-stopping over a few games is mostly luck. A stat missing from the data counts as the position average.
-3. **Attack: sharing the team's chances.** A team's chances are measured in non-penalty xG, and each one is split between shooter and passer. The passer gets 40% of the xG of every shot he sets up (his xA; `PASSER_SHARE`). The shooter keeps the rest. We don't know which of his shots were assisted, so his team's assisted share (team xA / team xG) is used. Summed over a team, the credits add back up to its xG, so nothing is counted twice. Attack = his credit minus the average credit at his position.
+3. **Attack: sharing the team's chances.** A team's chances are measured in non-penalty xG, and each one is split between shooter and passer. The passer gets 40% of the xG of every shot he sets up (his xA; `PASSER_SHARE`). The shooter keeps the rest. We don't know which of his shots were assisted, so his team's assisted share (team xA / team xG) is used. Summed over a team, the credits add back up to its xG, so nothing is counted twice. Each npxG is worth `XG_GOAL_VALUE` goals, measured from the data: college players scored 0.93 non-penalty goals per npxG (0.945 in 2025, 0.912 in 2026). Attack = his credit minus the average credit at his position.
 4. **Defense: stats weighted by goals saved.** The defensive stats in `gar_weights_real.csv` (side = defense) get a weight in goals. A ridge regression across all team-seasons (about 420) asks how many fewer goals per game a team concedes when its players at a position are above average on each stat. The `direction` column fixes whether a stat helps or hurts, and the data picks the size. A weight of 0 means the data found no clear link. Defense = weight x (his value - position average), summed. Wingers and forwards have no defensive stats, so their defense part is 0.
 5. **Replacement level.** A replacement-level player is the 20th percentile of players at the position with 270+ minutes that season (`REPL_PCTL`). The gap between an average player and replacement level is the same for everyone at a position, so it's credit for playing time.
 
@@ -121,21 +121,39 @@ Each player's rating also gets an **80% range** from the sampling noise of each 
 
 ## PAR (points above replacement)
 
-PAR is the same idea measured in **league points** (3 for a win, 1 for a draw), with one difference: each stat is put on a 0-1 scale before weighting.
+PAR is the same idea measured in **league points** (3 for a win, 1 for a draw), built from **3-4 stat categories per position** (for a CB: defending, aerial, passing & progression, goal threat).
 
-1. **Stats and small-sample blending**, as in GAR, using the stat list in `war_weights_real.csv` (attacking and defensive stats together).
-2. **0-1 scale.** Within each position and season, the 5th-percentile value = 0 and the 95th = 1 (`SCALE_LO`, `SCALE_HI`). Players beyond them keep going past 0 or 1 (`CAP_SCALE <- FALSE`).
-3. **Weights.** A ridge regression across all team-seasons predicts team points per game from each position's above- or below-average scaled stats. Signs are fixed by `direction`; the data picks the size.
-4. **PAR per 90** = Σ weight x (his scaled value - position average) + (average - replacement level). **PAR** = PAR per 90 x minutes / 90.
+1. **Stats and small-sample blending**, as in GAR, using the stats listed in `par_categories.csv`.
+2. **0-1 scale.** Within each position and season, the 5th-percentile value = 0 and the 95th = 1 (`SCALE_LO`, `SCALE_HI`). Players beyond them keep going past 0 or 1 (`CAP_SCALE <- FALSE`). Stats where fewer is better (cards) are flipped, so higher is always better.
+3. **Categories.** Each category score is a weighted average of its stats on that scale (`weight_in_category`).
+4. **Category weights.** A ridge regression across all team-seasons (about 420) asks how much higher a team's **Massey rating** is when its players at a position are above average in each category (`TARGET <- "massey"`). Massey uses every game and the opponents, so it's a steadier target than a 5-12 game conference record. One Massey point is worth about 0.79 league points per game (fitted from the same teams), which turns the weights into points. Weights can't be negative. `TARGET <- "outcome"` fits to conference points per game instead (the old way).
+5. **PAR per 90** = Σ category weight x (his category score - position average) + (average - replacement level). **PAR** = PAR per 90 x minutes / 90.
+6. **80% ranges** from each stat's sampling noise, as in GAR, so the app shows a "chance he's better" for PAR too.
 
-Outputs (`par_output_real/`): `player_par.csv`, `par_breakdown.csv`, `par_replacement.csv`, `model_settings.csv`, `weights_used.csv`, `team_par.csv`, charts.
+### Changing what PAR values: `par_categories.csv`
+
+This is the file to edit. One row per stat:
+
+| Column | Meaning |
+|---|---|
+| `position`, `category`, `stat` | Which stat counts in which category at which position (stat names are defined in section 3 of `player_war.R`) |
+| `direction` | +1 more is better, -1 fewer is better, 0 leave it out |
+| `weight_in_category` | How much the stat counts inside its category (2 = twice as much as a 1) |
+| `fixed_points_per_season` | Blank = learned from the data. A number = set the category's value yourself, in league points over a full season (1,800 minutes) for going from the position's 5th- to 95th-percentile player in that category. Put the same number on every row of the category |
+| `note` | What the stat is |
+
+**To see what PAR currently values, open `par_output_real/par_weights.csv`.** For every position and category: whether it was learned or fixed, `points_per_season_category` (same units as `fixed_points_per_season`, so you can copy a learned value and adjust it), each stat's share and value, and `points_per_season_per_unit`: what one more of the stat per 90 (or one more % point) is worth over a season.
+
+Outputs (`par_output_real/`): `player_par.csv` (with 80% ranges), `par_weights.csv`, `par_breakdown.csv`, `par_replacement.csv`, `model_settings.csv`, `team_par.csv`, charts.
 
 ### Key settings (both scripts)
 
 | Setting | Real-data value | Meaning |
 |---|---|---|
-| `WEIGHTS_FILE` | `gar_weights_real.csv` / `war_weights_real.csv` | Which stats count at each position, and whether more is good (+1) or bad (-1) |
-| `WEIGHT_MODE` | `learned` | `learned`, or `manual` to use `manual_weight` from the CSV |
+| `WEIGHTS_FILE` | `gar_weights_real.csv` / `par_categories.csv` | Which stats count at each position, and whether more is good (+1) or bad (-1) |
+| `WEIGHT_MODE` | `learned` | `learned`, or `manual` (GAR: `manual_weight` from the CSV; PAR: every category needs `fixed_points_per_season`) |
+| `TARGET` | `massey` | PAR: fit the category weights to Massey ratings, or `outcome` for conference points per game |
+| `XG_GOAL_VALUE` | `NA` (measured, 0.93) | GAR: goals per non-penalty xG |
 | `PRIOR_MIN` | 270 | Small-sample blending strength |
 | `MIN_QUAL` | 270 | Minutes to count toward averages, scaling and replacement level |
 | `REPL_PCTL` | 0.20 | Replacement-level percentile |

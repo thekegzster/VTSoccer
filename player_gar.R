@@ -12,14 +12,14 @@
 #           + replacement value (how far an average player at the position is
 #             above a replacement-level backup, for the minutes played)
 #
-# Inputs (in DATA_DIR):
-#   simulated_player_metrics.csv   one row per player per season (Wyscout-style)
-#   simulated_standings.csv        team records, goals for/against, schedule
-#   gar_weights.csv                like war_weights_compiled.csv, plus a "side"
-#                                  column: attack or defense
+# Inputs (in DATA_DIR; run prepare_real_data.R first):
+#   real_player_metrics.csv   one row per player per season (Wyscout, conference games)
+#   real_standings.csv        team records, goals for/against
+#   gar_weights_real.csv      which stats count at each position, their direction,
+#                             and a "side" column: attack or defense
 #
-# Outputs (in OUT_DIR = GAR_output): player_gar.csv, team_gar.csv,
-#   weights_used.csv, scorecard files, charts
+# Outputs (in OUT_DIR = GAR_output_real): player_gar.csv, team_gar.csv,
+#   weights_used.csv, gar_breakdown.csv (for the app), roster comparison, charts
 #
 # Steps 1-5 are the same as player_war.R (build stats, shrink, schedule
 # adjustment). Unlike WAR, stats are NOT rescaled to 0-1: they stay in raw units.
@@ -36,12 +36,14 @@ library(scales)
 
 # ---- Settings ---------------------------------------------------------------
 
-DATA_DIR     <- "."            # folder with the input CSVs
-OUT_DIR      <- "GAR_output"
-STANDINGS_FILE <- "simulated_standings.csv"   # needs goals_for and goals_against columns
-WEIGHTS_FILE <- "gar_weights.csv"   # stat list with a side column (attack / defense)
+DATA_DIR     <- "."            # folder with the input CSVs (written by prepare_real_data.R)
+PLAYERS_FILE <- "real_player_metrics.csv"
+STANDINGS_FILE <- "real_standings.csv"        # needs goals_for and goals_against columns
+OUT_DIR      <- "GAR_output_real"
+WEIGHTS_FILE <- "gar_weights_real.csv"   # stat list with a side column (attack / defense)
 WEIGHT_MODE  <- "learned"      # "learned" or "manual"
-MIN_QUAL     <- 300            # minutes to count toward scaling and replacement level
+MIN_QUAL     <- 270            # minutes to count toward scaling and replacement level
+                               # (a season is ~5-12 conference games)
 STAT_PRIOR_MIN <- c(prevented_goals = 1800)  # stats that need more minutes before they're
                                # trusted: goalkeeper shot-stopping swings a lot by luck, so a keeper
                                # is treated as if he also had 1,800 average minutes (PRIOR_MIN for others)
@@ -51,12 +53,12 @@ PRIOR_MIN    <- 270            # shrinkage: a player is treated as if he also pl
                                # this many minutes at the position average
 REPL_PCTL    <- 0.20           # replacement level = this percentile of qualified
                                # players' NET index at the position, each season
-ADJUST_SOS   <- TRUE           # adjust stats for strength of schedule
+ADJUST_SOS   <- FALSE          # adjust stats for strength of schedule; off because the
+                               # Adjusted sheet already corrects for conference strength
 FIT_EXCLUDE  <- c(2020)        # seasons left out of the weight fit (COVID)
 FOCUS_TEAM   <- "Virginia Tech"
-LATEST       <- 2025           # most recent complete season (for charts); NA = latest in the data
-VERSION      <- ""             # scorecard label; "" = automatic from weights file and mode
-SCORE_MIN    <- 600            # minutes needed to count in the scorecard and scatter
+LATEST       <- NA             # season shown in the charts; NA = latest in the data
+SCORE_MIN    <- 360            # minutes needed to appear in the attack-vs-defense scatter
 GOAL_UNIT_STATS <- c("xg", "xa")  # stats already measured in goals (expected goals and
                                # expected assists). They get ONE value per expected goal
                                # shared by every position, and the fit doesn't shrink it.
@@ -69,51 +71,31 @@ PASSER_SHARE <- 0.40           # share of an assisted chance credited to the pas
                                # the shooter keeps the rest, plus all of his unassisted chances
 FIXED_WEIGHTS <- c(prevented_goals = 1.0)  # goals per unit, set rather than fitted: a goal
                                # a keeper prevents is one goal fewer conceded (real data only)
-XG_GOAL_VALUE <- 1.0           # goals per expected goal (xG is built so 1 xG = 1 goal on average)
+XG_GOAL_VALUE <- NA            # goals per expected goal. NA = measured from the data (league
+                               # non-penalty goals / npxG, about 0.93); or set a number, e.g. 1.0
 RANGE_LEVEL  <- 0.80           # uncertainty range shown for each player (0.80 = the middle
                                # 80% of plausible values)
 
 # Comparing players with our own roster (for the transfer portal)
 ROSTER_SEASON <- NA            # season of our roster to compare everyone against; NA = LATEST
 PROJ_MINUTES  <- 1500          # minutes a regular starter plays in a season
-COMPARE_MIN   <- 600           # minutes a player needs to appear in the roster comparison
+COMPARE_MIN   <- 360           # minutes a player needs to appear in the roster comparison
 STARTER_SLOTS <- c(GK = 1, CB = 2, FB = 2, DM = 1, CM = 2, AM = 1, W = 2, CF = 1)
                                # how many of our players at each position count as regulars
 
-# ---- Which data: simulated or real ------------------------------------------
-# "simulated" = simulated_player_metrics.csv / simulated_standings.csv (many seasons)
-# "real"      = the files prepare_real_data.R writes from the Wyscout export
-#               (one season, conference games only). Run prepare_real_data.R first.
-DATA_SOURCE  <- "real"
-PLAYERS_FILE <- "simulated_player_metrics.csv"
-if (DATA_SOURCE == "real") {
-  PLAYERS_FILE   <- "real_player_metrics.csv"
-  STANDINGS_FILE <- "real_standings.csv"
-  WEIGHTS_FILE   <- "gar_weights_real.csv"   # stat list without stats the export lacks
-  OUT_DIR        <- "GAR_output_real"
-  ADJUST_SOS     <- FALSE   # the Adjusted sheet already corrects for conference strength
-  LATEST         <- NA      # = the latest season in the file (2026)
-  MIN_QUAL       <- 270     # a season so far is ~5-11 conference games, so lower minute cut-offs
-  SCORE_MIN      <- 360
-  COMPARE_MIN    <- 360
-}
-
 # Optional overrides from the command line:
-#   Rscript player_gar.R gar_weights.csv manual
+#   Rscript player_gar.R gar_weights_real.csv manual
 args <- commandArgs(trailingOnly = TRUE)
 if ("--no-plots" %in% args) { MAKE_PLOTS <- FALSE; args <- setdiff(args, "--no-plots") }
 if (length(args) >= 1) WEIGHTS_FILE <- args[1]
 if (length(args) >= 2) WEIGHT_MODE  <- args[2]
-if (length(args) >= 3) VERSION      <- args[3]
 
 stopifnot(WEIGHT_MODE %in% c("learned", "manual"))
 if (!file.exists(file.path(DATA_DIR, WEIGHTS_FILE))) stop("Weights file not found: ", WEIGHTS_FILE)
 stopifnot(ATTACK_MODEL %in% c("chance_share", "learned"))
-if (VERSION == "") VERSION <- sprintf("%s (%s, %s)", sub("\\.csv$", "", WEIGHTS_FILE), WEIGHT_MODE,
-                                     if (ATTACK_MODEL == "chance_share")
-                                       sprintf("chance share %d%%", round(100 * PASSER_SHARE))
-                                     else "learned attack")
-cat(sprintf("Weights: %s | mode: %s | scorecard label: %s\n", WEIGHTS_FILE, WEIGHT_MODE, VERSION))
+cat(sprintf("Weights: %s | mode: %s | attack: %s\n", WEIGHTS_FILE, WEIGHT_MODE,
+            if (ATTACK_MODEL == "chance_share") sprintf("chance share, %d%% to the passer", round(100 * PASSER_SHARE))
+            else "learned"))
 
 set.seed(2026)
 dir.create(OUT_DIR, showWarnings = FALSE)
@@ -127,8 +109,7 @@ players <- read_csv(file.path(DATA_DIR, PLAYERS_FILE),
 if (is.na(LATEST)) LATEST <- max(players$season_year)
 if (is.na(ROSTER_SEASON)) ROSTER_SEASON <- LATEST
 n_seasons <- n_distinct(players$season_year)
-DATA_CAPTION <- if (DATA_SOURCE == "real") sprintf("Wyscout data, conference games, %d season to date", LATEST) else
-  "Simulated player data"
+DATA_CAPTION <- sprintf("Wyscout data, conference games, %d season", LATEST)
 span_yrs <- intersect(sort(unique(players$season_year)), setdiff((LATEST - 4):LATEST, FIT_EXCLUDE))
 SEASON_SPAN <- if (length(span_yrs) == 1) as.character(span_yrs) else
   sprintf("%d-%d%s", min(span_yrs), max(span_yrs), if (any(FIT_EXCLUDE %in% min(span_yrs):max(span_yrs))) " (2020 excluded)" else "")
@@ -244,6 +225,20 @@ if (use_np) {
   cat("Using non-penalty xG (npxG) for xG\n")
 }
 
+# Goals per expected goal. NA = measure it: the league's goals divided by its xG over
+# the fitted seasons, like for like (non-penalty goals / npxG when npxG is used). A
+# ratio of totals, not a regression slope: noise in a team's xG pulls a slope toward 0.
+if (is.na(XG_GOAL_VALUE)) {
+  cal <- players %>% filter(!season_year %in% FIT_EXCLUDE)
+  g_col  <- if (use_np && "Non-penalty goals, total" %in% names(cal)) "Non-penalty goals, total" else "Goals"
+  xg_col <- if (use_np && "npxG, total" %in% names(cal)) "npxG, total" else "xG, Total"
+  XG_GOAL_VALUE <- sum(cal[[g_col]], na.rm = TRUE) / sum(cal[[xg_col]], na.rm = TRUE)
+  cat(sprintf("XG_GOAL_VALUE measured: %s / %s = %.3f goals per expected goal (by season: %s)\n", g_col, xg_col,
+              XG_GOAL_VALUE, cal %>% group_by(season_year) %>%
+                summarise(r = sum(.data[[g_col]], na.rm = TRUE) / sum(.data[[xg_col]], na.rm = TRUE)) %>%
+                with(paste(sprintf("%d %.3f", season_year, r), collapse = ", "))))
+}
+
 players <- players %>%
   mutate(
     accelerations    = z(`Accelerations / 90`),
@@ -281,7 +276,7 @@ players <- players %>%
     duels_won        = z(`Offensive Duels / 90`) * z(`Offensive Duels %`) / 100 + aerial_won,
     shots_against    = `Shots against / 90`,
     exits            = `Exits, per 90 mins`,
-    # In the real export only (empty on simulated data):
+    # Stats only some exports have (left empty when missing):
     shots_blocked    = padj(z(`Shots blocked / 90`), team_possession_pct),
     duel_win_pct     = `Duels won (%)`,
     prevented_goals  = `Prevented goals / 90`,   # GK: xG faced minus goals conceded, per 90
@@ -312,7 +307,8 @@ long <- players %>%
 
 long <- long %>%
   group_by(season_year, position, stat) %>%
-  mutate(prior = mean(raw[qualified], na.rm = TRUE),
+  mutate(missing = is.na(raw),
+         prior = mean(raw[qualified], na.rm = TRUE),
          raw   = coalesce(raw, prior),
          pm    = coalesce(unname(STAT_PRIOR_MIN[stat]), PRIOR_MIN),
          value = (raw * minutes_played + prior * pm) / (minutes_played + pm)) %>%
@@ -468,16 +464,23 @@ fx <- cfg$stat %in% names(FIXED_WEIGHTS)
 if (any(fx) && WEIGHT_MODE == "learned") cfg$weight[fx] <- unname(FIXED_WEIGHTS[cfg$stat[fx]])
 
 if (ATTACK_MODEL == "chance_share") {
-  # check: do team chances (xG) line up with team goals? Uses the raw totals.
-  chk_xg <- assisted %>%
+  # check: do team chances (xG) line up with team goals? Like for like: non-penalty
+  # goals against npxG (penalties are in neither). Uses the raw totals.
+  g_col <- if (use_np && "Non-penalty goals, total" %in% names(players)) "Non-penalty goals, total" else "Goals"
+  chk_xg <- players %>%
+    group_by(season_year, team) %>%
+    summarise(goals = sum(.data[[g_col]], na.rm = TRUE), .groups = "drop") %>%
+    inner_join(assisted, by = c("season_year", "team")) %>%
     inner_join(teams, by = c("season_year", "team")) %>%
     filter(!season_year %in% FIT_EXCLUDE, !is.na(gf_pg)) %>%
-    mutate(xg_pg = team_xg / games)
-  m_xg <- lm(gf_pg ~ xg_pg, data = chk_xg)
+    mutate(xg_pg = team_xg / games, g_pg = goals / games)
+  m_xg <- lm(g_pg ~ xg_pg, data = chk_xg)
   r2_oos[["attack"]] <- summary(m_xg)$r.squared
-  cat(sprintf(paste0("Attack (chance sharing, %d%% to the passer): team xG explains %.2f of team goals ",
-                     "scored; 1 xG = %.2f goals (XG_GOAL_VALUE uses %.2f)\n"),
-              round(100 * PASSER_SHARE), r2_oos[["attack"]], coef(m_xg)[["xg_pg"]], XG_GOAL_VALUE))
+  cat(sprintf(paste0("Attack (chance sharing, %d%% to the passer): team %s explains %.2f of team %s; ",
+                     "goals / xG = %.2f (XG_GOAL_VALUE uses %.2f; the regression slope, %.2f, is pulled toward 0 by noise)\n"),
+              round(100 * PASSER_SHARE), if (use_np) "npxG" else "xG", r2_oos[["attack"]],
+              if (use_np) "non-penalty goals" else "goals", sum(chk_xg$g_pg * chk_xg$games) / sum(chk_xg$xg_pg * chk_xg$games),
+              XG_GOAL_VALUE, coef(m_xg)[["xg_pg"]]))
 }
 
 # Position calibration (manual mode only): converts each position's attack and
@@ -655,6 +658,59 @@ cat(sprintf("Uncertainty: a CF with ~900 minutes has a %.0f%% range of about +/-
             median(z_range * cf_900$se_per_90 * cf_900$minutes_played / 90)))
 
 write_csv(player_gar, file.path(OUT_DIR, "player_gar.csv"))
+
+# ---- 8d. How each player's GAR adds up (the app's "How it's calculated" tab) ---
+# One row per player x part. per_90 = goals per 90 above an average player at his
+# position that season; the rows plus the replacement gap (gar_replacement.csv) add
+# up to gar_per_90. credit = weight x value; avg_credit = the same for the position average.
+#   attack rows:  xg = his shots (non-penalty xG he keeps), xa = chances he set up
+#   defense rows: one per defensive stat in the weights file
+br_def <- long %>%
+  inner_join(weights_used %>% select(position, stat, goal_weight), by = c("position", "stat")) %>%
+  transmute(season_year, player_id, part = "defense", stat, missing, raw, value = val, pos_avg,
+            weight = goal_weight, credit = goal_weight * val, avg_credit = goal_weight * pos_avg,
+            per_90 = credit - avg_credit)
+br_att <- if (ATTACK_MODEL == "chance_share") {
+  raw_ch <- ch %>% select(player_id, season_year, stat, raw) %>%
+    pivot_wider(names_from = stat, values_from = raw, names_prefix = "raw_")
+  chance_tab %>%
+    left_join(raw_ch, by = c("player_id", "season_year")) %>%
+    mutate(w_xg = XG_GOAL_VALUE * (1 - PASSER_SHARE * assisted_share), w_xa = XG_GOAL_VALUE * PASSER_SHARE) %>%
+    group_by(season_year, position) %>%
+    mutate(avg_xg = weighted.mean(xg, minutes_played), avg_xa = weighted.mean(xa, minutes_played),
+           avg_c_xg = weighted.mean(w_xg * xg, minutes_played), avg_c_xa = weighted.mean(w_xa * xa, minutes_played)) %>%
+    ungroup() %>%
+    { bind_rows(
+        transmute(., season_year, player_id, part = "attack", stat = "xg", missing = FALSE, raw = raw_xg, value = xg,
+                  pos_avg = avg_xg, weight = w_xg, credit = w_xg * xg, avg_credit = avg_c_xg),
+        transmute(., season_year, player_id, part = "attack", stat = "xa", missing = FALSE, raw = raw_xa, value = xa,
+                  pos_avg = avg_xa, weight = w_xa, credit = w_xa * xa, avg_credit = avg_c_xa)) } %>%
+    mutate(per_90 = credit - avg_credit)
+} else {
+  long %>% semi_join(filter(weights_cfg, side == "attack"), by = c("position", "stat")) %>%
+    inner_join(weights_used %>% select(position, stat, goal_weight), by = c("position", "stat")) %>%
+    transmute(season_year, player_id, part = "attack", stat, missing, raw, value = val, pos_avg,
+              weight = goal_weight, credit = goal_weight * val, avg_credit = goal_weight * pos_avg,
+              per_90 = credit - avg_credit)
+}
+write_csv(bind_rows(br_att, br_def) %>% arrange(season_year, player_id, part, stat) %>%
+            mutate(across(where(is.double) & !season_year, ~ signif(.x, 5))),
+          file.path(OUT_DIR, "gar_breakdown.csv"), na = "")
+# Replacement level per position and season: how far an average player is above a
+# replacement-level one (the REPL_PCTL percentile of players with MIN_QUAL+ minutes), per 90
+player_index %>%
+  group_by(season_year, position) %>%
+  summarise(avg_level = first(net_avg), repl_level = quantile(net[qualified], REPL_PCTL),
+            qualified_players = sum(qualified), .groups = "drop") %>%
+  mutate(avg_minus_repl = avg_level - repl_level) %>%
+  write_csv(file.path(OUT_DIR, "gar_replacement.csv"))
+# The settings the app's explanation quotes
+tibble(setting = c("PRIOR_MIN", "MIN_QUAL", "REPL_PCTL", "PASSER_SHARE", "XG_GOAL_VALUE", "ATTACK_MODEL",
+                   "WEIGHT_MODE", "NON_PENALTY", "ADJUST_SOS", "WINS_PER_GOAL", "FIT_SEASONS"),
+       value = c(PRIOR_MIN, MIN_QUAL, REPL_PCTL, PASSER_SHARE, XG_GOAL_VALUE, ATTACK_MODEL,
+                 WEIGHT_MODE, use_np, ADJUST_SOS, round(WINS_PER_GOAL, 3),
+                 paste(setdiff(sort(unique(teams$season_year)), FIT_EXCLUDE), collapse = ", "))) %>%
+  write_csv(file.path(OUT_DIR, "model_settings.csv"))
 
 # ---- 8c. Compare every player with our own roster ---------------------------
 # For the portal, the real alternative to a target is the player we already have.
@@ -927,112 +983,5 @@ p4 <- ggplot(team_long, aes(rating, actual)) +
        caption = DATA_CAPTION) +
   theme_gar
 save(p4, "04_team_ratings_vs_goals.png", w = 11, h = 5.5)
-
-# ---- 11. Scorecard ----------------------------------------------------------
-# Same as player_war.R, on GAR per 90. Skipped automatically on real data.
-
-if (all(c("true_talent", "team_strength_z") %in% names(players))) {
-
-  sc_data <- player_gar %>%
-    filter(minutes_played >= SCORE_MIN, !season_year %in% FIT_EXCLUDE) %>%
-    inner_join(players %>% select(player_id, season_year, true_talent, team_strength_z),
-               by = c("player_id", "season_year"))
-
-  partial_r <- function(x, y, z) cor(resid(lm(x ~ z)), resid(lm(y ~ z)))
-
-  by_position <- sc_data %>%
-    group_by(position) %>%
-    summarise(n                = n(),
-              r_talent         = cor(gar_per_90, true_talent),
-              r_talent_no_team = partial_r(gar_per_90, true_talent, team_strength_z),
-              r_team           = cor(gar_per_90, team_strength_z),
-              talent_vs_team   = cor(true_talent, team_strength_z),
-              .groups = "drop")
-
-  scorecard <- bind_rows(
-    by_position,
-    by_position %>%
-      summarise(position = "Average", n = sum(n),
-                across(c(r_talent, r_talent_no_team, r_team, talent_vs_team), mean))
-  ) %>%
-    pivot_longer(-c(position, n), names_to = "metric", values_to = "value") %>%
-    bind_rows(tibble(
-      position = "Model",
-      n        = NA_integer_,
-      metric   = c("heldout_r2_attack", "heldout_r2_defense", "year_to_year_r", "team_r_goal_diff"),
-      value    = c(r2_oos[["attack"]], r2_oos[["defense"]], yoy_r, r_net))) %>%
-    mutate(version = VERSION, weight_mode = WEIGHT_MODE,
-           run_time = format(Sys.time(), "%Y-%m-%d %H:%M"), value = round(value, 3)) %>%
-    relocate(version, weight_mode, run_time)
-
-  hist_file <- file.path(OUT_DIR, "scorecard_history.csv")
-  history <- if (file.exists(hist_file)) {
-    read_csv(hist_file, col_types = cols(n = col_integer(), value = col_double(),
-                                         .default = col_character())) %>%
-      filter(version != VERSION)
-  } else NULL
-  history <- bind_rows(history, scorecard)
-  write_csv(scorecard, file.path(OUT_DIR, "scorecard.csv"))
-  write_csv(history, hist_file)
-
-  cat(sprintf("\nScorecard (%s): r with true talent, team strength removed\n", VERSION))
-  print(scorecard %>% filter(metric == "r_talent_no_team") %>%
-          select(position, n, value) %>%
-          arrange(match(position, c(pos_order, "Average"))), n = 20)
-
-  # 05: this run, by position
-  metric_labels <- c(r_talent_no_team = "GAR vs true talent, team strength removed (main score)",
-                     r_talent         = "GAR vs true talent",
-                     r_team           = "GAR vs team strength",
-                     talent_vs_team   = "True talent vs team strength (expected team link)")
-  metric_cols   <- c("#1baf7a", "#2a78d6", "#eb6834", "#a8a6a0")
-  sc_plot <- scorecard %>%
-    filter(metric %in% names(metric_labels)) %>%
-    mutate(position = factor(position, levels = rev(c(pos_order, "Average"))),
-           metric   = factor(metric_labels[metric], levels = metric_labels))
-  mv <- with(filter(scorecard, position == "Model"), setNames(value, metric))
-  fmt <- function(v) ifelse(is.na(v), "n/a", sprintf("%.2f", v))
-
-  p5 <- ggplot(sc_plot, aes(value, position, colour = metric, shape = metric,
-                            group = factor(metric, levels = rev(metric_labels)))) +
-    geom_vline(xintercept = 0, colour = ink2, linewidth = 0.3) +
-    geom_point(size = 3, position = position_dodge(width = 0.6)) +
-    scale_colour_manual(values = metric_cols) +
-    scale_shape_manual(values = c(16, 16, 17, 4)) +
-    scale_x_continuous(limits = c(min(0, sc_plot$value), 1), breaks = seq(0, 1, 0.2)) +
-    guides(colour = guide_legend(ncol = 1), shape = guide_legend(ncol = 1)) +
-    labs(title = sprintf("GAR scorecard: %s", VERSION),
-         subtitle = sprintf(paste0("Correlations for players with %d+ minutes\nHeld-out R-squared: attack %s, ",
-                                   "defense %s\nYear-to-year r %.2f; team goal difference r %.2f"),
-                            SCORE_MIN, fmt(mv[["heldout_r2_attack"]]), fmt(mv[["heldout_r2_defense"]]),
-                            mv[["year_to_year_r"]], mv[["team_r_goal_diff"]]),
-         x = "Correlation", y = NULL,
-         caption = "Simulated player data; true talent is the simulation's answer key") +
-    theme_gar + theme(panel.grid.major.y = element_blank())
-  save(p5, "05_scorecard.png", h = 7)
-
-  # 06: main score across versions (once there are at least two)
-  if (n_distinct(history$version) >= 2) {
-    hist_plot <- history %>%
-      filter(metric == "r_talent_no_team") %>%
-      mutate(position = factor(position, levels = c(pos_order, "Average")),
-             # versions are shown in alphabetical order of their labels
-             version  = factor(version, levels = sort(unique(history$version))))
-    p6 <- ggplot(hist_plot, aes(position, value, colour = version, group = version)) +
-      geom_line(linewidth = 0.6, alpha = 0.6) +
-      geom_point(size = 2.8) +
-      geom_hline(yintercept = 0, colour = ink2, linewidth = 0.3) +
-      { if (n_distinct(hist_plot$version) <= 6)
-          scale_colour_manual(values = c("#a8a6a0", "#2a78d6", "#eb6834", "#1baf7a", "#eda100", "#7b5cd6")) } +
-      scale_y_continuous(limits = c(min(0, hist_plot$value), 1)) +
-      labs(title = "Is the method getting better?",
-           subtitle = "GAR vs true talent with team strength removed, by version (higher is better)",
-           x = NULL, y = "Correlation", caption = DATA_CAPTION) +
-      theme_gar + theme(panel.grid.major.x = element_blank())
-    save(p6, "06_scorecard_history.png")
-  }
-} else {
-  cat("\nNo true_talent column: scorecard skipped (expected on real data).\n")
-}
 
 cat("\nDone. Outputs in", OUT_DIR, if (!MAKE_PLOTS) "(charts skipped: MAKE_PLOTS is FALSE)" else "", "\n")

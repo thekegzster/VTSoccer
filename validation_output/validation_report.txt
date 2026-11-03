@@ -1,123 +1,284 @@
-Validating GAR and PAR for season 2026 (real data); players with 360+ minutes count as qualified
+Validating GAR and PAR for seasons 2025 and 2026; players with 360+ minutes count as qualified
+
+==================== SEASON 2025 ====================
 
 1. OUT-OF-SAMPLE GAMES: does a conference-game team rating predict non-conference points per game?
-# A tibble: 5 x 4
+# A tibble: 5 × 4
   predictor                               r    lo    hi
   <chr>                               <dbl> <dbl> <dbl>
-1 Team GAR per game                    0.44  0.34  0.54
-2 Team PAR per game                    0.41  0.3   0.5 
-3 Conference goal difference per game  0.26  0.13  0.38
+1 Team GAR per game                    0.56  0.48  0.63
+2 Team PAR per game                    0.56  0.48  0.62
+3 Conference goal difference per game  0.41  0.31  0.5 
+4 Conference xG difference per game    0.46  0.36  0.54
+5 Conference points per game           0.38  0.28  0.48
+   212 teams, about 10 non-conference games each.
+   GAR on top of goal difference: +0.155 R-squared (p = 0.000)
+   PAR on top of goal difference: +0.153 R-squared (p = 0.000)
+   GAR and PAR together: R-squared 0.341 (GAR alone 0.322, PAR alone 0.321)
+
+2. OUTSIDE JUDGMENT: does team rating line up with Massey ratings?
+   GAR: r = 0.74 (90% CI 0.69 to 0.79)
+   PAR: r = 0.73 (90% CI 0.67 to 0.78) (fitted to Massey, not an independent check)
+   Baseline, conference goal difference: r = 0.65
+
+3. COACHES' CHOICES: within a team and position, does the higher-rated player play more?
+# A tibble: 8 × 4
+  position   GAR   PAR Baseline
+  <chr>    <dbl> <dbl>    <dbl>
+1 GK        0.58  0.57     0.55
+2 CB        0.55  0.56     0.52
+3 FB        0.56  0.54     0.49
+4 DM        0.6   0.54     0.5 
+5 CM        0.54  0.58     0.49
+6 AM        0.52  0.54     0.55
+7 W         0.58  0.6      0.58
+8 CF        0.56  0.58     0.53
+   GAR overall: 0.55
+   PAR overall: 0.56
+   Baseline (simple stat by position): 0.52. 0.50 = no better than a coin flip.
+
+4. RELIABILITY: how much of the real differences between players does the rating capture?
+   GAR: 0.55 overall (correlation with true level about 0.74). By position: GK 0.15, CB 0.55, FB 0.54, DM 0.67, CM 0.68, AM 0.64, W 0.57, CF 0.56
+   PAR: 0.70 overall (correlation with true level about 0.84). By position: GK 0.16, CB 0.76, FB 0.78, DM 0.70, CM 0.71, AM 0.80, W 0.79, CF 0.70
+
+5. TEAM-STRENGTH LEAK: how strongly does player rating follow team quality?
+   GAR: average 0.31 (baseline 0.12)
+   PAR: average 0.34 (baseline 0.12)
+   Some link is expected (good teams recruit good players); above ~0.5 suggests team credit leaking in.
+
+==================== SEASON 2026 ====================
+
+1. OUT-OF-SAMPLE GAMES: does a conference-game team rating predict non-conference points per game?
+# A tibble: 5 × 4
+  predictor                               r    lo    hi
+  <chr>                               <dbl> <dbl> <dbl>
+1 Team GAR per game                    0.44  0.34  0.53
+2 Team PAR per game                    0.51  0.4   0.59
+3 Conference goal difference per game  0.26  0.15  0.36
 4 Conference xG difference per game    0.31  0.2   0.41
 5 Conference points per game           0.17  0.06  0.27
    207 teams, about 8 non-conference games each.
-   GAR on top of goal difference: +0.127 R-squared (p = 0.000)
-   PAR on top of goal difference: +0.099 R-squared (p = 0.000)
-   GAR and PAR together: R-squared 0.195 (GAR alone 0.194, PAR alone 0.165)
+   GAR on top of goal difference: +0.128 R-squared (p = 0.000)
+   PAR on top of goal difference: +0.190 R-squared (p = 0.000)
+   GAR and PAR together: R-squared 0.257 (GAR alone 0.194, PAR alone 0.257)
 
 2. OUTSIDE JUDGMENT: does team rating line up with Massey ratings?
-   GAR: r = 0.68 (90% CI 0.61 to 0.73)
-   PAR: r = 0.68 (90% CI 0.61 to 0.74)
+   GAR: r = 0.66 (90% CI 0.59 to 0.72)
+   PAR: r = 0.74 (90% CI 0.68 to 0.79) (fitted to Massey, not an independent check)
    Baseline, conference goal difference: r = 0.55
 
 3. COACHES' CHOICES: within a team and position, does the higher-rated player play more?
-# A tibble: 8 x 4
+# A tibble: 8 × 4
   position   GAR   PAR Baseline
   <chr>    <dbl> <dbl>    <dbl>
-1 GK        0.48  0.48     0.5 
-2 CB        0.54  0.55     0.52
-3 FB        0.53  0.53     0.48
-4 DM        0.51  0.56     0.44
-5 CM        0.56  0.53     0.51
-6 AM        0.56  0.54     0.55
-7 W         0.54  0.53     0.54
-8 CF        0.51  0.53     0.53
-   GAR overall: 0.54
+1 GK        0.48  0.45     0.5 
+2 CB        0.54  0.56     0.52
+3 FB        0.54  0.5      0.48
+4 DM        0.48  0.5      0.44
+5 CM        0.53  0.56     0.51
+6 AM        0.56  0.55     0.55
+7 W         0.54  0.57     0.54
+8 CF        0.51  0.52     0.53
+   GAR overall: 0.53
    PAR overall: 0.54
    Baseline (simple stat by position): 0.51. 0.50 = no better than a coin flip.
 
 4. RELIABILITY: how much of the real differences between players does the rating capture?
-   GAR: 0.50 overall (correlation with true level about 0.70). By position: GK 0.14, CB 0.50, FB 0.51, DM 0.55, CM 0.66, AM 0.57, W 0.46, CF 0.51
-   PAR: not available (no uncertainty ranges in its output)
+   GAR: 0.50 overall (correlation with true level about 0.70). By position: GK 0.14, CB 0.50, FB 0.50, DM 0.58, CM 0.65, AM 0.57, W 0.46, CF 0.51
+   PAR: 0.66 overall (correlation with true level about 0.81). By position: GK 0.14, CB 0.72, FB 0.74, DM 0.65, CM 0.72, AM 0.74, W 0.73, CF 0.66
 
 5. TEAM-STRENGTH LEAK: how strongly does player rating follow team quality?
-   GAR: average 0.28 (baseline 0.08)
-   PAR: average 0.27 (baseline 0.08)
+   GAR: average 0.26 (baseline 0.08)
+   PAR: average 0.35 (baseline 0.08)
    Some link is expected (good teams recruit good players); above ~0.5 suggests team credit leaking in.
 
-6. SENSITIVITY: re-running each model with other settings
-   GAR Passer share 25%           ... rank r = 0.99, top-50 overlap 100% (5s)
-   GAR Passer share 55%           ... rank r = 0.99, top-50 overlap 94% (4s)
-   GAR Less shrinkage (135 min)   ... rank r = 0.99, top-50 overlap 92% (5s)
-   GAR More shrinkage (540 min)   ... rank r = 0.99, top-50 overlap 74% (5s)
-   GAR Replacement = 10th pct     ... rank r = 0.99, top-50 overlap 94% (5s)
-   GAR Replacement = 30th pct     ... rank r = 0.99, top-50 overlap 100% (4s)
-   GAR Manual weights             ... rank r = 0.59, top-50 overlap 30% (5s)
-   PAR Less shrinkage (135 min)   ... rank r = 1.00, top-50 overlap 96% (4s)
-   PAR More shrinkage (540 min)   ... rank r = 1.00, top-50 overlap 94% (4s)
-   PAR Replacement = 10th pct     ... rank r = 0.98, top-50 overlap 80% (3s)
-   PAR Replacement = 30th pct     ... rank r = 0.99, top-50 overlap 94% (3s)
-   PAR Scale on 10th-90th pct     ... rank r = 1.00, top-50 overlap 100% (3s)
-   PAR Capped at 95th pct         ... rank r = 0.98, top-50 overlap 76% (3s)
-   PAR Manual weights             ... rank r = 0.55, top-50 overlap 24% (3s)
+==================== 2025-2026 POOLED ====================
+
+1. NON-CONFERENCE GAMES, 419 team-seasons
+   GAR                                  r = 0.50 (90% CI 0.43 to 0.55)
+   PAR                                  r = 0.53 (90% CI 0.47 to 0.59)
+   Conference goal difference per game  r = 0.33 (90% CI 0.25 to 0.40)
+   Conference xG difference per game    r = 0.38 (90% CI 0.31 to 0.45)
+   Conference points per game           r = 0.26 (90% CI 0.19 to 0.34)
+   GAR on top of goal difference: +0.141 R-squared (p = 0.0000)
+   PAR on top of goal difference: +0.172 R-squared (p = 0.0000)
+
+2. MASSEY RATINGS, 419 team-seasons (Massey scaled within each season)
+   GAR: r = 0.70
+   PAR: r = 0.73
+   Baseline, conference goal difference: r = 0.60
+
+==================== ACROSS SEASONS ====================
+
+6. SENSITIVITY: re-running each model with other settings (rankings compared for 2026)
+   GAR Passer share 25%           ... rank r = 0.99, top-50 overlap 92% (7s)
+   GAR Passer share 55%           ... rank r = 0.99, top-50 overlap 88% (7s)
+   GAR Less shrinkage (135 min)   ... rank r = 1.00, top-50 overlap 86% (7s)
+   GAR More shrinkage (540 min)   ... rank r = 0.99, top-50 overlap 74% (7s)
+   GAR Replacement = 10th pct     ... rank r = 0.99, top-50 overlap 86% (7s)
+   GAR Replacement = 30th pct     ... rank r = 0.99, top-50 overlap 96% (9s)
+   GAR Manual weights             ... rank r = 0.65, top-50 overlap 46% (8s)
+   GAR Weights from 2025 only     ... rank r = 0.97, top-50 overlap 70% (8s)
+   GAR Weights from 2026 only     ... rank r = 0.94, top-50 overlap 82% (8s)
+   PAR Less shrinkage (135 min)   ... rank r = 1.00, top-50 overlap 98% (7s)
+   PAR More shrinkage (540 min)   ... rank r = 1.00, top-50 overlap 92% (8s)
+   PAR Replacement = 10th pct     ... rank r = 0.99, top-50 overlap 94% (7s)
+   PAR Replacement = 30th pct     ... rank r = 1.00, top-50 overlap 96% (7s)
+   PAR Scale on 10th-90th pct     ... rank r = 1.00, top-50 overlap 98% (7s)
+   PAR Capped at 95th pct         ... rank r = 0.99, top-50 overlap 80% (8s)
+   PAR Points target (old)        ... rank r = 0.94, top-50 overlap 72% (7s)
+   PAR One weight per stat (old)  ... rank r = 0.84, top-50 overlap 68% (10s)
+   PAR Weights from 2025 only     ... rank r = 0.94, top-50 overlap 80% (8s)
+   PAR Weights from 2026 only     ... rank r = 0.92, top-50 overlap 30% (8s)
+
+   Weights learned on ONE season, tested on the OTHER season's non-conference games:
+   GAR, weights from 2025, rating 2026 teams: r = 0.44 (weights from all seasons 0.44)
+   GAR, weights from 2026, rating 2025 teams: r = 0.53 (weights from all seasons 0.56)
+   PAR, weights from 2025, rating 2026 teams: r = 0.46 (weights from all seasons 0.51)
+   PAR, weights from 2026, rating 2025 teams: r = 0.51 (weights from all seasons 0.56)
 
 7. YEAR TO YEAR: does a player's rating repeat the next season?
-   GAR: needs a second season of data
-   PAR: needs a second season of data
+   GAR: r = 0.30 within position over 980 returning players (simple stat 0.14); across positions 0.31 (simple stat 0.71)
+      stayed at the same team: r = 0.30 (n = 822, simple stat 0.15)
+      transferred: r = 0.29 (n = 158, simple stat 0.07)
+   PAR: r = 0.39 within position over 980 returning players (simple stat 0.14); across positions 0.42 (simple stat 0.71)
+      stayed at the same team: r = 0.40 (n = 822, simple stat 0.15)
+      transferred: r = 0.34 (n = 158, simple stat 0.07)
+
+11. NEXT-SEASON FORECAST: do 2025 ratings of the 2026 roster predict 2026 results?
+   205 teams in both seasons; on average 62% of this season's minutes go to players rated last season
+   2026 goal difference per game: last season's GD r = 0.42, last season's Massey r = 0.35, roster simple stat r = 0.05
+      GAR roster rating r = 0.33; on top of last season's GD + Massey: +0.022 R-squared (p = 0.0183)
+      PAR roster rating r = 0.39; on top of last season's GD + Massey: +0.048 R-squared (p = 0.0005)
+   2026 Massey rating: last season's GD r = 0.41, last season's Massey r = 0.77, roster simple stat r = 0.16
+      GAR roster rating r = 0.64; on top of last season's GD + Massey: +0.046 R-squared (p = 0.0000)
+      PAR roster rating r = 0.63; on top of last season's GD + Massey: +0.042 R-squared (p = 0.0000)
+   2026 points per game: last season's GD r = 0.35, last season's Massey r = 0.30, roster simple stat r = 0.09
+      GAR roster rating r = 0.28; on top of last season's GD + Massey: +0.014 R-squared (p = 0.0750)
+      PAR roster rating r = 0.36; on top of last season's GD + Massey: +0.049 R-squared (p = 0.0006)
 
 8. AWARDS: do honored players rate high?
    No awards.csv. Fill in awards_template.csv (player_name and team as in the model output) and save it as awards.csv.
 
-10. GAR vs PAR: how similarly do they rank players at each position?
-# A tibble: 8 x 4
+10. GAR vs PAR: how similarly do they rank players at each position? (2026)
+# A tibble: 8 × 4
   position     n rank_r top10_shared
   <chr>    <int>  <dbl>        <dbl>
-1 GK         195   1             0.9
-2 CB         451   0.72          0.2
-3 FB         403   0.45          0.3
-4 DM         182   0.65          0.2
-5 CM         215   0.65          0.4
-6 AM         230   0.77          0.5
-7 W          135   0.78          0.6
-8 CF         242   0.95          0.5
+1 GK         195   0.94          0.8
+2 CB         451   0.54          0.1
+3 FB         403   0.59          0.1
+4 DM         182   0.77          0.2
+5 CM         215   0.83          0.4
+6 AM         230   0.85          0.6
+7 W          135   0.77          0.4
+8 CF         242   0.88          0.5
    Biggest disagreements written to biggest_disagreements.csv
 
 ==================== SUMMARY ====================
 1. Non-conference games 
-   r with non-conference points per game: GAR 0.44 | PAR 0.41 | baseline 0.31 (Conference xG difference per game)
+   r with non-conference points per game [2025]: GAR 0.56 | PAR 0.56 | baseline 0.46 (Conference xG difference per game)
       GAR -> beats the baseline
       PAR -> beats the baseline
-   extra R-squared over conference goal difference: GAR 0.13 | PAR 0.10
+   r with non-conference points per game [2026]: GAR 0.44 | PAR 0.51 | baseline 0.31 (Conference xG difference per game)
+      GAR -> beats the baseline
+      PAR -> beats the baseline
+   r with non-conference points per game [2025-2026 pooled]: GAR 0.50 | PAR 0.53 | baseline 0.38 (Conference xG difference per game)
+      GAR -> beats the baseline
+      PAR -> beats the baseline
+   extra R-squared over conference goal difference [2025]: GAR 0.15 | PAR 0.15
+      GAR -> adds information
+      PAR -> adds information
+   extra R-squared over conference goal difference [2026]: GAR 0.13 | PAR 0.19
+      GAR -> adds information
+      PAR -> adds information
+   extra R-squared over conference goal difference [2025-2026 pooled]: GAR 0.14 | PAR 0.17
       GAR -> adds information
       PAR -> adds information
 2. Massey ratings 
-   r with Massey team rating: GAR 0.68 | PAR 0.68 | baseline 0.55 (Conference goal difference per game)
+   r with Massey team rating [2025]: GAR 0.74 | PAR 0.73 | baseline 0.65 (Conference goal difference per game)
+      GAR -> beats the baseline
+      PAR -> not independent: fitted to Massey ratings
+   r with Massey team rating [2026]: GAR 0.66 | PAR 0.74 | baseline 0.55 (Conference goal difference per game)
+      GAR -> beats the baseline
+      PAR -> not independent: fitted to Massey ratings
+   r with Massey team rating [2025-2026 pooled]: GAR 0.70 | PAR 0.73 | baseline 0.60 (Conference goal difference per game)
+      GAR -> beats the baseline
+      PAR -> not independent: fitted to Massey ratings
+3. Coaches' choices 
+   share of teammate pairs where the higher-rated player plays more [2025]: GAR 0.55 | PAR 0.56 | baseline 0.52 (Simple stat by position)
       GAR -> beats the baseline
       PAR -> beats the baseline
-3. Coaches' choices 
-   share of teammate pairs where the higher-rated player plays more: GAR 0.54 | PAR 0.54 | baseline 0.51 (Simple stat by position)
-      GAR -> beats the baseline
+   share of teammate pairs where the higher-rated player plays more [2026]: GAR 0.53 | PAR 0.54 | baseline 0.51 (Simple stat by position)
+      GAR -> about equal
       PAR -> beats the baseline
 4. Reliability 
-   share of real player differences captured (0-1): GAR 0.49 | PAR —
+   share of real player differences captured (0-1) [2025]: GAR 0.55 | PAR 0.70
+      GAR -> moderate: compare tiers, not exact ranks
+      PAR -> good
+   share of real player differences captured (0-1) [2026]: GAR 0.49 | PAR 0.66
       GAR -> low: rank in tiers
-      PAR -> not available
+      PAR -> moderate: compare tiers, not exact ranks
 5. Team-strength leak 
-   average rank correlation of player rating with team quality: GAR 0.28 | PAR 0.27 | baseline 0.08 (Simple stat by position)
+   average rank correlation of player rating with team quality [2025]: GAR 0.31 | PAR 0.34 | baseline 0.12 (Simple stat by position)
       GAR -> fine
       PAR -> fine
+   average rank correlation of player rating with team quality [2026]: GAR 0.26 | PAR 0.35 | baseline 0.08 (Simple stat by position)
+      GAR -> fine
+      PAR -> watch
 6. Sensitivity 
-   lowest rank correlation after small setting tweaks: GAR 0.99 | PAR 0.98
+   lowest rank correlation after small setting tweaks [2026]: GAR 0.99 | PAR 0.99
       GAR -> robust
       PAR -> robust
-   rank correlation with hand-set (manual) weights: GAR 0.58 | PAR 0.55
-      GAR -> depends on how weights are set
-      PAR -> depends on how weights are set
+   rank correlation with a different method: manual weights [2026]: GAR 0.65
+      GAR -> depends on the method
+   rank correlation with weights from 2025 only [2026]: GAR 0.97 | PAR 0.94
+      GAR -> robust
+      PAR -> robust
+   rank correlation with weights from 2026 only [2026]: GAR 0.94 | PAR 0.92
+      GAR -> robust
+      PAR -> robust
+   rank correlation with a different method: points target (old) [2026]: PAR 0.94
+      PAR -> robust
+   rank correlation with a different method: one weight per stat (old) [2026]: PAR 0.84
+      PAR -> mostly robust
+6b. Weights from another season 
+   r with 2026 non-conference points per game, weights fitted on 2025 only [2026]: GAR 0.43 | PAR 0.46 | baseline 0.44 (Weights fitted on all seasons)
+      GAR -> about equal
+      PAR -> baseline does better
+   r with 2025 non-conference points per game, weights fitted on 2026 only [2025]: GAR 0.53 | PAR 0.51 | baseline 0.56 (Weights fitted on all seasons)
+      GAR -> about equal
+      PAR -> baseline does better
 7. Year to year 
-   r between back-to-back seasons: GAR — | PAR —
-      GAR -> needs a second season
-      PAR -> needs a second season
+   r between a player's rating in back-to-back seasons (within position) [2025-2026 pooled]: GAR 0.30 | PAR 0.39 | baseline 0.14 (Simple stat by position)
+      GAR -> mostly noise
+      PAR -> somewhat stable
+   r between back-to-back seasons (within position), players who stayed at the same team [2025-2026 pooled]: GAR 0.30 | PAR 0.40 | baseline 0.15 (Simple stat by position)
+      GAR -> beats the baseline
+      PAR -> beats the baseline
+   r between back-to-back seasons (within position), players who transferred [2025-2026 pooled]: GAR 0.29 | PAR 0.34 | baseline 0.07 (Simple stat by position)
+      GAR -> beats the baseline
+      PAR -> beats the baseline
+11. Next-season forecast 
+   r with 2026 goal difference per game [2026]: GAR 0.34 | PAR 0.39 | baseline 0.42 (Last season's goal difference)
+      GAR -> baseline does better
+      PAR -> baseline does better
+   extra R-squared for 2026 goal difference per game over last season's GD + Massey [2026]: GAR 0.02 | PAR 0.05
+      GAR -> adds information
+      PAR -> adds information
+   r with 2026 Massey rating [2026]: GAR 0.64 | PAR 0.63 | baseline 0.77 (Last season's Massey rating)
+      GAR -> baseline does better
+      PAR -> not independent: fitted to Massey ratings
+   extra R-squared for 2026 Massey rating over last season's GD + Massey [2026]: GAR 0.05 | PAR 0.04
+      GAR -> adds information
+      PAR -> adds information
+   r with 2026 points per game [2026]: GAR 0.28 | PAR 0.36 | baseline 0.35 (Last season's goal difference)
+      GAR -> baseline does better
+      PAR -> about equal
+   extra R-squared for 2026 points per game over last season's GD + Massey [2026]: GAR 0.01 | PAR 0.05
+      GAR -> no clear extra information
+      PAR -> adds information
 10. GAR vs PAR 
-   rank correlation between GAR and PAR (within position, average): both 0.75
+   rank correlation between GAR and PAR (within position, average) [2026]: both 0.77
       both -> mostly agree
 
 Charts and CSVs are in validation_output/

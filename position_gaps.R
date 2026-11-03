@@ -24,21 +24,14 @@ suppressPackageStartupMessages({
 })
 
 # ---- Settings ---------------------------------------------------------------
-DATA_SOURCE <- "real"            # "real" or "simulated"
 FOCUS_TEAM  <- "Virginia Tech"
-RANK_BY     <- "massey"             # how "top" teams are picked: "rpi" (RPI rank) or "massey" (Massey rating, real data)
+RANK_BY     <- "massey"             # how "top" teams are picked: "rpi" (RPI rank) or "massey" (Massey rating)
 TOP_A       <- 10                # first comparison group: top 10
 TOP_B       <- 30                # second comparison group: top 30 (ranks 1-30, so it includes the top 10)
 SEASON      <- NA                # NA = latest season in the data
 MAKE_PLOTS  <- TRUE
-
-if (DATA_SOURCE == "real") {
-  GAR_DIR <- "GAR_output_real"; PAR_DIR <- "par_output_real"
-  STANDINGS_FILE <- "real_standings.csv"; OUT_DIR <- "position_gaps_real"
-} else {
-  GAR_DIR <- "GAR_output"; PAR_DIR <- "par_output"
-  STANDINGS_FILE <- "simulated_standings.csv"; OUT_DIR <- "position_gaps"
-}
+GAR_DIR <- "GAR_output_real"; PAR_DIR <- "par_output_real"
+STANDINGS_FILE <- "real_standings.csv"; OUT_DIR <- "position_gaps_real"
 POS <- c("GK", "CB", "FB", "DM", "CM", "AM", "W", "CF")
 POS_NAMES <- c(GK = "Goalkeeper", CB = "Center back", FB = "Fullback", DM = "Defensive mid",
                CM = "Central mid", AM = "Attacking mid", W = "Winger", CF = "Center forward")

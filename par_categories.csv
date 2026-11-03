@@ -1,0 +1,73 @@
+position,category,stat,direction,weight_in_category,fixed_points_per_season,note
+GK,Shot-stopping,prevented_goals,1,1,3.92,"FIXED: goals prevented per 90 = xG faced minus goals conceded; 1 goal prevented = 0.68 points, like GAR (still heavily blended toward average)"
+GK,Distribution,pass_acc,1,1,,pass accuracy %
+GK,Distribution,long_pass_acc,1,1,,long pass accuracy %
+CB,Defending,def_duel_win_pct,1,2,1.5,"FIXED at 1.5 points per season (5th to 95th pct): the fit gave CB defending 0, which is not credible; 1.5 = GAR's estimate for CB duel winning converted to points. defensive duels won %: the core 1v1 measure"
+CB,Defending,interceptions,1,1,1.5,interceptions per 30 min of opponent possession
+CB,Defending,sliding_tackles,1,1,1.5,sliding tackles per 30 min of opponent possession
+CB,Defending,shots_blocked,1,1,1.5,shots blocked per 90
+CB,Defending,cards,-1,1,1.5,yellow + 2 x red per 90 (fewer is better)
+CB,Aerial,aerial_win_pct,1,2,,aerial duels won %
+CB,Aerial,aerial_won,1,1,,aerial duels won per 90
+CB,Passing & progression,pass_acc,1,1,,pass accuracy %
+CB,Passing & progression,long_pass_acc,1,1,,long pass accuracy %
+CB,Passing & progression,prog_passes,1,1,,progressive passes per 90
+CB,Passing & progression,final_third_passes,1,1,,passes into the final third per 90
+CB,Shooting (npxG),xg,1,1,0.88,"FIXED: non-penalty xG per 90. Same value per expected goal at every position (points per goal x goals per xG x shooter share x range) (set pieces, mostly)"
+FB,Defending,def_duel_win_pct,1,2,,defensive duels won %
+FB,Defending,interceptions,1,1,,interceptions per 30 min of opponent possession
+FB,Defending,sliding_tackles,1,1,,sliding tackles per 30 min of opponent possession
+FB,Defending,shots_blocked,1,1,,shots blocked per 90
+FB,Expected assists,xa,1,1,0.52,"FIXED: expected assists per 90. Same value per expected assist at every position (passer gets 40% of the chance, as in GAR)"
+FB,Crossing & box entries,crosses,1,1,,crosses per 90 (value beyond the xA they create)
+FB,Crossing & box entries,box_passes,1,1,,passes into the penalty area per 90
+FB,Progression,prog_runs,1,1,,progressive runs per 90
+FB,Progression,dribbles_won,1,1,,dribbles completed per 90
+FB,Progression,accelerations,1,1,,accelerations per 90
+FB,Progression,prog_passes,1,1,,progressive passes per 90
+FB,Shooting (npxG),xg,1,1,0.9,FIXED: non-penalty xG per 90. Same value per expected goal at every position (points per goal x goals per xG x shooter share x range)
+DM,Defending,def_duel_win_pct,1,2,,defensive duels won %
+DM,Defending,interceptions,1,2,,interceptions per 30 min of opponent possession
+DM,Defending,sliding_tackles,1,1,,sliding tackles per 30 min of opponent possession
+DM,Defending,shots_blocked,1,1,,shots blocked per 90
+DM,Aerial,aerial_win_pct,1,1,,aerial duels won %
+DM,Passing & progression,pass_acc,1,1,,pass accuracy % (passes per 90 removed: it mostly measures how much his team has the ball)
+DM,Passing & progression,prog_passes,1,1,,progressive passes per 90 (passes per 90 removed: it mostly measures how much his team has the ball)
+DM,Passing & progression,final_third_passes,1,1,,passes into the final third per 90 (passes per 90 removed: it mostly measures how much his team has the ball)
+DM,Shooting (npxG),xg,1,1,0.89,FIXED: non-penalty xG per 90. Same value per expected goal at every position (points per goal x goals per xG x shooter share x range)
+DM,Expected assists,xa,1,1,0.47,"FIXED: expected assists per 90. Same value per expected assist at every position (passer gets 40% of the chance, as in GAR)"
+CM,Defending,def_duel_win_pct,1,2,,defensive duels won %
+CM,Defending,interceptions,1,1,,interceptions per 30 min of opponent possession
+CM,Defending,aerial_win_pct,1,1,,aerial duels won %
+CM,Passing & progression,pass_acc,1,1,,pass accuracy %
+CM,Passing & progression,prog_passes,1,1,,progressive passes per 90
+CM,Passing & progression,final_third_passes,1,1,,passes into the final third per 90
+CM,Passing & progression,through_passes,1,1,,through passes per 90
+CM,Expected assists,xa,1,1,0.59,"FIXED: expected assists per 90. Same value per expected assist at every position (passer gets 40% of the chance, as in GAR)"
+CM,Chance volume,key_passes,1,1,,key passes per 90 (value beyond the xA they create)
+CM,Shooting (npxG),xg,1,1,1.02,FIXED: non-penalty xG per 90. Same value per expected goal at every position (points per goal x goals per xG x shooter share x range)
+AM,Shooting (npxG),xg,1,1,1.74,FIXED: non-penalty xG per 90. Same value per expected goal at every position (points per goal x goals per xG x shooter share x range)
+AM,Box presence,touches_box,1,1,,touches in the penalty area per 90 (value beyond his xG)
+AM,Expected assists,xa,1,1,0.68,"FIXED: expected assists per 90. Same value per expected assist at every position (passer gets 40% of the chance, as in GAR)"
+AM,Chance volume,key_passes,1,1,,key passes per 90 (value beyond the xA they create)
+AM,Chance volume,through_passes,1,1,,through passes per 90 (value beyond the xA they create)
+AM,Chance volume,box_passes,1,1,,passes into the penalty area per 90 (value beyond the xA they create)
+AM,Carrying,dribbles_won,1,1,,dribbles completed per 90
+AM,Carrying,prog_runs,1,1,,progressive runs per 90
+AM,Carrying,accelerations,1,1,,accelerations per 90
+W,Shooting (npxG),xg,1,1,1.51,FIXED: non-penalty xG per 90. Same value per expected goal at every position (points per goal x goals per xG x shooter share x range)
+W,Box presence,touches_box,1,1,,touches in the penalty area per 90 (value beyond his xG)
+W,Expected assists,xa,1,1,0.66,"FIXED: expected assists per 90. Same value per expected assist at every position (passer gets 40% of the chance, as in GAR)"
+W,Chance volume,key_passes,1,1,,key passes per 90 (value beyond the xA they create)
+W,Chance volume,crosses,1,1,,crosses per 90 (value beyond the xA they create)
+W,Carrying,dribbles_won,1,1,,dribbles completed per 90
+W,Carrying,prog_runs,1,1,,progressive runs per 90
+W,Carrying,accelerations,1,1,,accelerations per 90
+CF,Shooting (npxG),xg,1,1,2.44,FIXED: non-penalty xG per 90. Same value per expected goal at every position (points per goal x goals per xG x shooter share x range)
+CF,Box presence,touches_box,1,1,,touches in the penalty area per 90 (value beyond his xG)
+CF,Expected assists,xa,1,1,0.49,"FIXED: expected assists per 90. Same value per expected assist at every position (passer gets 40% of the chance, as in GAR)"
+CF,Chance volume,key_passes,1,1,,key passes per 90 (value beyond the xA they create)
+CF,Chance volume,through_passes,1,1,,through passes per 90 (value beyond the xA they create)
+CF,Hold-up & duels,duels_won,1,1,,offensive + aerial duels won per 90
+CF,Hold-up & duels,off_duel_win_pct,1,1,,offensive duels won %
+CF,Hold-up & duels,aerial_win_pct,1,1,,aerial duels won %

@@ -1,4 +1,216 @@
 season_year,team,conference,rpi_rank,sos_rank,overall_w,overall_l,overall_t,games,win_pct,goals_for,goals_against,team_rating,conference_rating,wyscout_team,record_as_of
+2025,Air Force,Western Athletic,206,83,0,6,1,7.06,0.07142857142857142,2,16,7.13,8.12,Air Force Falcons,updated 10/19/2026 11:52 AM PT
+2025,Akron,Big East,13,47,5,2,1,10.86,0.6875,14,11,8.75,8.26,Akron Zips,updated 10/19/2026 11:35 AM PT
+2025,American,Patriot League,70,154,7,1,1,15.19,0.8333333333333334,21,9,8.15,7.87,American Eagles,updated 10/19/2026 11:45 AM PT
+2025,Army West Point,Patriot League,111,154,5,3,1,11.12,0.6111111111111112,17,11,7.85,7.87,Army West Point Black Knights,updated 10/19/2026 11:45 AM PT
+2025,Bellarmine,Atlantic Sun,116,127,3,1,2,10.19,0.6666666666666666,19,11,8.2,8,Bellarmine Knights,updated 10/19/2026 11:34 AM PT
+2025,Belmont,Missouri Val,95,91,3,2,2,8.21,0.5714285714285714,13,7,8.27,8.07,Belmont Bruins,updated 10/19/2026 11:43 AM PT
+2025,Binghamton,America East,181,99,0,7,0,7.93,0,2,16,7.49,8.03,Binghamton BearCats,updated 10/19/2026 11:28 AM PT
+2025,Boston College,Atlantic Coast,81,1,1,6,1,10.88,0.1875,5,16,8.14,8.55,Boston College Eagles,updated 10/19/2026 11:32 AM PT
+2025,Boston U.,Patriot League,65,154,5,4,0,12.37,0.5555555555555556,15,13,8.14,7.87,Boston Terriers,updated 10/19/2026 11:45 AM PT
+2025,Bowling Green,Missouri Val,138,91,1,4,2,6.94,0.2857142857142857,6,12,7.88,8.07,Bowling Green Falcons,updated 10/19/2026 11:43 AM PT
+2025,Bradley,Missouri Val,187,91,0,5,2,8.05,0.14285714285714285,8,19,7.47,8.07,Bradley Braves,updated 10/19/2026 11:43 AM PT
+2025,Brown,Ivy League,67,66,2,4,1,8.28,0.35714285714285715,5,9,8.08,8.22,Brown Bears,updated 10/19/2026 11:41 AM PT
+2025,Bryant,America East,6,99,6,1,0,10.62,0.8571428571428571,20,8,8.81,8.03,Bryant Bulldogs,updated 10/19/2026 11:28 AM PT
+2025,Bucknell,Patriot League,59,154,4,2,3,11.22,0.6111111111111112,9,8,8.07,7.87,Bucknell Bison,updated 10/19/2026 11:45 AM PT
+2025,Butler,Big East,159,47,2,4,2,9.76,0.375,10,15,7.91,8.26,Butler Bulldogs,updated 10/19/2026 11:35 AM PT
+2025,CSU Bakersfield,Big West,179,117,3,4,2,11.53,0.4444444444444444,11,15,7.7,8.01,CSU Bakersfield Roadrunners,updated 10/19/2026 11:39 AM PT
+2025,CSUN,Big West,163,117,1,5,3,11.02,0.2777777777777778,4,10,8.02,8.01,CSUN Matadors,updated 10/19/2026 11:39 AM PT
+2025,Cal Poly,Big West,102,117,5,2,2,12.66,0.6666666666666666,12,7,8.25,8.01,Cal Poly Mustangs,updated 10/19/2026 11:39 AM PT
+2025,Cal State Fullerton,Big West,117,117,5,3,1,12.24,0.6111111111111112,16,9,8.25,8.01,Cal State Fullerton Titans,updated 10/19/2026 11:39 AM PT
+2025,California,Atlantic Coast,51,1,2,5,1,13.25,0.3125,12,17,8.5,8.55,Berkeley Golden Bears,updated 10/19/2026 11:32 AM PT
+2025,California Baptist,Western Athletic,56,83,4,2,1,9.57,0.6428571428571429,15,11,8.5,8.12,California Baptist Lancers,updated 10/19/2026 11:52 AM PT
+2025,Campbell,Coastal,115,99,4,2,2,10.55,0.625,19,13,8.18,8.03,Campbell Camels,updated 10/19/2026 11:40 AM PT
+2025,Canisius,Metro,198,182,3,7,0,11.76,0.3,7,19,7.39,7.7,Canisius Golden Griffins,updated 10/19/2026 11:42 AM PT
+2025,Central Arkansas,Atlantic Sun,146,127,3,2,1,8.59,0.5833333333333334,17,18,7.76,8,Central Arkansas Bears,updated 10/19/2026 11:34 AM PT
+2025,Central Connecticut,Northeast,213,203,1,7,1,10.05,0.16666666666666666,6,21,6.66,7.32,CCSU Blue Devils,updated 10/19/2026 11:54 AM PT
+2025,Charlotte,American Athletic,48,74,5,1,2,13.92,0.75,27,5,8.43,8.18,Charlotte 49ers,updated 10/19/2026 11:31 AM PT
+2025,Chicago State,Northeast,212,203,1,7,1,10.57,0.16666666666666666,5,22,6.44,7.32,Chicago State Cougars,updated 10/19/2026 11:54 AM PT
+2025,Clemson,Atlantic Coast,29,1,4,2,2,11.5,0.625,17,16,8.57,8.55,Clemson Tigers,updated 10/19/2026 11:32 AM PT
+2025,Cleveland State,Horizon,97,172,5,1,3,13.35,0.7222222222222222,17,7,8.14,7.73,Cleveland State Vikings,updated 10/19/2026 11:40 AM PT
+2025,Coastal Carolina,Sun Belt,149,37,2,6,1,13.16,0.2777777777777778,12,15,7.69,8.27,Coastal Carolina Chanticleers,updated 10/19/2026 11:49 AM PT
+2025,Colgate,Patriot League,133,154,1,4,4,10.26,0.3333333333333333,2,5,7.86,7.87,Colgate Raiders,updated 10/19/2026 11:45 AM PT
+2025,College of Charleston,Coastal,105,99,3,3,2,7.88,0.5,10,7,7.94,8.03,Charleston Cougars,updated 10/19/2026 11:40 AM PT
+2025,Columbia,Ivy League,114,66,1,5,1,8.24,0.21428571428571427,6,13,7.79,8.22,Columbia Lions,updated 10/19/2026 11:41 AM PT
+2025,Cornell,Ivy League,19,66,5,1,1,10.2,0.7857142857142857,15,9,8.7,8.22,Cornell Big Red,updated 10/19/2026 11:41 AM PT
+2025,Creighton,Big East,49,47,4,2,2,10.24,0.625,10,14,8.41,8.26,Creighton Bluejays,updated 10/19/2026 11:35 AM PT
+2025,Dartmouth,Ivy League,128,66,2,5,0,8.14,0.2857142857142857,6,15,7.77,8.22,Dartmouth Big Green,updated 10/19/2026 11:41 AM PT
+2025,Davidson,Atlantic 10,52,135,4,2,2,10.92,0.625,10,10,8.16,7.98,Davidson Wildcats,updated 10/19/2026 11:32 AM PT
+2025,Dayton,Atlantic 10,88,135,4,1,3,13.79,0.6875,18,10,8.19,7.98,Dayton Flyers,updated 10/19/2026 11:32 AM PT
+2025,DePaul,Big East,183,47,0,6,2,10.98,0.125,7,20,7.47,8.26,DePaul Blue Demons,updated 10/19/2026 11:35 AM PT
+2025,Delaware,Summit Lg,46,47,3,1,2,8.2,0.6666666666666666,11,8,8.64,8.26,Delaware Blue Hens,updated 10/19/2026 11:48 AM PT
+2025,Denver,Summit Lg,23,47,4,1,1,10.15,0.75,18,7,8.72,8.26,Denver Pioneers,updated 10/19/2026 11:48 AM PT
+2025,Detroit Mercy,Horizon,184,172,2,5,2,10.31,0.3333333333333333,9,16,7.7,7.73,Detroit Mercy Titans,updated 10/19/2026 11:40 AM PT
+2025,Drake,Missouri Val,75,91,3,1,3,9.32,0.6428571428571429,10,6,8.25,8.07,Drake Bulldogs,updated 10/19/2026 11:43 AM PT
+2025,Drexel,Coastal,124,99,2,5,1,10.29,0.3125,7,12,7.84,8.03,Drexel Dragons,updated 10/19/2026 11:40 AM PT
+2025,Duke,Atlantic Coast,31,1,4,2,2,11.61,0.625,10,8,8.62,8.55,Duke Blue Devils,updated 10/19/2026 11:32 AM PT
+2025,Duquesne,Atlantic 10,126,135,2,6,0,7.91,0.25,8,15,7.99,7.98,Duquesne Duke,updated 10/19/2026 11:32 AM PT
+2025,ETSU,Southern,201,148,2,3,0,7.12,0.4,12,13,7.41,7.91,ETSU Buccaneers,updated 10/19/2026 11:46 AM PT
+2025,Eastern Illinois,OH Valley,169,195,3,4,3,12.29,0.45,12,15,7.59,7.65,Eastern Illinois Panthers,updated 10/19/2026 11:44 AM PT
+2025,Elon,Coastal,71,99,4,1,3,11.83,0.6875,15,8,8.26,8.03,Elon Phoenix,updated 10/19/2026 11:40 AM PT
+2025,Evansville,Missouri Val,94,91,3,1,3,9.19,0.6428571428571429,12,7,8.13,8.07,Evansville Purple Aces,updated 10/19/2026 11:43 AM PT
+2025,FDU,Northeast,68,203,7,1,1,12.82,0.8333333333333334,26,6,8.1,7.32,Fairleigh Dickinson Knights,updated 10/19/2026 11:54 AM PT
+2025,FGCU,Atlantic Sun,89,127,2,3,1,7.36,0.4166666666666667,7,9,8.16,8,FGCU Eagles,updated 10/19/2026 11:34 AM PT
+2025,FIU,American Athletic,69,74,4,4,0,12.02,0.5,11,13,8.28,8.18,FIU Panthers,updated 10/19/2026 11:31 AM PT
+2025,Fairfield,Metro,80,182,5,1,4,15.41,0.7,25,12,8.06,7.7,Fairfield Stags,updated 10/19/2026 11:42 AM PT
+2025,Florida Atlantic,American Athletic,33,74,5,1,2,13.02,0.75,26,11,8.55,8.18,FAU Owls,updated 10/19/2026 11:31 AM PT
+2025,Fordham,Atlantic 10,92,135,5,1,2,12,0.75,18,8,8.24,7.98,Fordham Rams,updated 10/19/2026 11:32 AM PT
+2025,Furman,Southern,14,148,4,0,1,5.96,0.9,12,4,8.88,7.91,Furman Paladins,updated 10/19/2026 11:46 AM PT
+2025,Gardner-Webb,Big South,35,164,5,1,1,12.15,0.7857142857142857,19,8,8.55,7.81,Gardner-Webb Bulldogs,updated 10/19/2026 11:36 AM PT
+2025,George Mason,Atlantic 10,78,135,4,2,2,10.05,0.625,16,14,8.18,7.98,George Mason Patriots,updated 10/19/2026 11:32 AM PT
+2025,George Washington,Atlantic 10,205,135,0,7,1,9.13,0.0625,5,13,7.33,7.98,George Washington Colonials,updated 10/19/2026 11:32 AM PT
+2025,Georgetown,Big East,9,47,6,0,2,12.04,0.875,25,4,8.94,8.26,Georgetown Hoyas,updated 10/19/2026 11:35 AM PT
+2025,Georgia Southern,Sun Belt,34,37,6,3,0,12.52,0.6666666666666666,20,14,8.66,8.27,Georgia Southern Eagles,updated 10/19/2026 11:49 AM PT
+2025,Georgia State,Sun Belt,166,37,2,4,3,11.76,0.3888888888888889,15,20,7.98,8.27,Georgia State Panthers,updated 10/19/2026 11:49 AM PT
+2025,Gonzaga,West Coast,127,27,2,5,2,10.93,0.3333333333333333,14,15,8.03,8.35,Gonzaga Bulldogs,updated 10/19/2026 11:50 AM PT
+2025,Grand Canyon,Western Athletic,38,83,3,1,3,12.14,0.6428571428571429,19,8,8.65,8.12,Grand Canyon Lopes,updated 10/19/2026 11:52 AM PT
+2025,Green Bay,Horizon,135,172,5,3,1,14.14,0.6111111111111112,20,11,7.9,7.73,Green Bay Phoenix,updated 10/19/2026 11:40 AM PT
+2025,HCU,OH Valley,106,195,5,3,2,13.87,0.6,17,11,8.03,7.65,HCU Huskies,updated 10/19/2026 11:44 AM PT
+2025,Harvard,Ivy League,60,66,2,3,2,9.27,0.42857142857142855,9,13,8.27,8.22,Harvard Crimson,updated 10/19/2026 11:41 AM PT
+2025,High Point,Big South,11,164,7,0,0,10.7,1,30,1,8.93,7.81,High Point Panthers,updated 10/19/2026 11:36 AM PT
+2025,Hofstra,Coastal,27,99,7,1,0,11.26,0.875,26,8,8.72,8.03,Hofstra Pride,updated 10/19/2026 11:40 AM PT
+2025,Holy Cross,Patriot League,177,154,1,5,3,10.42,0.2777777777777778,7,12,7.69,7.87,Holy Cross Crusaders,updated 10/19/2026 11:45 AM PT
+2025,Howard,Northeast,208,203,3,5,1,9.09,0.3888888888888889,9,14,7.05,7.32,Howard Bison,updated 10/19/2026 11:54 AM PT
+2025,IU Indy,Horizon,170,172,3,5,1,10.7,0.3888888888888889,8,11,7.82,7.73,IU Indianapolis,updated 10/19/2026 11:40 AM PT
+2025,Indiana,Big 10,10,16,5,5,0,11.8,0.5,25,18,8.74,8.53,Indiana Hoosiers,updated 10/19/2026 11:37 AM PT
+2025,Iona,Metro,119,182,6,1,3,14,0.75,24,11,8.09,7.7,Iona Gaels,updated 10/19/2026 11:42 AM PT
+2025,Jacksonville,Atlantic Sun,123,127,2,2,2,8.47,0.5,9,7,7.98,8,Jacksonville Dolphins,updated 10/19/2026 11:34 AM PT
+2025,James Madison,Sun Belt,120,37,0,6,3,10.78,0.16666666666666666,6,14,7.75,8.27,JMU Dukes,updated 10/19/2026 11:49 AM PT
+2025,Kansas City,Summit Lg,20,47,4,1,1,9.92,0.75,15,12,8.62,8.26,UMKC Kangaroos,updated 10/19/2026 11:48 AM PT
+2025,Kentucky,Sun Belt,39,37,7,1,1,13.47,0.8333333333333334,15,10,8.56,8.27,Kentucky Wildcats,updated 10/19/2026 11:49 AM PT
+2025,LIU,Northeast,125,203,5,1,3,10.31,0.7222222222222222,13,9,7.77,7.32,LIU Sharks,updated 10/19/2026 11:54 AM PT
+2025,LMU,West Coast,103,27,1,3,5,11.39,0.3888888888888889,12,17,8.29,8.35,LMU Lions,updated 10/19/2026 11:50 AM PT
+2025,La Salle,Atlantic 10,165,135,2,2,4,9.96,0.5,11,17,7.56,7.98,La Salle Explorers,updated 10/19/2026 11:32 AM PT
+2025,Lafayette,Patriot League,108,154,3,2,4,14.23,0.5555555555555556,13,11,8,7.87,Lafayette Leopards,updated 10/19/2026 11:45 AM PT
+2025,Le Moyne,Northeast,182,203,4,3,2,11.6,0.5555555555555556,15,13,7.4,7.32,Le Moyne Dolphins,updated 10/19/2026 11:54 AM PT
+2025,Lehigh,Patriot League,61,154,5,1,3,12.64,0.7222222222222222,16,11,8.03,7.87,Lehigh Mountain Hawks,updated 10/19/2026 11:45 AM PT
+2025,Liberty,OH Valley,140,195,4,2,4,14.54,0.6,17,11,7.72,7.65,Liberty Flames,updated 10/19/2026 11:44 AM PT
+2025,Lindenwood,OH Valley,90,195,6,2,2,13.94,0.7,18,6,8.18,7.65,Lindenwood Lions,updated 10/19/2026 11:44 AM PT
+2025,Lipscomb,Atlantic Sun,176,127,1,2,3,8.77,0.4166666666666667,10,13,7.46,8,Lipscomb Bisons,updated 10/19/2026 11:34 AM PT
+2025,Longwood,Big South,186,164,1,4,2,8.39,0.2857142857142857,9,18,7.52,7.81,Longwood Lancers,updated 10/19/2026 11:36 AM PT
+2025,Louisville,Atlantic Coast,79,1,1,5,2,10.86,0.25,2,12,8.23,8.55,Louisville Cardinals,updated 10/19/2026 11:32 AM PT
+2025,Loyola Chicago,Atlantic 10,153,135,1,3,4,8.31,0.375,3,10,7.93,7.98,Loyola Chicago Ramblers,updated 10/19/2026 11:32 AM PT
+2025,Loyola Maryland,Patriot League,158,154,2,5,2,10.36,0.3333333333333333,5,11,7.64,7.87,Loyola Greyhounds,updated 10/19/2026 11:45 AM PT
+2025,Manhattan,Metro,173,182,3,4,3,11.21,0.45,11,9,7.55,7.7,Manhattan Jaspers,updated 10/19/2026 11:42 AM PT
+2025,Marist,Metro,77,182,4,4,2,12.06,0.5,18,19,8.01,7.7,Marist Red Foxes,updated 10/19/2026 11:42 AM PT
+2025,Marquette,Big East,131,47,1,7,0,9.65,0.125,6,11,7.98,8.26,Marquette Golden Eagles,updated 10/19/2026 11:35 AM PT
+2025,Marshall,Sun Belt,18,37,6,2,1,18.57,0.7222222222222222,32,15,8.66,8.27,Marshall Thundering Herd,updated 10/19/2026 11:49 AM PT
+2025,Maryland,Big 10,7,16,8,0,2,17.38,0.9,35,11,9.1,8.53,Maryland College Park Terrapins,updated 10/19/2026 11:37 AM PT
+2025,Memphis,American Athletic,147,74,3,5,0,8.61,0.375,14,16,8.02,8.18,Memphis Tigers,updated 10/19/2026 11:31 AM PT
+2025,Mercer,Southern,168,148,3,1,1,3.72,0.7,3,7,7.88,7.91,Mercer Bears,updated 10/19/2026 11:46 AM PT
+2025,Mercyhurst,Northeast,209,203,3,5,1,10.53,0.3888888888888889,14,10,7.31,7.32,Mercyhurst Lakers,updated 10/19/2026 11:54 AM PT
+2025,Merrimack,Metro,204,182,2,6,2,12.38,0.3,17,19,7.36,7.7,Merrimack Warriors,updated 10/19/2026 11:42 AM PT
+2025,Michigan,Big 10,30,16,6,2,2,17.88,0.7,19,14,8.64,8.53,Michigan Wolverines,updated 10/19/2026 11:37 AM PT
+2025,Michigan State,Big 10,91,16,2,5,3,13.33,0.35,13,15,8.18,8.53,Michigan State Spartans,updated 10/19/2026 11:37 AM PT
+2025,Milwaukee,Horizon,185,172,3,1,5,11.32,0.6111111111111112,14,14,7.63,7.73,Milwaukee Panthers,updated 10/19/2026 11:40 AM PT
+2025,Missouri State,American Athletic,83,74,3,3,2,11.91,0.5,10,11,8.4,8.18,Missouri State Bears,updated 10/19/2026 11:31 AM PT
+2025,Monmouth,Coastal,130,99,2,3,3,11.13,0.4375,11,26,7.87,8.03,Monmouth Hawks,updated 10/19/2026 11:40 AM PT
+2025,Mount St. Mary's,Metro,195,182,3,6,1,11.79,0.35,9,17,7.44,7.7,Mount St. Mary's Mountaineers,updated 10/19/2026 11:42 AM PT
+2025,NC State,Atlantic Coast,16,1,4,1,3,12.07,0.6875,13,6,8.99,8.55,NC State Wolfpack,updated 10/19/2026 11:32 AM PT
+2025,NJIT,America East,175,99,1,4,2,7.82,0.2857142857142857,5,7,7.62,8.03,NJIT Highlanders,updated 10/19/2026 11:28 AM PT
+2025,Navy,Patriot League,207,154,0,6,3,9.86,0.16666666666666666,6,17,7.3,7.87,Navy Midshipmen,updated 10/19/2026 11:45 AM PT
+2025,New Hampshire,America East,112,99,3,3,1,10.42,0.5,8,14,8.04,8.03,New Hampshire Wildcats,updated 10/19/2026 11:28 AM PT
+2025,New Haven,Northeast,196,203,3,3,3,9.24,0.5,13,13,7.51,7.32,New Haven Chargers,updated 10/19/2026 11:54 AM PT
+2025,Niagara,Metro,151,182,5,4,1,14.18,0.55,14,17,7.69,7.7,Niagara Purple Eagles,updated 10/19/2026 11:42 AM PT
+2025,North Carolina,Atlantic Coast,28,1,2,2,4,12.15,0.5,10,8,8.63,8.55,North Carolina Heels,updated 10/19/2026 11:32 AM PT
+2025,North Florida,Atlantic Sun,50,127,4,2,0,10.06,0.6666666666666666,12,8,8.48,8,North Florida Ospreyes,updated 10/19/2026 11:34 AM PT
+2025,Northeastern,Coastal,145,99,2,5,1,9.15,0.3125,7,14,7.86,8.03,Northeastern Huskies,updated 10/19/2026 11:40 AM PT
+2025,Northern Illinois,Missouri Val,85,91,3,1,3,6.67,0.6428571428571429,5,6,8.04,8.07,Northern Illinois Huskies,updated 10/19/2026 11:43 AM PT
+2025,Northern Kentucky,Horizon,189,172,2,5,2,11.05,0.3333333333333333,11,12,7.59,7.73,NKU Norse,updated 10/19/2026 11:40 AM PT
+2025,Northwestern,Big 10,66,16,3,5,2,12.43,0.4,11,13,8.34,8.53,Northwestern Wildcats,updated 10/19/2026 11:37 AM PT
+2025,Notre Dame,Atlantic Coast,44,1,3,3,2,11.15,0.5,8,26,8.47,8.55,Notre Dame Fighting Irish,updated 10/19/2026 11:32 AM PT
+2025,Oakland,Horizon,194,172,3,3,3,13.11,0.5,11,12,7.61,7.73,Oakland Golden Grizzlies,updated 10/19/2026 11:40 AM PT
+2025,Ohio State,Big 10,101,16,3,7,0,14.08,0.3,15,24,8.25,8.53,Ohio State Buckeyes,updated 10/19/2026 11:37 AM PT
+2025,Old Dominion,Sun Belt,96,37,1,3,5,12.65,0.3888888888888889,11,15,8.05,8.27,Old Dominion Monarchs,updated 10/19/2026 11:49 AM PT
+2025,Omaha,Summit Lg,143,47,1,3,2,6.91,0.3333333333333333,3,10,7.95,8.26,Omaha Mavericks,updated 10/19/2026 11:48 AM PT
+2025,Oral Roberts,Summit Lg,132,47,1,3,2,8.02,0.3333333333333333,4,9,7.91,8.26,Oral Roberts Golden Eagles,updated 10/19/2026 11:48 AM PT
+2025,Oregon State,West Coast,22,27,6,1,2,13.22,0.7777777777777778,40,15,8.71,8.35,Oregon State Beavers,updated 10/19/2026 11:50 AM PT
+2025,Pacific,West Coast,174,27,1,8,0,10.92,0.1111111111111111,9,25,7.64,8.35,Pacific Tigers,updated 10/19/2026 11:50 AM PT
+2025,Penn,Ivy League,72,66,3,2,2,9.2,0.5714285714285714,10,6,8.4,8.22,Penn Quakers,updated 10/19/2026 11:41 AM PT
+2025,Penn State,Big 10,104,16,1,6,3,12.5,0.25,8,34,8.09,8.53,Penn State Nittany Lion,updated 10/19/2026 11:37 AM PT
+2025,Pittsburgh,Atlantic Coast,62,1,1,4,3,12.1,0.3125,9,16,8.35,8.55,Pittsburgh Panthers,updated 10/19/2026 11:32 AM PT
+2025,Portland,West Coast,8,27,6,1,2,11.16,0.7777777777777778,17,6,8.96,8.35,Portland Pilots,updated 10/19/2026 11:50 AM PT
+2025,Presbyterian,Big South,144,164,3,3,1,10.63,0.5,12,17,7.74,7.81,Presbyterian BlueHose,updated 10/19/2026 11:36 AM PT
+2025,Princeton,Ivy League,1,66,7,0,0,10.76,1,17,1,8.92,8.22,Princeton Tigers,updated 10/19/2026 11:41 AM PT
+2025,Providence,Big East,73,47,4,2,2,10.81,0.625,16,13,8.22,8.26,Providence Friars,updated 10/19/2026 11:35 AM PT
+2025,Purdue Fort Wayne,Horizon,141,172,5,2,2,12.95,0.6666666666666666,16,12,7.88,7.73,IPFW Mastodons,updated 10/19/2026 11:40 AM PT
+2025,Queens,Atlantic Sun,164,127,0,2,4,6.85,0.3333333333333333,5,7,7.99,8,Queens Royals,updated 10/19/2026 11:34 AM PT
+2025,Quinnipiac,Metro,150,182,5,5,0,11.92,0.5,13,18,7.58,7.7,Quinnipiac Bobcats,updated 10/19/2026 11:42 AM PT
+2025,Radford,Big South,202,164,1,4,2,10.13,0.2857142857142857,10,13,7.28,7.81,Radford Highlanders,updated 10/19/2026 11:36 AM PT
+2025,Rhode Island,Atlantic 10,139,135,2,3,3,8.18,0.4375,11,6,7.83,7.98,Rhode Island Rhody,updated 10/19/2026 11:32 AM PT
+2025,Rider,Metro,197,182,1,6,3,12.67,0.25,12,17,7.38,7.7,Rider Broncs,updated 10/19/2026 11:42 AM PT
+2025,Robert Morris,Horizon,152,172,3,1,5,15.16,0.6111111111111112,22,12,7.78,7.73,Robert Morris Colonials,updated 10/19/2026 11:40 AM PT
+2025,Rutgers,Big 10,41,16,3,5,2,13.93,0.4,10,19,8.51,8.53,Rutgers Scarlet Knights,updated 10/19/2026 11:37 AM PT
+2025,SIUE,OH Valley,167,195,4,4,2,13.38,0.5,12,12,7.68,7.65,SIUE Cougars,updated 10/19/2026 11:44 AM PT
+2025,SMU,Atlantic Coast,4,1,3,2,3,15.11,0.5625,23,12,8.75,8.55,SMU Mustangs,updated 10/19/2026 11:32 AM PT
+2025,Sacramento State,Big West,191,117,1,6,2,10.62,0.2222222222222222,7,17,7.68,8.01,Sacramento State Hornets,updated 10/19/2026 11:39 AM PT
+2025,Sacred Heart,Metro,47,182,7,0,3,13.21,0.85,21,11,8.08,7.7,SHU Pioneers,updated 10/19/2026 11:42 AM PT
+2025,Saint Francis,Northeast,157,203,7,2,0,11.66,0.7777777777777778,18,8,7.59,7.32,SFU Red Flash,updated 10/19/2026 11:54 AM PT
+2025,Saint Joseph's,Atlantic 10,142,135,3,2,3,10.9,0.5625,10,9,7.81,7.98,Saint Joseph's Hawks,updated 10/19/2026 11:32 AM PT
+2025,Saint Louis,Atlantic 10,24,135,5,0,3,13.22,0.8125,20,6,8.75,7.98,Saint Louis Billikens,updated 10/19/2026 11:32 AM PT
+2025,Saint Mary's,West Coast,137,27,2,5,2,12.78,0.3333333333333333,5,11,8.06,8.35,St. Mary's College of CA Gaels,updated 10/19/2026 11:50 AM PT
+2025,Saint Peter's,Metro,193,182,2,7,1,12.18,0.25,11,22,7.38,7.7,Saint Peter's Peacocks,updated 10/19/2026 11:42 AM PT
+2025,San Diego,West Coast,5,27,7,1,1,10.84,0.8333333333333334,17,5,8.75,8.35,San Diego Toreros,updated 10/19/2026 11:50 AM PT
+2025,San Diego State,Western Athletic,99,83,3,2,2,10.27,0.5714285714285714,10,13,8.06,8.12,San Diego State Aztecs,updated 10/19/2026 11:52 AM PT
+2025,San Francisco,West Coast,40,27,5,4,0,11.2,0.5555555555555556,14,16,8.61,8.35,San Francisco Dons,updated 10/19/2026 11:50 AM PT
+2025,San Jose State,Western Athletic,54,83,3,2,2,11.78,0.5714285714285714,20,14,8.47,8.12,San Jose State Spartans,updated 10/19/2026 11:52 AM PT
+2025,Santa Clara,West Coast,87,27,3,3,3,10.68,0.5,9,13,8.26,8.35,Santa Clara Broncos,updated 10/19/2026 11:50 AM PT
+2025,Seattle,West Coast,110,27,2,4,3,10.93,0.3888888888888889,16,20,8.13,8.35,Seattle Redhawks,updated 10/19/2026 11:50 AM PT
+2025,Seton Hall,Big East,17,47,3,1,4,9.77,0.625,9,5,8.35,8.26,Seton Hall Pirates,updated 10/19/2026 11:35 AM PT
+2025,Siena,Metro,63,182,6,1,3,14.07,0.75,24,10,8.05,7.7,Siena Saints,updated 10/19/2026 11:42 AM PT
+2025,South Carolina,Sun Belt,100,37,1,6,2,10.66,0.2222222222222222,8,19,8.05,8.27,South Carolina Gamecocks,updated 10/19/2026 11:49 AM PT
+2025,South Florida,American Athletic,57,74,5,2,1,11.11,0.6875,18,16,8.32,8.18,USF Bulls,updated 10/19/2026 11:31 AM PT
+2025,Southern Indiana,OH Valley,190,195,1,4,5,11.82,0.35,15,26,7.12,7.65,Southern Indiana Screaming Eagles,updated 10/19/2026 11:44 AM PT
+2025,St. Bonaventure,Atlantic 10,192,135,1,5,2,9.62,0.25,11,21,7.42,7.98,St. Bonaventure Bonnies,updated 10/19/2026 11:32 AM PT
+2025,St. John's,Big East,42,47,3,3,2,10.58,0.5,10,11,8.35,8.26,St John's Red Storm,updated 10/19/2026 11:35 AM PT
+2025,St. Thomas,Summit Lg,121,47,1,3,2,6.9,0.3333333333333333,4,8,7.85,8.26,St. Thomas Tommies,updated 10/19/2026 11:48 AM PT
+2025,Stanford,Atlantic Coast,12,1,5,2,1,13.53,0.6875,17,8,8.9,8.55,Stanford Cardinal,updated 10/19/2026 11:32 AM PT
+2025,Stetson,Atlantic Sun,122,127,2,3,1,8.98,0.4166666666666667,11,9,7.93,8,Stetson Hatters,updated 10/19/2026 11:34 AM PT
+2025,Stonehill,Northeast,200,203,3,3,3,10.03,0.5,8,12,7.31,7.32,Stonehill College Skyhawks,updated 10/19/2026 11:54 AM PT
+2025,Stony Brook,Coastal,64,99,4,3,1,13.1,0.5625,18,15,8.11,8.03,Stony Brook Seawolves,updated 10/19/2026 11:40 AM PT
+2025,Syracuse,Atlantic Coast,37,1,4,3,1,13.63,0.5625,17,16,8.42,8.55,Syracuse Orange,updated 10/19/2026 11:32 AM PT
+2025,Temple,American Athletic,180,74,0,8,0,9.66,0,5,26,7.45,8.18,Temple Owls,updated 10/19/2026 11:31 AM PT
+2025,Tulsa,American Athletic,107,74,3,3,2,11.66,0.5,12,14,8.03,8.18,Tulsa Hurricane,updated 10/19/2026 11:31 AM PT
+2025,UAB,American Athletic,113,74,3,4,1,11.35,0.4375,20,13,8.14,8.18,UAB Blazers,updated 10/19/2026 11:31 AM PT
+2025,UAlbany,America East,98,99,3,2,2,10.2,0.5714285714285714,13,13,7.75,8.03,Albany Great Danes,updated 10/19/2026 11:28 AM PT
+2025,UC Davis,Big West,162,117,4,3,2,12.96,0.5555555555555556,15,15,7.99,8.01,UC Davis Aggies,updated 10/19/2026 11:39 AM PT
+2025,UC Irvine,Big West,55,117,4,0,5,13.16,0.7222222222222222,19,9,8.42,8.01,UC Irvine Anteaters,updated 10/19/2026 11:39 AM PT
+2025,UC Riverside,Big West,178,117,2,6,1,10.48,0.2777777777777778,11,15,7.83,8.01,UC Riverside Highlanders,updated 10/19/2026 11:39 AM PT
+2025,UC San Diego,Big West,161,117,2,2,5,11.83,0.5,8,14,7.68,8.01,UC San Diego Tritons,updated 10/19/2026 11:39 AM PT
+2025,UC Santa Barbara,Big West,74,117,4,0,5,12.78,0.7222222222222222,14,7,8.25,8.01,UC Santa Barbara Gauchos,updated 10/19/2026 11:39 AM PT
+2025,UCF,Sun Belt,32,37,4,3,2,15.51,0.5555555555555556,25,14,8.59,8.27,UCF Knights,updated 10/19/2026 11:49 AM PT
+2025,UCLA,Big 10,25,16,5,3,2,14.38,0.6,25,14,8.53,8.53,UCLA Bruins,updated 10/19/2026 11:37 AM PT
+2025,UConn,Big East,15,47,5,2,1,12.22,0.6875,16,12,8.59,8.26,UCONN Huskies,updated 10/19/2026 11:35 AM PT
+2025,UIC,Missouri Val,93,91,2,1,4,11.18,0.5714285714285714,9,12,8.24,8.07,UIC Flames,updated 10/19/2026 11:43 AM PT
+2025,UIW,OH Valley,172,195,1,5,4,11.84,0.3,9,15,7.49,7.65,UIW Cardinals,updated 10/19/2026 11:44 AM PT
+2025,UMBC,America East,155,99,2,3,2,9.5,0.42857142857142855,9,8,7.89,8.03,UMBC Retrievers,updated 10/19/2026 11:28 AM PT
+2025,UMass,Summit Lg,76,47,1,3,2,6.79,0.3333333333333333,6,9,8.15,8.26,UMass Minutemen,updated 10/19/2026 11:48 AM PT
+2025,UMass Lowell,America East,109,99,2,3,2,10.86,0.42857142857142855,9,15,7.98,8.03,UMASS Lowell River Hawks,updated 10/19/2026 11:28 AM PT
+2025,UNC Asheville,Big South,148,164,3,3,1,9.22,0.5,9,16,7.84,7.81,UNC Asheville Bulldogs,updated 10/19/2026 11:36 AM PT
+2025,UNCG,Southern,26,148,3,2,0,8.98,0.6,14,6,8.68,7.91,UNCG Spartans,updated 10/19/2026 11:46 AM PT
+2025,UNCW,Coastal,129,99,4,4,0,8.23,0.5,10,13,7.98,8.03,UNCW Seahawks,updated 10/19/2026 11:40 AM PT
+2025,UNLV,Western Athletic,136,83,1,2,4,8.14,0.42857142857142855,10,11,7.97,8.12,UNLV Rebels,updated 10/19/2026 11:52 AM PT
+2025,USC Upstate,Big South,156,164,2,3,2,11.02,0.42857142857142855,15,14,7.58,7.81,USC Upstate Spartans,updated 10/19/2026 11:36 AM PT
+2025,Utah Tech,Western Athletic,154,83,3,1,3,9.68,0.6428571428571429,14,13,7.96,8.12,Utah Tech Trailblazers,updated 10/19/2026 11:52 AM PT
+2025,Utah Valley,Western Athletic,82,83,2,3,2,9.77,0.42857142857142855,11,16,8.26,8.12,Utah Valley Wolverines,updated 10/19/2026 11:52 AM PT
+2025,VCU,Atlantic 10,43,135,3,2,3,10.56,0.5625,9,14,8.34,7.98,VCU Rams,updated 10/19/2026 11:32 AM PT
+2025,VMI,Southern,211,148,1,4,0,3.36,0.2,3,8,6.85,7.91,VMI Keydets,updated 10/19/2026 11:46 AM PT
+2025,Vermont,America East,2,99,6,0,1,11.55,0.9285714285714286,21,3,8.68,8.03,Vermont Catamouts,updated 10/19/2026 11:28 AM PT
+2025,Villanova,Big East,86,47,2,3,3,9.82,0.4375,8,15,8.1,8.26,Villanova Wildcats,updated 10/19/2026 11:35 AM PT
+2025,Virginia,Atlantic Coast,3,1,5,0,3,16.54,0.8125,27,9,8.77,8.55,Virginia Cavaliers,updated 10/19/2026 11:32 AM PT
+2025,Virginia Tech,Atlantic Coast,53,1,2,3,3,12.01,0.4375,12,17,8.43,8.55,Virginia Tech Hokies,updated 10/19/2026 11:32 AM PT
+2025,Wake Forest,Atlantic Coast,45,1,2,3,3,11.04,0.4375,17,21,8.45,8.55,Wake Forest Demon Deacon,updated 10/19/2026 11:32 AM PT
+2025,Washington,Big 10,36,16,7,3,0,14.57,0.7,21,10,9.13,8.53,Washington Huskies,updated 10/19/2026 11:37 AM PT
+2025,West Virginia,Sun Belt,21,37,7,2,0,16.06,0.7777777777777778,20,11,8.72,8.27,West Virginia Mountaineers,updated 10/19/2026 11:49 AM PT
+2025,Western Illinois,OH Valley,188,195,3,3,4,13.53,0.5,9,24,7.41,7.65,WIU Fighting Leathernecks,updated 10/19/2026 11:44 AM PT
+2025,Western Michigan,Missouri Val,84,91,2,2,3,10.23,0.5,12,8,8.27,8.07,Western Michigan Broncos,updated 10/19/2026 11:43 AM PT
+2025,William & Mary,Coastal,171,99,1,6,1,8.99,0.1875,6,19,7.5,8.03,William & Mary Tribe,updated 10/19/2026 11:40 AM PT
+2025,Winthrop,Big South,210,164,1,5,1,8.07,0.21428571428571427,5,18,7,7.81,Winthrop Eagles,updated 10/19/2026 11:36 AM PT
+2025,Wisconsin,Big 10,58,16,4,6,0,13.78,0.4,12,18,8.36,8.53,Wisconsin Badgers,updated 10/19/2026 11:37 AM PT
+2025,Wofford,Southern,160,148,1,4,0,7.03,0.2,8,14,7.75,7.91,Wofford Terriers,updated 10/19/2026 11:46 AM PT
+2025,Wright State,Horizon,203,172,2,7,0,10.28,0.2222222222222222,11,18,7.26,7.73,Wright State Raiders,updated 10/19/2026 11:40 AM PT
+2025,Xavier,Big East,118,47,1,4,3,9.49,0.3125,7,14,8.07,8.26,Xavier Musketeers,updated 10/19/2026 11:35 AM PT
+2025,Yale,Ivy League,134,66,2,4,1,7.96,0.35714285714285715,4,12,7.8,8.22,Yale Bulldogs,updated 10/19/2026 11:41 AM PT
 2026,Akron,Big East,15,27,1,1,3,7.04,0.5,7,6,8.36,8,Akron Zips,updated 10/19/2026 13:24:29 ET
 2026,American,Patriot League,117,170,3,1,1,8.18,0.7,10,5,7.56,7.32,American Eagles,updated 10/19/2026 14:45:44 ET
 2026,Army West Point,Patriot League,203,170,0,5,0,7.98,0,5,16,7.05,7.32,Army West Point Black Knights,updated 10/19/2026 14:45:44 ET

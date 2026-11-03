@@ -1,20 +1,63 @@
-check,measure,model,value,baseline,baseline_name,verdict,meaning
-1. Non-conference games,r with non-conference points per game,GAR,0.44,0.307,Conference xG difference per game,beats the baseline,Games the model never saw: the most honest team-level test
-1. Non-conference games,extra R-squared over conference goal difference,GAR,0.127,,,adds information,p = 0.000
-1. Non-conference games,r with non-conference points per game,PAR,0.403,0.307,Conference xG difference per game,beats the baseline,Games the model never saw: the most honest team-level test
-1. Non-conference games,extra R-squared over conference goal difference,PAR,0.096,,,adds information,p = 0.000
-2. Massey ratings,r with Massey team rating,GAR,0.676,0.547,Conference goal difference per game,beats the baseline,Massey uses the whole season and opponents; partly the same games
-2. Massey ratings,r with Massey team rating,PAR,0.668,0.547,Conference goal difference per game,beats the baseline,Massey uses the whole season and opponents; partly the same games
-3. Coaches' choices,share of teammate pairs where the higher-rated player plays more,GAR,0.535,0.514,Simple stat by position,beats the baseline,0.50 = coin flip; coaches see every practice
-3. Coaches' choices,share of teammate pairs where the higher-rated player plays more,PAR,0.537,0.514,Simple stat by position,beats the baseline,0.50 = coin flip; coaches see every practice
-4. Reliability,share of real player differences captured (0-1),GAR,0.495,,,low: rank in tiers,"sampling noise only, not model error, so a best case"
-4. Reliability,share of real player differences captured (0-1),PAR,,,,not available,the model has no uncertainty ranges
-5. Team-strength leak,average rank correlation of player rating with team quality,GAR,0.276,0.077,Simple stat by position,fine,lower is better for players who will change teams; some link is expected
-5. Team-strength leak,average rank correlation of player rating with team quality,PAR,0.269,0.077,Simple stat by position,fine,lower is better for players who will change teams; some link is expected
-6. Sensitivity,lowest rank correlation after small setting tweaks,GAR,0.99,,,robust,worst: More shrinkage (540 min); lowest top-50 overlap 74%
-6. Sensitivity,rank correlation with hand-set (manual) weights,GAR,0.585,,,depends on how weights are set,top-50 overlap 30%
-6. Sensitivity,lowest rank correlation after small setting tweaks,PAR,0.958,,,robust,worst: Replacement = 10th pct; lowest top-50 overlap 70%
-6. Sensitivity,rank correlation with hand-set (manual) weights,PAR,0.586,,,depends on how weights are set,top-50 overlap 14%
-7. Year to year,r between back-to-back seasons,GAR,,,,needs a second season,
-7. Year to year,r between back-to-back seasons,PAR,,,,needs a second season,
-10. GAR vs PAR,"rank correlation between GAR and PAR (within position, average)",both,0.771,,,mostly agree,lowest: FB 0.44
+check,measure,season,model,value,baseline,baseline_name,verdict,meaning
+1. Non-conference games,r with non-conference points per game,2025,GAR,0.561,0.455,Conference xG difference per game,beats the baseline,Games the model never saw: the most honest team-level test
+1. Non-conference games,extra R-squared over conference goal difference,2025,GAR,0.155,,,adds information,p = 0.000
+1. Non-conference games,r with non-conference points per game,2025,PAR,0.555,0.455,Conference xG difference per game,beats the baseline,"Partly in-sample: the weights were fitted to Massey, which includes these games (see 6b)"
+1. Non-conference games,extra R-squared over conference goal difference,2025,PAR,0.153,,,adds information,p = 0.000
+2. Massey ratings,r with Massey team rating,2025,GAR,0.741,0.652,Conference goal difference per game,beats the baseline,Massey uses the whole season and opponents; partly the same games
+2. Massey ratings,r with Massey team rating,2025,PAR,0.73,0.652,Conference goal difference per game,not independent: fitted to Massey ratings,Massey uses the whole season and opponents; partly the same games
+3. Coaches' choices,share of teammate pairs where the higher-rated player plays more,2025,GAR,0.553,0.524,Simple stat by position,beats the baseline,0.50 = coin flip; coaches see every practice
+3. Coaches' choices,share of teammate pairs where the higher-rated player plays more,2025,PAR,0.562,0.524,Simple stat by position,beats the baseline,0.50 = coin flip; coaches see every practice
+4. Reliability,share of real player differences captured (0-1),2025,GAR,0.552,,,"moderate: compare tiers, not exact ranks","sampling noise only, not model error, so a best case"
+4. Reliability,share of real player differences captured (0-1),2025,PAR,0.703,,,good,"sampling noise only, not model error, so a best case"
+5. Team-strength leak,average rank correlation of player rating with team quality,2025,GAR,0.312,0.117,Simple stat by position,fine,lower is better for players who will change teams; some link is expected
+5. Team-strength leak,average rank correlation of player rating with team quality,2025,PAR,0.336,0.117,Simple stat by position,fine,lower is better for players who will change teams; some link is expected
+1. Non-conference games,r with non-conference points per game,2026,GAR,0.44,0.307,Conference xG difference per game,beats the baseline,Games the model never saw: the most honest team-level test
+1. Non-conference games,extra R-squared over conference goal difference,2026,GAR,0.128,,,adds information,p = 0.000
+1. Non-conference games,r with non-conference points per game,2026,PAR,0.506,0.307,Conference xG difference per game,beats the baseline,"Partly in-sample: the weights were fitted to Massey, which includes these games (see 6b)"
+1. Non-conference games,extra R-squared over conference goal difference,2026,PAR,0.19,,,adds information,p = 0.000
+2. Massey ratings,r with Massey team rating,2026,GAR,0.662,0.547,Conference goal difference per game,beats the baseline,Massey uses the whole season and opponents; partly the same games
+2. Massey ratings,r with Massey team rating,2026,PAR,0.738,0.547,Conference goal difference per game,not independent: fitted to Massey ratings,Massey uses the whole season and opponents; partly the same games
+3. Coaches' choices,share of teammate pairs where the higher-rated player plays more,2026,GAR,0.534,0.514,Simple stat by position,about equal,0.50 = coin flip; coaches see every practice
+3. Coaches' choices,share of teammate pairs where the higher-rated player plays more,2026,PAR,0.535,0.514,Simple stat by position,beats the baseline,0.50 = coin flip; coaches see every practice
+4. Reliability,share of real player differences captured (0-1),2026,GAR,0.495,,,low: rank in tiers,"sampling noise only, not model error, so a best case"
+4. Reliability,share of real player differences captured (0-1),2026,PAR,0.659,,,"moderate: compare tiers, not exact ranks","sampling noise only, not model error, so a best case"
+5. Team-strength leak,average rank correlation of player rating with team quality,2026,GAR,0.26,0.077,Simple stat by position,fine,lower is better for players who will change teams; some link is expected
+5. Team-strength leak,average rank correlation of player rating with team quality,2026,PAR,0.353,0.077,Simple stat by position,watch,lower is better for players who will change teams; some link is expected
+1. Non-conference games,r with non-conference points per game,2025-2026 pooled,GAR,0.497,0.377,Conference xG difference per game,beats the baseline,Games the model never saw: the most honest team-level test
+1. Non-conference games,extra R-squared over conference goal difference,2025-2026 pooled,GAR,0.141,,,adds information,p = 0.0000
+1. Non-conference games,r with non-conference points per game,2025-2026 pooled,PAR,0.528,0.377,Conference xG difference per game,beats the baseline,Games the model never saw: the most honest team-level test
+1. Non-conference games,extra R-squared over conference goal difference,2025-2026 pooled,PAR,0.172,,,adds information,p = 0.0000
+2. Massey ratings,r with Massey team rating,2025-2026 pooled,GAR,0.702,0.599,Conference goal difference per game,beats the baseline,Massey uses the whole season and opponents; partly the same games
+2. Massey ratings,r with Massey team rating,2025-2026 pooled,PAR,0.734,0.599,Conference goal difference per game,not independent: fitted to Massey ratings,Massey uses the whole season and opponents; partly the same games
+6. Sensitivity,lowest rank correlation after small setting tweaks,2026,GAR,0.986,,,robust,worst: Replacement = 10th pct; lowest top-50 overlap 74%
+6. Sensitivity,rank correlation with a different method: manual weights,2026,GAR,0.649,,,depends on the method,top-50 overlap 46%
+6. Sensitivity,rank correlation with weights from 2025 only,2026,GAR,0.966,,,robust,top-50 overlap 70%
+6. Sensitivity,rank correlation with weights from 2026 only,2026,GAR,0.94,,,robust,top-50 overlap 82%
+6. Sensitivity,lowest rank correlation after small setting tweaks,2026,PAR,0.991,,,robust,worst: Replacement = 10th pct; lowest top-50 overlap 80%
+6. Sensitivity,rank correlation with a different method: points target (old),2026,PAR,0.935,,,robust,top-50 overlap 72%
+6. Sensitivity,rank correlation with a different method: one weight per stat (old),2026,PAR,0.839,,,mostly robust,top-50 overlap 68%
+6. Sensitivity,rank correlation with weights from 2025 only,2026,PAR,0.945,,,robust,top-50 overlap 80%
+6. Sensitivity,rank correlation with weights from 2026 only,2026,PAR,0.924,,,robust,top-50 overlap 30%
+6b. Weights from another season,"r with 2026 non-conference points per game, weights fitted on 2025 only",2026,GAR,0.435,0.44,Weights fitted on all seasons,about equal,Fully out of sample: neither the weights nor the ratings saw these games
+6b. Weights from another season,"r with 2025 non-conference points per game, weights fitted on 2026 only",2025,GAR,0.531,0.561,Weights fitted on all seasons,about equal,Fully out of sample: neither the weights nor the ratings saw these games
+6b. Weights from another season,"r with 2026 non-conference points per game, weights fitted on 2025 only",2026,PAR,0.464,0.506,Weights fitted on all seasons,baseline does better,Fully out of sample: neither the weights nor the ratings saw these games
+6b. Weights from another season,"r with 2025 non-conference points per game, weights fitted on 2026 only",2025,PAR,0.514,0.555,Weights fitted on all seasons,baseline does better,Fully out of sample: neither the weights nor the ratings saw these games
+7. Year to year,r between a player's rating in back-to-back seasons (within position),2025-2026 pooled,GAR,0.3,0.141,Simple stat by position,mostly noise,"Conference games only: ~5-12 games a season, so a lot of noise either way"
+7. Year to year,"r between back-to-back seasons (within position), players who stayed at the same team",2025-2026 pooled,GAR,0.303,0.155,Simple stat by position,beats the baseline,"Same team, coach and role"
+7. Year to year,"r between back-to-back seasons (within position), players who transferred",2025-2026 pooled,GAR,0.295,0.074,Simple stat by position,beats the baseline,The recruiting question: does a rating carry over to a new team?
+7. Year to year,r between a player's rating in back-to-back seasons (within position),2025-2026 pooled,PAR,0.393,0.141,Simple stat by position,somewhat stable,"Conference games only: ~5-12 games a season, so a lot of noise either way"
+7. Year to year,"r between back-to-back seasons (within position), players who stayed at the same team",2025-2026 pooled,PAR,0.4,0.155,Simple stat by position,beats the baseline,"Same team, coach and role"
+7. Year to year,"r between back-to-back seasons (within position), players who transferred",2025-2026 pooled,PAR,0.337,0.074,Simple stat by position,beats the baseline,The recruiting question: does a rating carry over to a new team?
+11. Next-season forecast,r with 2026 goal difference per game,2026,GAR,0.335,0.422,Last season's goal difference,baseline does better,Last season's ratings of this season's roster: what a recruiting class adds
+11. Next-season forecast,extra R-squared for 2026 goal difference per game over last season's GD + Massey,2026,GAR,0.022,,,adds information,p = 0.0183
+11. Next-season forecast,r with 2026 goal difference per game,2026,PAR,0.39,0.422,Last season's goal difference,baseline does better,Last season's ratings of this season's roster: what a recruiting class adds
+11. Next-season forecast,extra R-squared for 2026 goal difference per game over last season's GD + Massey,2026,PAR,0.048,,,adds information,p = 0.0005
+11. Next-season forecast,r with 2026 Massey rating,2026,GAR,0.639,0.769,Last season's Massey rating,baseline does better,Last season's ratings of this season's roster: what a recruiting class adds
+11. Next-season forecast,extra R-squared for 2026 Massey rating over last season's GD + Massey,2026,GAR,0.046,,,adds information,p = 0.0000
+11. Next-season forecast,r with 2026 Massey rating,2026,PAR,0.633,0.769,Last season's Massey rating,not independent: fitted to Massey ratings,Last season's ratings of this season's roster: what a recruiting class adds
+11. Next-season forecast,extra R-squared for 2026 Massey rating over last season's GD + Massey,2026,PAR,0.042,,,adds information,p = 0.0000
+11. Next-season forecast,r with 2026 points per game,2026,GAR,0.278,0.35,Last season's goal difference,baseline does better,Last season's ratings of this season's roster: what a recruiting class adds
+11. Next-season forecast,extra R-squared for 2026 points per game over last season's GD + Massey,2026,GAR,0.014,,,no clear extra information,p = 0.0750
+11. Next-season forecast,r with 2026 points per game,2026,PAR,0.362,0.35,Last season's goal difference,about equal,Last season's ratings of this season's roster: what a recruiting class adds
+11. Next-season forecast,extra R-squared for 2026 points per game over last season's GD + Massey,2026,PAR,0.049,,,adds information,p = 0.0006
+10. GAR vs PAR,"rank correlation between GAR and PAR (within position, average)",2026,both,0.77,,,mostly agree,lowest: CB 0.54
