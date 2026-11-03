@@ -70,7 +70,7 @@ SLATE  <- "#44546A"
 # When both players are on the same side, the comparison player gets a lighter shade.
 VT_ORANGE  <- "#E5751F"; VT_ORANGE2 <- "#F4B886"
 BLUE       <- "#2F6DB5"; BLUE2      <- "#9CBFE6"
-DEFENSE_COL <- "#3A7D7C"   # GAR's defense part (teal, so it isn't confused with VT orange)
+DEFENSE_COL <- "#D9A3B4"   # GAR's defense part (light maroon, paired with the maroon attack part)
 
 # ---- Skill list: id, Wyscout column, label, group, lower is better ----------
 SKILLS <- tribble(
@@ -170,6 +170,54 @@ POS_LABELS <- c(GK = "Goalkeeper", CB = "Center back", FB = "Fullback",
                 W = "Winger", CF = "Center forward")
 CLASS_LABELS <- c(Fr = "Freshman", So = "Sophomore", Jr = "Junior", Sr = "Senior", Gr = "Graduate")
 
+# Country name (as Wyscout writes it) -> 3-letter code of its flag in www/CountryFlags.
+# Drop a new <CODE>.png in that folder and the header picks it up; a country without a
+# flag file shows its code instead. England, Scotland, Wales and Northern Ireland use
+# GBR.png unless their own file is there.
+FLAG_DIR <- "CountryFlags"
+COUNTRY_CODES <- c(
+  "United States" = "USA", "England" = "ENG", "Scotland" = "SCO", "Wales" = "WAL",
+  "Northern Ireland" = "NIR", "United Kingdom" = "GBR", "Great Britain" = "GBR",
+  "Canada" = "CAN", "Spain" = "ESP", "Germany" = "GER", "Norway" = "NOR", "France" = "FRA",
+  "Denmark" = "DEN", "Brazil" = "BRA", "Italy" = "ITA", "Japan" = "JPN", "Ghana" = "GHA",
+  "Australia" = "AUS", "Portugal" = "POR", "Sweden" = "SWE", "Iceland" = "ISL", "Israel" = "ISR",
+  "Netherlands" = "NED", "Costa Rica" = "CRC", "Argentina" = "ARG", "Republic of Ireland" = "IRL",
+  "Jamaica" = "JAM", "Austria" = "AUT", "Belgium" = "BEL", "Mexico" = "MEX", "Cyprus" = "CYP",
+  "Uganda" = "UGA", "Serbia" = "SRB", "New Zealand" = "NZL", "Senegal" = "SEN", "Colombia" = "COL",
+  "Puerto Rico" = "PUR", "South Africa" = "RSA", "Switzerland" = "SUI", "Chile" = "CHI",
+  "Finland" = "FIN", "Slovenia" = "SLO", "Bermuda" = "BER", "Czech Republic" = "CZE",
+  "Georgia" = "GEO", "Haiti" = "HAI", "Bolivia" = "BOL", "Ecuador" = "ECU", "Greece" = "GRE",
+  "Hungary" = "HUN", "Kenya" = "KEN", "Korea Republic" = "KOR", "Trinidad and Tobago" = "TTO",
+  "Venezuela" = "VEN", "Guatemala" = "GUA", "Latvia" = "LAT", "Lithuania" = "LTU", "Nigeria" = "NGR",
+  "Poland" = "POL", "Bahamas" = "BAH", "Bangladesh" = "BAN", "Cameroon" = "CMR",
+  "Cayman Islands" = "CAY", "China PR" = "CHN", "Egypt" = "EGY", "Faroe Islands" = "FRO",
+  "Luxembourg" = "LUX", "Morocco" = "MAR", "Panama" = "PAN", "Romania" = "ROU", "Russia" = "RUS",
+  "United Arab Emirates" = "UAE", "Zambia" = "ZAM", "Andorra" = "AND", "Angola" = "ANG",
+  "Armenia" = "ARM", "Bosnia and Herzegovina" = "BIH", "Bulgaria" = "BUL", "Burkina Faso" = "BUR",
+  "Chinese Taipei" = "TPE", "Congo DR" = "COD", "Congo" = "CGO", "Cuba" = "CUB",
+  "Dominican Republic" = "DOM", "El Salvador" = "ESA", "Estonia" = "EST", "Ethiopia" = "ETH",
+  "Grenada" = "GRN", "Honduras" = "HON", "India" = "IND", "Jordan" = "JOR", "Korea DPR" = "PRK",
+  "Liberia" = "LBR", "Mali" = "MLI", "Montenegro" = "MNE", "North Macedonia" = "MKD", "Peru" = "PER",
+  "Philippines" = "PHI", "Singapore" = "SGP", "Slovakia" = "SVK", "Suriname" = "SUR",
+  "Ukraine" = "UKR", "US Virgin Islands" = "ISV", "Uruguay" = "URU", "Zimbabwe" = "ZIM",
+  "Croatia" = "CRO", "Kazakhstan" = "KAZ", "Mongolia" = "MGL", "Moldova" = "MDA",
+  "Thailand" = "THA", "Uzbekistan" = "UZB", "Greenland" = "GRL", "Türkiye" = "TUR",
+  "Kosovo" = "KOS", "Indonesia" = "INA", "Malaysia" = "MAS", "Tonga" = "TGA"
+)
+HOME_NATIONS <- c("ENG", "SCO", "WAL", "NIR")
+
+# Flag (or country code) for the header. Uses birth country, else the first passport.
+flag_tag <- function(birth, passport) {
+  country <- if (!is.na(birth) && nzchar(birth)) birth else trimws(strsplit(passport %||% "", ",")[[1]][1])
+  if (is.null(country) || is.na(country) || !nzchar(country)) return(NULL)
+  code <- unname(COUNTRY_CODES[country])
+  if (is.na(code)) return(span(class = "flag flag-code", title = country, toupper(substr(country, 1, 3))))
+  file <- paste0(code, ".png")
+  if (!file.exists(file.path("www", FLAG_DIR, file)) && code %in% HOME_NATIONS) file <- "GBR.png"
+  if (!file.exists(file.path("www", FLAG_DIR, file))) return(span(class = "flag flag-code", title = country, code))
+  tags$img(class = "flag", src = file.path(FLAG_DIR, file), alt = country, title = country)
+}
+
 # ---- Load data once at startup ----------------------------------------------
 # If a file isn't where the settings say, look for it in the app folder, the
 # folder above, the one above that, and the current working directory
@@ -220,7 +268,7 @@ if (length(missing_cols)) SKILLS <- filter(SKILLS, !col %in% missing_cols)
 metrics <- read_csv(METRICS_FILE, show_col_types = FALSE,
                     col_select = any_of(c("season_year", "team", "player_id", "position",
                                           "age", "height_cm", "foot", "portal_status", "portal_initiated",
-                                          "market_value", SKILLS$col)))
+                                          "market_value", "birth_country", "passport_country", SKILLS$col)))
 names(metrics) <- recode(names(metrics), !!!setNames(SKILLS$id, SKILLS$col))
 metrics <- distinct(metrics, season_year, player_id, .keep_all = TRUE)
 
@@ -232,12 +280,13 @@ portal_join <- portal %>%
 
 players <- gar %>%
   left_join(metrics %>% select(season_year, player_id, age, height_cm, foot,
-                               any_of(c("portal_status", "portal_initiated", "market_value"))),
+                               any_of(c("portal_status", "portal_initiated", "market_value",
+                                        "birth_country", "passport_country"))),
             by = c("season_year", "player_id")) %>%
   left_join(portal_join, by = c("player_name", "team", "position", "season_year")) %>%
   left_join(par, by = c("season_year", "player_id")) %>%
   mutate(search = tolower(paste(player_name, team, conference)))
-for (nm in c("portal_status", "portal_initiated", "market_value"))
+for (nm in c("portal_status", "portal_initiated", "market_value", "birth_country", "passport_country"))
   if (!nm %in% names(players)) players[[nm]] <- NA
 HAS_PORTAL <- any(!is.na(players$portal_status))
 HAS_CLASS  <- any(!is.na(players$class_year))
@@ -481,12 +530,17 @@ CSS <- "
   table.dataTable.no-footer { border-bottom: 1px solid var(--line); }
 
   /* Player header */
-  .who-name { font-family: 'Barlow Semi Condensed', sans-serif; font-size: 1.75rem; font-weight: 700;
+  .who { width: 100%; }
+  .who-name { display: flex; align-items: center; flex-wrap: wrap; gap: 10px;
+    font-family: 'Barlow Semi Condensed', sans-serif; font-size: 1.75rem; font-weight: 700;
     line-height: 1.1; margin: 0; color: var(--ink); }
-  .who-sub { color: var(--muted); font-size: .86rem; margin-top: 2px; }
+  .flag { height: 20px; width: auto; border-radius: 3px; flex: none;
+    box-shadow: 0 0 0 1px rgba(0,0,0,.12); }
+  .flag-code { display: inline-flex; align-items: center; height: 20px; padding: 0 6px; background: var(--soft);
+    color: var(--muted); font-family: Inter, sans-serif; font-size: .66rem; font-weight: 600; letter-spacing: .05em; }
+  .who-sub { color: var(--muted); font-size: .9rem; font-weight: 400; margin-top: 4px; }
   .chip { display: inline-block; font-family: Inter, sans-serif; font-size: .68rem; font-weight: 600;
-    padding: 2px 9px; border-radius: 999px; margin-left: 8px; vertical-align: 5px; letter-spacing: .02em; }
-  .chip-portal { background: #FDEBDD; color: #A4500F; }
+    padding: 2px 9px; border-radius: 999px; letter-spacing: .02em; }
   .chip-ours { background: var(--vt-maroon); color: #fff; }
   .kpis { display: flex; flex-wrap: wrap; gap: 0; margin: 12px 0 2px; }
   .kpis > div { padding: 0 22px; border-left: 1px solid var(--line); }
@@ -748,14 +802,14 @@ server <- function(input, output, session) {
   # ---- Header -------------------------------------------------------------------
   output$who <- renderUI({
     s <- sel()
-    chips <- tagList(
-      if (s$team == FOCUS_TEAM) span(class = "chip chip-ours", "Our player"),
-      if (!is.na(s$portal_status)) span(class = "chip chip-portal", paste("Portal:", s$portal_status))
-    )
     kpi <- function(v, l) div(div(class = "kpi-v", v), div(class = "kpi-l", l))
-    tagList(
-      div(class = "who-name", s$player_name, chips),
-      div(class = "who-sub", sprintf("%s \u00b7 %s", POS_LABELS[[s$position]], s$team)),
+    div(class = "who",
+      div(class = "who-name",
+          flag_tag(s$birth_country, s$passport_country),
+          span(s$player_name),
+          if (s$team == FOCUS_TEAM) span(class = "chip chip-ours", "Our player")),
+      div(class = "who-sub",
+          span(title = POS_LABELS[[s$position]], s$position), " · ", s$team),
       div(class = "kpis mt-2",
           kpi(fmt(s$gar), "GAR"),
           if (HAS_PAR) kpi(fmt(s$par), "PAR (points)") else kpi(fmt(s$gar_per_90, 3), "GAR per 90"),
