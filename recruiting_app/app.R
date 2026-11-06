@@ -1312,8 +1312,9 @@ server <- function(input, output, session) {
       left_join(players %>% count(season_year, position, name = "n_pos"), by = c("season_year", "position")) %>%
       transmute(Season = season_year, Team = team, Pos = position, Min = minutes_played,
                 GAR = gar, `GAR/90` = gar_per_90, PAR = par,
-                `Rank at pos` = sprintf("#%d of %d", gar_rank_pos, n_pos))
-    if (!HAS_PAR) d$PAR <- NULL
+                `PAR rank at pos` = if_else(is.na(par_rank_pos), "—", sprintf("#%d of %d", par_rank_pos, n_pos)),
+                `GAR rank at pos` = sprintf("#%d of %d", gar_rank_pos, n_pos))
+    if (!HAS_PAR) { d$PAR <- NULL; d$`PAR rank at pos` <- NULL }
     datatable(d, rownames = FALSE, class = "compact", selection = "none",
               options = list(dom = "t", paging = FALSE, ordering = FALSE,
                              columnDefs = list(list(className = "dt-left", targets = 0:2)))) %>%
