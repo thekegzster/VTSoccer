@@ -33,6 +33,7 @@ library(purrr)
 library(ggplot2)
 library(glmnet)
 library(scales)
+source("model_helpers.R")   # shrink_stats(), team_folds()
 
 # ---- Settings ---------------------------------------------------------------
 
@@ -44,13 +45,16 @@ WEIGHTS_FILE <- "gar_weights_real.csv"   # stat list with a side column (attack 
 WEIGHT_MODE  <- "learned"      # "learned" or "manual"
 MIN_QUAL     <- 270            # minutes to count toward scaling and replacement level
                                # (a season is ~5-12 conference games)
-STAT_PRIOR_MIN <- c(prevented_goals = 1800)  # stats that need more minutes before they're
-                               # trusted: goalkeeper shot-stopping swings a lot by luck, so a keeper
-                               # is treated as if he also had 1,800 average minutes (PRIOR_MIN for others)
+SHRINK_MODE  <- "per_stat"     # small-sample blending toward the position average:
+                               #   "per_stat" = each stat as much as its own noise calls for
+                               #     (xG and xA much more than pass accuracy; win-% stats by
+                               #     attempts); see shrink_stats() in model_helpers.R
+                               #   "minutes"  = the old way: PRIOR_MIN minutes for every stat
+PRIOR_MIN    <- 270            # "minutes" mode: a player is treated as if he also played
+                               # this many minutes at the position average
+STAT_PRIOR_MIN <- c(prevented_goals = 1800)  # "minutes" mode only: more for noisier stats
 MAKE_PLOTS   <- TRUE           # FALSE = skip the charts and only write the CSV files (much faster)
 NON_PENALTY  <- TRUE           # use non-penalty xG (npxG) when the data has it
-PRIOR_MIN    <- 270            # shrinkage: a player is treated as if he also played
-                               # this many minutes at the position average
 REPL_PCTL    <- 0.20           # replacement level = this percentile of qualified
                                # players' NET index at the position, each season
 ADJUST_SOS   <- FALSE          # adjust stats for strength of schedule; off because the
@@ -305,14 +309,12 @@ long <- players %>%
 
 # ---- 4. Fill gaps and shrink small samples ----------------------------------
 
+# A missing stat counts as the position average. Each stat is then blended toward the
+# position average, as much as its own sampling noise calls for (SHRINK_MODE).
+ctx <- stat_context(players)
 long <- long %>%
-  group_by(season_year, position, stat) %>%
-  mutate(missing = is.na(raw),
-         prior = mean(raw[qualified], na.rm = TRUE),
-         raw   = coalesce(raw, prior),
-         pm    = coalesce(unname(STAT_PRIOR_MIN[stat]), PRIOR_MIN),
-         value = (raw * minutes_played + prior * pm) / (minutes_played + pm)) %>%
-  ungroup()
+  left_join(ctx, by = c("player_id", "season_year")) %>%
+  shrink_stats(SHRINK_MODE, PRIOR_MIN, STAT_PRIOR_MIN)
 
 # ---- 5. Strength-of-schedule adjustment -------------------------------------
 # For each position x stat, estimate how much a tougher schedule changes the
@@ -369,11 +371,10 @@ if (ATTACK_MODEL == "chance_share") {
               .groups = "drop") %>%
     mutate(assisted_share = pmin(1, if_else(team_xg > 0, team_xa / team_xg, 0)))
   ch <- ch %>%
+    select(-shots90, -sa90) %>%
     pivot_longer(c(xg, xa), names_to = "stat", values_to = "raw") %>%
-    group_by(season_year, position, stat) %>%
-    mutate(prior = mean(raw[qualified], na.rm = TRUE),
-           value = (raw * minutes_played + prior * PRIOR_MIN) / (minutes_played + PRIOR_MIN)) %>%
-    ungroup()
+    left_join(ctx, by = c("player_id", "season_year")) %>%
+    shrink_stats(SHRINK_MODE, PRIOR_MIN, STAT_PRIOR_MIN)
   if (ADJUST_SOS) {
     ch_fx <- ch %>%
       filter(qualified) %>%
@@ -384,8 +385,9 @@ if (ATTACK_MODEL == "chance_share") {
       mutate(value = value - sos_slope * (sos_pct - 0.5))
   }
   chance_tab <- ch %>%
-    select(player_id, season_year, team, position, minutes_played, stat, value, shots90, sa90) %>%
-    pivot_wider(names_from = stat, values_from = value) %>%
+    select(player_id, season_year, team, position, minutes_played, stat, value, post_var) %>%
+    pivot_wider(names_from = stat, values_from = c(value, post_var)) %>%
+    rename(xg = value_xg, xa = value_xa, v_xg = post_var_xg, v_xa = post_var_xa) %>%
     left_join(assisted %>% select(season_year, team, assisted_share), by = c("season_year", "team")) %>%
     mutate(shot_credit = xg * (1 - PASSER_SHARE * assisted_share),   # per 90
            pass_credit = PASSER_SHARE * xa,                            # per 90
@@ -437,8 +439,7 @@ for (sd in sides_fit) {
     lower <- c(ifelse(dir_f > 0, 0, -Inf), -Inf)
     upper <- c(ifelse(dir_f > 0, Inf, 0),  Inf)
     # leave one season out; with one season (real data), 10 random groups of teams
-    folds <- if (n_distinct(fit_rows$season_year) >= 3) as.integer(factor(fit_rows$season_year)) else
-      sample(rep_len(1:10, nrow(fit_rows)))
+    folds <- team_folds(fit_rows)   # a team's seasons stay in the same group
     cv <- cv.glmnet(X, y, alpha = 0, foldid = folds, keep = TRUE,
                     lower.limits = lower, upper.limits = upper,
                     # goal-unit stats and schedule aren't shrunk; everything else is
@@ -602,39 +603,20 @@ player_gar <- player_index %>%
 #   percentages (duel win %, pass accuracy)      depend on attempts: p(100 - p) / attempts
 #   xG and xA                                    depend on how many shots / chances they
 #                                                come from (a few big chances = noisier)
-# The noise shrinks with minutes, and the same shrinkage toward the position average
-# as step 4 is applied (PRIOR_MIN). Stats are combined using their weights:
+# The noise left after the small-sample blending (post_var from shrink_stats(), the
+# same noise model as the blending) is combined using the weights:
 #   noise of the rating = sqrt( sum of weight^2 x noise of each stat )
 # Stats are treated as independent, so ranges are a little narrow if stats move together.
 z_range <- qnorm(0.5 + RANGE_LEVEL / 2)
-helper <- players %>%
-  transmute(player_id, season_year,
-            vol_def  = z(`Defensive duels / 90 minutes`), vol_aer = z(`Aerial duels / 90 minutes`),
-            vol_pass = z(`Passes / 90`), shots90 = z(`Shots / 90`), sa90 = z(`Shot assists / 90`),
-            xga90 = z(`xG against / 90`))
 unc <- long %>%
   inner_join(weights_used %>% select(position, stat, goal_weight), by = c("position", "stat")) %>%
-  left_join(helper, by = c("player_id", "season_year")) %>%
-  mutate(attempts = case_when(stat == "def_duel_win_pct" ~ vol_def,
-                              stat == "aerial_win_pct"   ~ vol_aer,
-                              stat == "pass_acc"         ~ vol_pass),
-         # noise of one season's per-90 value = c x 90 / minutes
-         c = case_when(!is.na(attempts) ~ pmax(value, 0) * pmax(100 - value, 0) / pmax(attempts, 0.5),
-                       stat == "xg" ~ 2 * pmax(value, 0) * pmin(pmax(value, 0) / pmax(shots90, 0.1), 0.6),
-                       stat == "xa" ~ 2 * pmax(value, 0) * pmin(pmax(value, 0) / pmax(sa90, 0.1), 0.6),
-                       stat == "prevented_goals" ~ xga90,   # goals conceded vary like a count
-                       TRUE ~ pmax(value, 0)),
-         post_var   = c * 90 / (minutes_played + pm),                    # after shrinkage
-         stat_var = post_var) %>%
   group_by(player_id, season_year) %>%
-  summarise(stat_var_sum = sum(goal_weight^2 * stat_var, na.rm = TRUE), .groups = "drop")
+  summarise(stat_var_sum = sum(goal_weight^2 * post_var, na.rm = TRUE), .groups = "drop")
 
 # chance-sharing attack: noise of xG and xA, weighted by the shooter / passer shares
 att_var <- if (ATTACK_MODEL == "chance_share") {
   chance_tab %>%
-    mutate(v_xg = 2 * pmax(xg, 0) * pmin(pmax(xg, 0) / pmax(shots90, 0.1), 0.6) * 90 / (minutes_played + PRIOR_MIN),
-           v_xa = 2 * pmax(xa, 0) * pmin(pmax(xa, 0) / pmax(sa90, 0.1), 0.6) * 90 / (minutes_played + PRIOR_MIN),
-           att_var = XG_GOAL_VALUE^2 * ((1 - PASSER_SHARE * assisted_share)^2 * v_xg + PASSER_SHARE^2 * v_xa)) %>%
+    mutate(att_var = XG_GOAL_VALUE^2 * ((1 - PASSER_SHARE * assisted_share)^2 * v_xg + PASSER_SHARE^2 * v_xa)) %>%
     select(player_id, season_year, att_var)
 } else tibble(player_id = character(), season_year = numeric(), att_var = numeric())
 
@@ -667,12 +649,12 @@ write_csv(player_gar, file.path(OUT_DIR, "player_gar.csv"))
 #   defense rows: one per defensive stat in the weights file
 br_def <- long %>%
   inner_join(weights_used %>% select(position, stat, goal_weight), by = c("position", "stat")) %>%
-  transmute(season_year, player_id, part = "defense", stat, missing, raw, value = val, pos_avg,
+  transmute(season_year, player_id, part = "defense", stat, missing, raw, own_share, value = val, pos_avg,
             weight = goal_weight, credit = goal_weight * val, avg_credit = goal_weight * pos_avg,
             per_90 = credit - avg_credit)
 br_att <- if (ATTACK_MODEL == "chance_share") {
-  raw_ch <- ch %>% select(player_id, season_year, stat, raw) %>%
-    pivot_wider(names_from = stat, values_from = raw, names_prefix = "raw_")
+  raw_ch <- ch %>% select(player_id, season_year, stat, raw, own_share) %>%
+    pivot_wider(names_from = stat, values_from = c(raw, own_share))
   chance_tab %>%
     left_join(raw_ch, by = c("player_id", "season_year")) %>%
     mutate(w_xg = XG_GOAL_VALUE * (1 - PASSER_SHARE * assisted_share), w_xa = XG_GOAL_VALUE * PASSER_SHARE) %>%
@@ -681,15 +663,15 @@ br_att <- if (ATTACK_MODEL == "chance_share") {
            avg_c_xg = weighted.mean(w_xg * xg, minutes_played), avg_c_xa = weighted.mean(w_xa * xa, minutes_played)) %>%
     ungroup() %>%
     { bind_rows(
-        transmute(., season_year, player_id, part = "attack", stat = "xg", missing = FALSE, raw = raw_xg, value = xg,
+        transmute(., season_year, player_id, part = "attack", stat = "xg", missing = FALSE, raw = raw_xg, own_share = own_share_xg, value = xg,
                   pos_avg = avg_xg, weight = w_xg, credit = w_xg * xg, avg_credit = avg_c_xg),
-        transmute(., season_year, player_id, part = "attack", stat = "xa", missing = FALSE, raw = raw_xa, value = xa,
+        transmute(., season_year, player_id, part = "attack", stat = "xa", missing = FALSE, raw = raw_xa, own_share = own_share_xa, value = xa,
                   pos_avg = avg_xa, weight = w_xa, credit = w_xa * xa, avg_credit = avg_c_xa)) } %>%
     mutate(per_90 = credit - avg_credit)
 } else {
   long %>% semi_join(filter(weights_cfg, side == "attack"), by = c("position", "stat")) %>%
     inner_join(weights_used %>% select(position, stat, goal_weight), by = c("position", "stat")) %>%
-    transmute(season_year, player_id, part = "attack", stat, missing, raw, value = val, pos_avg,
+    transmute(season_year, player_id, part = "attack", stat, missing, raw, own_share, value = val, pos_avg,
               weight = goal_weight, credit = goal_weight * val, avg_credit = goal_weight * pos_avg,
               per_90 = credit - avg_credit)
 }
@@ -705,9 +687,9 @@ player_index %>%
   mutate(avg_minus_repl = avg_level - repl_level) %>%
   write_csv(file.path(OUT_DIR, "gar_replacement.csv"))
 # The settings the app's explanation quotes
-tibble(setting = c("PRIOR_MIN", "MIN_QUAL", "REPL_PCTL", "PASSER_SHARE", "XG_GOAL_VALUE", "ATTACK_MODEL",
+tibble(setting = c("SHRINK_MODE", "PRIOR_MIN", "MIN_QUAL", "REPL_PCTL", "PASSER_SHARE", "XG_GOAL_VALUE", "ATTACK_MODEL",
                    "WEIGHT_MODE", "NON_PENALTY", "ADJUST_SOS", "WINS_PER_GOAL", "FIT_SEASONS"),
-       value = c(PRIOR_MIN, MIN_QUAL, REPL_PCTL, PASSER_SHARE, XG_GOAL_VALUE, ATTACK_MODEL,
+       value = c(SHRINK_MODE, PRIOR_MIN, MIN_QUAL, REPL_PCTL, PASSER_SHARE, XG_GOAL_VALUE, ATTACK_MODEL,
                  WEIGHT_MODE, use_np, ADJUST_SOS, round(WINS_PER_GOAL, 3),
                  paste(setdiff(sort(unique(teams$season_year)), FIT_EXCLUDE), collapse = ", "))) %>%
   write_csv(file.path(OUT_DIR, "model_settings.csv"))

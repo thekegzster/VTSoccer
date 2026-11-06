@@ -37,6 +37,7 @@ library(purrr)
 library(ggplot2)
 library(glmnet)
 library(scales)
+source("model_helpers.R")   # shrink_stats(), team_folds()
 
 # ---- Settings ---------------------------------------------------------------
 
@@ -58,13 +59,16 @@ TARGET       <- "massey"       # what the category weights are fitted to:
 RANGE_LEVEL  <- 0.80           # uncertainty range shown for each player (as in GAR)
 MIN_QUAL     <- 270            # minutes to count toward min/max and replacement level
                                # (a season is ~5-12 conference games)
-STAT_PRIOR_MIN <- c(prevented_goals = 1800)  # stats that need more minutes before they're
-                               # trusted: goalkeeper shot-stopping swings a lot by luck, so a keeper
-                               # is treated as if he also had 1,800 average minutes (PRIOR_MIN for others)
+SHRINK_MODE  <- "per_stat"     # small-sample blending toward the position average:
+                               #   "per_stat" = each stat as much as its own noise calls for
+                               #     (xG and xA much more than pass accuracy; win-% stats by
+                               #     attempts); see shrink_stats() in model_helpers.R
+                               #   "minutes"  = the old way: PRIOR_MIN minutes for every stat
+PRIOR_MIN    <- 270            # "minutes" mode: a player is treated as if he also played
+                               # this many minutes at the position average
+STAT_PRIOR_MIN <- c(prevented_goals = 1800)  # "minutes" mode only: more for noisier stats
 MAKE_PLOTS   <- TRUE           # FALSE = skip the charts and only write the CSV files (much faster)
 NON_PENALTY  <- TRUE           # use non-penalty xG (npxG) when the data has it
-PRIOR_MIN    <- 270            # shrinkage: a player is treated as if he also played
-                               # this many minutes at the position average
 SCALE_LO     <- 0.05           # percentile used as the scaling "min"
 SCALE_HI     <- 0.95           # percentile used as the scaling "max"
 CAP_SCALE    <- FALSE          # FALSE = no cap: a player beyond the 95th percentile keeps
@@ -331,14 +335,11 @@ long <- players %>%
 
 # ---- 4. Fill gaps and shrink small samples ----------------------------------
 
+# A missing stat counts as the position average. Each stat is then blended toward the
+# position average, as much as its own sampling noise calls for (SHRINK_MODE).
 long <- long %>%
-  group_by(season_year, position, stat) %>%
-  mutate(missing = is.na(raw),
-         prior = mean(raw[qualified], na.rm = TRUE),
-         raw   = coalesce(raw, prior),
-         pm    = coalesce(unname(STAT_PRIOR_MIN[stat]), PRIOR_MIN),
-         value = (raw * minutes_played + prior * pm) / (minutes_played + pm)) %>%
-  ungroup()
+  left_join(stat_context(players), by = c("player_id", "season_year")) %>%
+  shrink_stats(SHRINK_MODE, PRIOR_MIN, STAT_PRIOR_MIN)
 
 # ---- 5. Strength-of-schedule adjustment -------------------------------------
 # For each position x stat, estimate how much a tougher schedule changes the
@@ -420,10 +421,12 @@ if (WEIGHT_MODE == "manual" && any(is.na(cfg_cat$fixed)))
 
 fit_rows <- team_features %>% filter(!season_year %in% FIT_EXCLUDE, !is.na(target), !is.na(win_pct))
 
-# Outcome units (points per game) per unit of the target, within seasons. 1 when
-# fitting to the outcome.
+# Outcome units (points per game) per unit of the target. 1 when fitting to the outcome.
+# Points come from games inside a conference, so a team in a strong conference earns
+# fewer points for the same Massey rating: the conversion holds conference strength
+# (sos_pct, the conference's rank) and the season fixed.
 OUT_PER_TARGET <- if (TARGET == "massey")
-  coef(lm(if (n_distinct(fit_rows$season_year) > 1) win_pct ~ target + factor(season_year) else win_pct ~ target,
+  coef(lm(if (n_distinct(fit_rows$season_year) > 1) win_pct ~ target + sos_pct + factor(season_year) else win_pct ~ target + sos_pct,
           data = fit_rows))[["target"]] else 1
 if (TARGET == "massey")
   cat(sprintf("Target: Massey rating. 1 Massey point = %.2f %s per game (r with %s = %.2f)\n",
@@ -440,9 +443,7 @@ if (length(fixed_ft))
 r2_oos <- NA_real_
 if (length(learn_ft)) {
   X <- as.matrix(fit_rows[, c(learn_ft, "sos_pct")])
-  # leave one season out with 3+ seasons; otherwise 10 random groups of teams
-  folds <- if (n_distinct(fit_rows$season_year) >= 3) as.integer(factor(fit_rows$season_year)) else
-    sample(rep_len(1:10, nrow(fit_rows)))
+  folds <- team_folds(fit_rows)   # a team's seasons stay in the same group
   cv <- cv.glmnet(X, y, alpha = 0, foldid = folds, keep = TRUE,
                   lower.limits = c(rep(0, length(learn_ft)), -Inf),
                   penalty.factor = c(rep(1, length(learn_ft)), 0))
@@ -500,27 +501,9 @@ player_index <- cats %>%
 #   noise of the rating = sqrt( sum over stats of (category weight x share)^2 x noise )
 # Stats are treated as independent, so ranges are a little narrow if stats move together.
 z_range <- qnorm(0.5 + RANGE_LEVEL / 2)
-attempts_for <- c(def_duel_win_pct = "Defensive duels / 90 minutes", aerial_win_pct = "Aerial duels / 90 minutes",
-                  pass_acc = "Passes / 90", long_pass_acc = "Long passes / 90 minutes",
-                  off_duel_win_pct = "Offensive Duels / 90", duel_win_pct = "Duels / 90",
-                  save_pct = "Shots against / 90")
-vols <- players %>% select(player_id, season_year, all_of(unique(unname(attempts_for))),
-                           shots90 = `Shots / 90`, sa90 = `Shot assists / 90`, xga90 = `xG against / 90`)
 unc <- long %>%
   left_join(cfg_cat %>% select(position, category, weight), by = c("position", "category")) %>%
-  left_join(vols, by = c("player_id", "season_year")) %>%
-  mutate(attempts = NA_real_)
-for (st in names(attempts_for)) {
-  i <- unc$stat == st
-  unc$attempts[i] <- z(unc[[attempts_for[[st]]]][i])
-}
-unc <- unc %>%
-  mutate(c = case_when(!is.na(attempts) ~ pmax(value, 0) * pmax(100 - value, 0) / pmax(attempts, 0.5),
-                       stat == "xg" ~ 2 * pmax(value, 0) * pmin(pmax(value, 0) / pmax(z(shots90), 0.1), 0.6),
-                       stat == "xa" ~ 2 * pmax(value, 0) * pmin(pmax(value, 0) / pmax(z(sa90), 0.1), 0.6),
-                       stat == "prevented_goals" ~ z(xga90),
-                       TRUE ~ pmax(value, 0)),
-         var_value  = c * 90 / (minutes_played + pm),
+  mutate(var_value  = post_var,   # noise left after the blending (shrink_stats())
          var_scaled = if_else(hi > lo, var_value / (hi - lo)^2, 0)) %>%
   group_by(player_id, season_year) %>%
   summarise(se_per_90 = sqrt(sum((weight * share)^2 * var_scaled, na.rm = TRUE)), .groups = "drop")
@@ -562,7 +545,7 @@ cat(sprintf("Uncertainty: a CF with ~900 minutes has a %.0f%% range of about +/-
 # (war_replacement.csv) add up to war_per_90. scaled is already flipped where fewer is better.
 long %>%
   inner_join(cfg_cat %>% select(position, category, weight), by = c("position", "category")) %>%
-  transmute(season_year, player_id, category, stat, direction, missing, raw, value, lo, hi,
+  transmute(season_year, player_id, category, stat, direction, missing, raw, own_share, value, lo, hi,
             scaled = signed, scaled_avg = signed_avg, share, weight,
             per_90 = weight * share * (signed - signed_avg)) %>%
   arrange(season_year, player_id, category, stat) %>%
@@ -574,10 +557,10 @@ player_index %>%
             qualified_players = sum(qualified), .groups = "drop") %>%
   mutate(avg_minus_repl = avg_level - repl_level) %>%
   write_csv(file.path(OUT_DIR, out_file("war_replacement.csv")))
-tibble(setting = c("PRIOR_MIN", "MIN_QUAL", "REPL_PCTL", "SCALE_LO", "SCALE_HI", "CAP_SCALE", "OUTCOME",
+tibble(setting = c("SHRINK_MODE", "PRIOR_MIN", "MIN_QUAL", "REPL_PCTL", "SCALE_LO", "SCALE_HI", "CAP_SCALE", "OUTCOME",
                    "WEIGHT_MODE", "TARGET", "OUT_PER_TARGET", "WEIGHTS_FILE", "HELDOUT_R2",
                    "NON_PENALTY", "ADJUST_SOS", "FIT_SEASONS", "FIT_TEAM_SEASONS"),
-       value = c(PRIOR_MIN, MIN_QUAL, REPL_PCTL, SCALE_LO, SCALE_HI, CAP_SCALE, OUTCOME,
+       value = c(SHRINK_MODE, PRIOR_MIN, MIN_QUAL, REPL_PCTL, SCALE_LO, SCALE_HI, CAP_SCALE, OUTCOME,
                  WEIGHT_MODE, TARGET, round(OUT_PER_TARGET, 4), WEIGHTS_FILE, round(r2_oos, 3),
                  NON_PENALTY, ADJUST_SOS,
                  paste(setdiff(sort(unique(teams$season_year)), FIT_EXCLUDE), collapse = ", "), nrow(fit_rows))) %>%
